@@ -1,4 +1,4 @@
-/**
+/*
  * BẢNG QUY ĐỔI DẤU CÂU
  * Chuyển đổi từ dấu câu tiếng Trung (full-width) sang tiếng Anh (half-width).
  */
@@ -73,16 +73,16 @@ export function standardizeDictionaryLine(line) {
   }
 
   const parts = line.split('=');
-  // Nếu không phải định dạng key=value, trả về nguyên bản
+
+  // Xử lý cho cả hai loại định dạng
   if (parts.length < 2) {
-    return line;
+    // Nếu không có dấu '=', chuẩn hóa cả dòng (dành cho file Blacklist)
+    return standardizeText(line.trim());
+  } else {
+    // Nếu có dấu '=', chỉ chuẩn hóa phần bên trái (dành cho Vietphrase, Names, v.v...)
+    const key = parts[0];
+    const value = parts.slice(1).join('='); // Giữ nguyên 100% phần nghĩa
+    const standardizedKey = standardizeText(key);
+    return `${standardizedKey}=${value}`;
   }
-
-  const key = parts[0];
-  const value = parts.slice(1).join('='); // Giữ nguyên 100% phần nghĩa
-
-  // Chỉ chuẩn hóa phần key (tiếng Trung)
-  const standardizedKey = standardizeText(key);
-
-  return `${standardizedKey}=${value}`;
 }
