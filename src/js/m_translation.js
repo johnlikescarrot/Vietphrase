@@ -130,11 +130,28 @@ export function performTranslation(state, options = {}) {
       const placeholderMatch = line.substring(i).match(/^%%NAME_\d+%%/);
       if (placeholderMatch) {
         const placeholder = placeholderMatch[0];
+
+        let leadingSpace = ' ';
+        // Áp dụng quy tắc tương tự như các từ thông thường, dựa vào ký tự của token đứng trước
+        if (UNAMBIGUOUS_OPENING.has(lastChar) ||
+          (isInsideDoubleQuote && lastChar === '"') ||
+          (isInsideSingleQuote && lastChar === "'")) {
+          leadingSpace = '';
+        }
+
+        // Không thêm space ở đầu dòng
+        if (i === 0 || /\s/.test(lastChar)) {
+          leadingSpace = '';
+        }
+
         const span = document.createElement('span');
         span.className = 'word';
         span.dataset.original = placeholder;
         span.textContent = placeholder;
-        lineHtml += (i === 0 ? '' : ' ') + span.outerHTML;
+
+        // Sử dụng biến leadingSpace đã được tính toán chính xác
+        lineHtml += leadingSpace + span.outerHTML;
+
         i += placeholder.length;
         lastChar = placeholder.slice(-1);
         continue;
