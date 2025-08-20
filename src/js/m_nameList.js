@@ -223,22 +223,32 @@ export function rebuildMasterData(state) {
     return;
   }
 
-  console.time('TrieBuiding'); // Bắt đầu đếm thời gian xây dựng Trie
+  console.time('TrieBuiding');
 
-  // 1. Xây dựng lại masterKeySet như cũ để các chức năng khác không bị ảnh hưởng
+  // 1. TẠO MỘT TRIE RIÊNG CHỈ DÀNH CHO NAME LIST
+  // Đây là bước quan trọng để tra cứu Name List siêu nhanh và ưu tiên tuyệt đối
+  const nameListTrie = new Trie();
+  if (nameDictionary.size > 0) {
+    nameDictionary.forEach((translation, key) => {
+      // Lưu ý: giá trị lưu trong Trie là một object để đồng bộ với các từ điển khác
+      nameListTrie.insert(key, { translation: translation, type: 'NamesUser' });
+    });
+  }
+  state.nameListTrie = nameListTrie; // Lưu Trie của Name List vào state để dùng sau
+
+  // 2. Xây dựng masterKeySet như cũ
   state.masterKeySet = new Set([...nameDictionary.keys()]);
   state.dictionaries.forEach(d => {
     d.dict.forEach((_, key) => state.masterKeySet.add(key));
   });
   console.log(`Master key set rebuilt with ${state.masterKeySet.size} unique keys.`);
 
-  // 2. Khởi tạo Trie và định nghĩa độ ưu tiên của từ điển
+  // 3. Xây dựng Trie chính cho các từ điển còn lại
   const dictionaryTrie = new Trie();
   const priorityOrder = [
-    'NamesUser', 'Names2', 'Names', 'LuatNhan', 'Vietphrase', 'PhienAm',
+    'Names2', 'Names', 'LuatNhan', 'Vietphrase', 'PhienAm',
     'Pronouns', 'English', 'Blacklist'
   ];
-
   const allDictionaries = new Map(state.dictionaries);
 
   // Thêm Name List của người dùng vào như một từ điển riêng với độ ưu tiên cao nhất (0)
@@ -246,7 +256,6 @@ export function rebuildMasterData(state) {
     allDictionaries.set('NamesUser', { priority: 0, dict: nameDictionary });
   }
 
-  // 3. Nạp từ điển vào Trie theo đúng thứ tự ưu tiên
   priorityOrder.forEach(dictName => {
     const dictInfo = allDictionaries.get(dictName);
     if (dictInfo && dictInfo.dict) {
@@ -255,7 +264,6 @@ export function rebuildMasterData(state) {
       });
     }
   });
-
-  state.dictionaryTrie = dictionaryTrie; // Lưu Trie vào state
-  console.timeEnd('TrieBuiding'); // Kết thúc đếm thời gian
+  state.dictionaryTrie = dictionaryTrie;
+  console.timeEnd('TrieBuiding');
 }
