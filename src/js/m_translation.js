@@ -64,7 +64,7 @@ export function synthesizeCompoundTranslation(text, state) {
 }
 
 export function performTranslation(state, options = {}) {
-  if (!state || !state.dictionaries || !state.dictionaryTrie || !state.nameListTrie) {
+  if (!state || !state.dictionaries || !state.dictionaryTrie) {
     DOMElements.outputPanel.textContent = 'Lỗi: Từ điển chưa được tải hoặc xử lý. Vui lòng thử lại.';
     return;
   }
@@ -80,13 +80,41 @@ export function performTranslation(state, options = {}) {
     state.lastTranslatedText = standardizedText;
   }
 
+  // ==========================================================================
+  // LỚP 1: ĐỤC LỖ VĂN BẢN GỐC VỚI NAME LIST (ƯU TIÊN TUYỆT ĐỐI)
+  // ==========================================================================
+  let processedText = standardizedText;
+  const placeholders = new Map();
+  let placeholderId = 0;
+
+  const sortedNameKeys = [...nameDictionary.keys()].sort((a, b) => b.length - a.length);
+
+  for (const nameKey of sortedNameKeys) {
+    if (processedText.includes(nameKey)) {
+      const placeholder = `%%NAME_${placeholderId}%%`;
+      const nameValue = nameDictionary.get(nameKey);
+
+      // *** THAY ĐỔI 1: Lưu cả chữ Hán gốc (nameKey) và nghĩa (nameValue) ***
+      // Thay vì chỉ lưu nghĩa, ta lưu một đối tượng chứa cả hai thông tin.
+      placeholders.set(placeholder, { original: nameKey, translation: nameValue });
+
+      const escapedKey = escapeRegExp(nameKey);
+      processedText = processedText.replace(new RegExp(escapedKey, 'g'), placeholder);
+
+      placeholderId++;
+    }
+  }
+
+  // ==========================================================================
+  // LỚP 2: DỊCH PHẦN VĂN BẢN CÒN LẠI (ĐÃ BỊ ĐỤC LỖ)
+  // ==========================================================================
   const isVietphraseMode = DOMElements.modeToggle.checked;
   const UNAMBIGUOUS_OPENING = new Set(['(', '[', '{', '“', '‘']);
   const UNAMBIGUOUS_CLOSING = new Set([')', ']', '}', '”', '’', ',', '.', '!', '?', ';', ':', '。', '：', '；', '，', '、', '！', '？', '……', '～']);
   const AMBIGUOUS_QUOTES = new Set(['"', "'"]);
   const ALL_PUNCTUATION = new Set([...UNAMBIGUOUS_OPENING, ...UNAMBIGUOUS_CLOSING, ...AMBIGUOUS_QUOTES]);
 
-  const lines = standardizedText.split('\n');
+  const lines = processedText.split('\n');
 
   const translatedLineHtmls = lines.map(line => {
     if (line.trim() === '') return null;
@@ -99,14 +127,21 @@ export function performTranslation(state, options = {}) {
     let lastChar = '';
     let i = 0;
     while (i < line.length) {
+      const placeholderMatch = line.substring(i).match(/^%%NAME_\d+%%/);
+      if (placeholderMatch) {
+        const placeholder = placeholderMatch[0];
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.dataset.original = placeholder;
+        span.textContent = placeholder;
+        lineHtml += (i === 0 ? '' : ' ') + span.outerHTML;
+        i += placeholder.length;
+        lastChar = placeholder.slice(-1);
+        continue;
+      }
+
       let bestMatch = null;
-
-      // === QUY TRÌNH TRA CỨU  ===
-      // 1. Ưu tiên tuyệt đối: Tra cứu trong Trie của Name List trước
-      bestMatch = state.nameListTrie.findLongestMatch(line, i);
-
-      // 2. Nếu không có, tra từ điển tạm thời
-      if (!bestMatch && temporaryNameDictionary.size > 0) {
+      if (temporaryNameDictionary.size > 0) {
         let longestKey = '';
         for (const [key] of temporaryNameDictionary.entries()) {
           if (line.startsWith(key, i) && key.length > longestKey.length) {
@@ -118,21 +153,18 @@ export function performTranslation(state, options = {}) {
         }
       }
 
-      // 3. Nếu vẫn không có, tra trong Trie của các từ điển chính
       if (!bestMatch) {
-        bestMatch = state.dictionaryTrie.findLongestMatch(line, i);
+        const trieMatch = state.dictionaryTrie.findLongestMatch(line, i);
+        if (trieMatch) {
+          bestMatch = trieMatch;
+        }
       }
-
-      // === KẾT THÚC QUY TRÌNH TRA CỨU ===
 
       if (bestMatch) {
         const { key: originalWord, value } = bestMatch;
-        // Từ đây, mọi logic xử lý phức tạp về dấu câu, viết hoa, khoảng trắng...
-        // sẽ được áp dụng đồng đều cho cả từ trong Name List và các từ điển khác.
-
         if (value.type === 'LuatNhan' && value.translation.includes('{0}')) {
           const ruleKey = value.ruleKey;
-          const regexPattern = escapeRegExp(ruleKey).replace(/\\{0\\}/g, '([\\u4e00-\\u9fa5]+)');
+          const regexPattern = escapeRegExp(ruleKey).replace(/\\{0\\}/g, '([\u4e00-\u9fa5]+)');
           const regex = new RegExp(`^${regexPattern}$`);
           const match = originalWord.match(regex);
           if (match && match[1]) {
@@ -190,7 +222,6 @@ export function performTranslation(state, options = {}) {
           continue;
         }
 
-        // Dù là từ Name List hay từ điển khác, ta đều dùng hàm translateWord để lấy các nghĩa khác nhau
         const translationResult = translateWord(originalWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
         const span = document.createElement('span');
         span.className = 'word';
@@ -204,7 +235,6 @@ export function performTranslation(state, options = {}) {
           span.classList.add('vietphrase-word');
           textForSpan = `(${translationResult.all.join('/')})`;
         } else {
-          // Luôn lấy nghĩa ưu tiên cao nhất đã tìm được
           textForSpan = translationResult.best;
         }
 
@@ -241,7 +271,7 @@ export function performTranslation(state, options = {}) {
           }
         }
 
-        if (i === 0 || /\s/.test(lastChar) || lastChar === '') {
+        if (i === 0 || /\s/.test(lastChar)) {
           leadingSpace = '';
         }
         lineHtml += leadingSpace + span.outerHTML;
@@ -255,11 +285,11 @@ export function performTranslation(state, options = {}) {
         } else {
           nonMatchEnd = i + 1;
           while (nonMatchEnd < line.length) {
-            let isKnownWordAhead = false;
-            if (state.nameListTrie.findLongestMatch(line, nonMatchEnd)) {
-              isKnownWordAhead = true;
+            if (line.substring(nonMatchEnd).match(/^%%NAME_\d+%%/)) {
+              break;
             }
-            if (!isKnownWordAhead && temporaryNameDictionary.size > 0) {
+            let isKnownWordAhead = false;
+            if (temporaryNameDictionary.size > 0) {
               for (const key of temporaryNameDictionary.keys()) {
                 if (line.startsWith(key, nonMatchEnd)) { isKnownWordAhead = true; break; }
               }
@@ -311,7 +341,7 @@ export function performTranslation(state, options = {}) {
           }
         }
 
-        if (i === 0 || /\s/.test(lastChar) || lastChar === '') {
+        if (i === 0 || /\s/.test(lastChar)) {
           leadingSpace = '';
         }
         lineHtml += leadingSpace + span.outerHTML;
@@ -337,15 +367,27 @@ export function performTranslation(state, options = {}) {
       text = text.replace(/([.!?:]\s*)(\p{L})/ug, (_, punctuationAndSpace, letter) => `${punctuationAndSpace}${letter.toUpperCase()}`);
       node.nodeValue = text;
       const trimmedText = text.trim();
-      if (trimmedText.length > 0 && /[.!?:]$/.test(trimmedText)) {
+      if (trimmedText.length > 0 && /[.!?]$/.test(trimmedText)) {
         capitalizeNextLetter = true;
-      } else {
-        capitalizeNextLetter = false;
       }
     }
     return `<p>${tempDiv.innerHTML}</p>`;
   }).filter(Boolean);
 
-  DOMElements.outputPanel.innerHTML = translatedLineHtmls.join('');
+  // ==========================================================================
+  // LỚP 3: LẮP RÁP KẾT QUẢ - THAY THẾ PLACEHOLDER BẰNG NGHĨA ĐÚNG
+  // ==========================================================================
+  let finalHtml = translatedLineHtmls.join('');
+  for (const [placeholder, data] of placeholders.entries()) {
+    const spanRegex = new RegExp(`<span class="word" data-original="${escapeRegExp(placeholder)}">${escapeRegExp(placeholder)}</span>`, 'g');
+
+    // *** THAY ĐỔI 2: Sử dụng thông tin đã lưu để tạo thẻ span chính xác ***
+    // data.original là chữ Hán, data.translation là nghĩa tiếng Việt.
+    const replacementSpan = `<span class="word" data-original="${data.original}">${data.translation}</span>`;
+
+    finalHtml = finalHtml.replace(spanRegex, replacementSpan);
+  }
+
+  DOMElements.outputPanel.innerHTML = finalHtml;
   temporaryNameDictionary.clear();
 }
