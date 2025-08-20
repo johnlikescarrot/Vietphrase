@@ -435,8 +435,10 @@ export function translateWord(word, dictionaries, nameDict, tempDict, getAllMean
 
 export function getAllMeanings(word, dictionaries, nameDict) {
   const allMeanings = {
-    name: null,
-    vietphrase: [],
+    name: null,       // Dành cho Name List
+    names: [],        // Dành cho Names.txt
+    names2: [],       // Dành cho Names2.txt
+    vietphrase: [],   // Dành cho Vietphrase.txt
     hanviet: null,
   };
 
@@ -445,15 +447,28 @@ export function getAllMeanings(word, dictionaries, nameDict) {
     allMeanings.name = nameDict.get(word);
   }
 
-  // 2. Lấy nghĩa từ Vietphrase (nếu có)
+  // 2. Lấy nghĩa từ Names.txt (nếu có)
+  const namesDict = dictionaries.get('Names')?.dict;
+  if (namesDict && namesDict.has(word)) {
+    const namesMeanings = namesDict.get(word);
+    allMeanings.names = namesMeanings.split(/[;/]/).map(m => m.trim()).filter(Boolean);
+  }
+
+  // 3. Lấy nghĩa từ Names2.txt (nếu có)
+  const names2Dict = dictionaries.get('Names2')?.dict;
+  if (names2Dict && names2Dict.has(word)) {
+    const names2Meanings = names2Dict.get(word);
+    allMeanings.names2 = names2Meanings.split(/[;/]/).map(m => m.trim()).filter(Boolean);
+  }
+
+  // 4. Lấy nghĩa từ Vietphrase (nếu có)
   const vpDict = dictionaries.get('Vietphrase')?.dict;
   if (vpDict && vpDict.has(word)) {
     const vpMeanings = vpDict.get(word);
-    // Tách các nghĩa khác nhau ra (phân tách bằng ; hoặc /)
     allMeanings.vietphrase = vpMeanings.split(/[;/]/).map(m => m.trim()).filter(Boolean);
   }
 
-  // 3. Lấy nghĩa Hán Việt
+  // 5. Lấy nghĩa Hán Việt
   allMeanings.hanviet = getHanViet(word, dictionaries);
 
   return allMeanings;

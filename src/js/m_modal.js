@@ -156,7 +156,7 @@ function showQuickEditPanel(selection, state) {
 function populateQuickEditPanel(text, state) {
   DOMElements.qInputZw.value = text;
 
-  // Lấy tất cả các nghĩa bằng hàm mới
+  // Lấy tất cả các nghĩa bằng hàm đã được nâng cấp
   const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
 
   // Điền Hán Việt
@@ -169,16 +169,22 @@ function populateQuickEditPanel(text, state) {
     DOMElements.qInputHV.value = '';
   }
 
-  // Điền Vietphrase - ưu tiên hiển thị nghĩa Vietphrase nếu có
+  // Gộp các nghĩa từ Vietphrase, Names, Names2 vào một chỗ để hiển thị
+  const quickVpParts = [];
   if (allMeanings.vietphrase.length > 0) {
-    DOMElements.qInputVp.value = allMeanings.vietphrase.join('/');
-  } else {
-    // Nếu không có Vietphrase, thử lấy nghĩa từ Name List
-    DOMElements.qInputVp.value = allMeanings.name || '';
+    quickVpParts.push(`(Vp) ${allMeanings.vietphrase.join('/')}`);
+  }
+  if (allMeanings.names.length > 0) {
+    quickVpParts.push(`(Names) ${allMeanings.names.join('/')}`);
+  }
+  if (allMeanings.names2.length > 0) {
+    quickVpParts.push(`(Names2) ${allMeanings.names2.join('/')}`);
   }
 
-  // Ô tùy chỉnh sẽ ưu tiên Name List > Vietphrase > Hán Việt
-  DOMElements.qInputTc.value = allMeanings.name || (allMeanings.vietphrase[0] || allMeanings.hanviet || '');
+  DOMElements.qInputVp.value = quickVpParts.join('; ');
+
+  // Ô tùy chỉnh vẫn ưu tiên Name List đầu tiên
+  DOMElements.qInputTc.value = allMeanings.name || (allMeanings.vietphrase[0] || allMeanings.names[0] || allMeanings.names2[0] || allMeanings.hanviet || '');
 }
 
 function hideQuickEditPanel() {
@@ -546,17 +552,36 @@ function updateOldModalFields(text, state) {
     return;
   }
 
-  // Sử dụng hàm mới để lấy tất cả các nghĩa
+  // Sử dụng hàm nâng cấp để lấy tất cả các nghĩa
   const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
 
-  // Điền Hán Việt
+  // Điền Hán Việt (như cũ)
   hanvietInput.value = allMeanings.hanviet ? allMeanings.hanviet.toLowerCase() : 'Không tìm thấy Hán Việt.';
 
   // Gộp tất cả các nghĩa tìm được vào một danh sách để hiển thị
   const combinedMeanings = [];
   if (allMeanings.name) {
-    combinedMeanings.push(`(Name) ${allMeanings.name}`);
+    combinedMeanings.push(`(Name) ${allMeanings.name}`); // Name List của bạn
   }
+  // Thêm Names2
+  if (allMeanings.names2.length > 0) {
+    allMeanings.names2.forEach(meaning => {
+      const formattedMeaning = `(Names2) ${meaning}`;
+      if (!combinedMeanings.includes(formattedMeaning)) {
+        combinedMeanings.push(formattedMeaning);
+      }
+    });
+  }
+  // Thêm Names
+  if (allMeanings.names.length > 0) {
+    allMeanings.names.forEach(meaning => {
+      const formattedMeaning = `(Names) ${meaning}`;
+      if (!combinedMeanings.includes(formattedMeaning)) {
+        combinedMeanings.push(formattedMeaning);
+      }
+    });
+  }
+  // Thêm Vietphrase
   if (allMeanings.vietphrase.length > 0) {
     allMeanings.vietphrase.forEach(meaning => {
       const formattedMeaning = `(Vp) ${meaning}`;
@@ -575,7 +600,6 @@ function updateOldModalFields(text, state) {
       optionEl.textContent = meaning;
       optionEl.title = meaning;
       optionEl.addEventListener('click', () => {
-        // Khi chọn, loại bỏ phần (Name) hoặc (Vp)
         const cleanMeaning = meaning.substring(meaning.indexOf(' ') + 1);
         vietphraseInput.value = cleanMeaning;
         customMeaningInput.value = cleanMeaning;
@@ -584,8 +608,8 @@ function updateOldModalFields(text, state) {
       optionsContainer.appendChild(optionEl);
     });
 
-    // Ưu tiên điền vào ô input theo thứ tự: Name List -> Vietphrase
-    const bestMeaning = allMeanings.name || allMeanings.vietphrase[0] || '';
+    // Ưu tiên điền vào ô input: Name List -> Names2 -> Names -> Vietphrase
+    const bestMeaning = allMeanings.name || allMeanings.names2[0] || allMeanings.names[0] || allMeanings.vietphrase[0] || '';
     vietphraseInput.value = bestMeaning;
     customMeaningInput.value = bestMeaning;
 
