@@ -1,0 +1,110 @@
+.btn {
+    background-color: var(--accent-color);
+    color: var(--bg-main);
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(122, 162, 247, 0.4);
+    }
+
+    &:disabled {
+        background-color: #414868;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+        color: var(--text-color);
+    }
+}
+
+.btn-secondary {
+    background-color: #414868;
+    color: var(--text-highlight);
+    font-weight: 600;
+
+    &:hover:not(:disabled) {
+        box-shadow: 0 4px 8px rgba(65, 72, 104, 0.4);
+    }
+}
+
+// Case buttons in edit modal
+.case-btn {
+    padding: 6px 10px !important;
+    font-size: 0.8rem !important;
+    margin-right: 4px;
+}
+
+// Quick Edit Panel icon buttons
+.q-temp-add-btn,
+.q-perm-add-btn,
+#q-search-btn,
+#q-copy-btn,
+#q-lock-btn,
+#q-close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s, color 0.2s;
+    color: var(--text-color);
+
+    &:hover {
+        opacity: 1;
+        transform: scale(1.2);
+        color: var(--accent-color);
+    }
+}
+
+#q-lock-btn.is-locked,
+#edit-modal-lock-btn.is-locked {
+    color: var(--accent-color);
+    opacity: 1;
+}
+
+// Hanviet options buttons
+#hanviet-options-container button {
+    padding: 6px 10px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+
+    &:hover {
+        background-color: var(--accent-color);
+        color: var(--bg-main);
+        border-color: var(--accent-color);
+    }
+}
+
+// Name list sort dropdown buttons
+
+#name-list-sort-dropdown {
+    background-color: var(--bg-panel);
+}
+
+#name-list-sort-dropdown button {
+    border-radius: 0;
+    transition: background-color 0.2s, color 0.2s;
+    border: none;
+    color: var(--text-highlight);
+}
+
+#name-list-sort-dropdown li:first-child button {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+#name-list-sort-dropdown li:last-child button {
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}

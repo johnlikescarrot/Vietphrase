@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VEY1BTYSZD"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-K9CK2BHBDQ'); //Root domain
+    gtag('config', 'G-VEY1BTYSZD'); //Subdomain
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vietphrase</title>
+  <link rel="icon" type="image/png" href="/404/logo.png" />
+  <script src="lib/tailwindcss.js"></script>
+  <link rel="stylesheet" href="src/scss/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
+
+  <style>
+    #vietphrase-options-container {
+      position: fixed;
+      /* Định vị theo cửa sổ trình duyệt */
+      z-index: 10001;
+      /* Luôn luôn nằm trên cùng */
+    }
+  </style>
+</head>
+
+<body class="p-2 lg:p-8">
+
+  <div id="loader" class="fixed inset-0 flex flex-col items-center justify-center">
+    <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-accent-color"></div>
+    <p id="loader-text" class="mt-4 text-lg font-semibold text-text-highlight">Đang khởi tạo...</p>
+  </div>
+
+  <div id="main-container" class="mx-auto flex flex-col gap-6">
+    <header class="text-center" aria-hidden="true">
+      <h1 class="text-3xl md:text-4xl font-bold text-text-highlight">Công Cụ Dịch Thuật Vietphrase</h1>
+      <p class="text-md mt-2">Dựa trên kho dữ liệu cá nhân của bạn</p>
+
+      <div class="flex items-center justify-center gap-4 mt-4 flex-wrap">
+        <button id="import-local-btn" class="btn">Tải Từ Điển (Cá nhân)</button>
+        <button id="import-server-btn" class="btn">Tải Từ Điển (Từ Server)</button>
+        <button id="clear-db-btn" class="btn btn-secondary">Xóa Từ Điển</button>
+      </div>
+
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" aria-hidden="true">
+      <div class="lg:col-span-2 panel p-6 flex flex-col">
+        <h2 class="text-xl font-semibold text-text-highlight mb-4">Văn bản gốc (Tiếng Trung)</h2>
+        <textarea id="input-text" class="w-full flex-grow text-lg leading-relaxed"
+          placeholder="Dán văn bản tiếng Trung vào đây..."></textarea>
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <button id="translate-btn" class="btn">Dịch</button>
+            <button id="clear-btn" class="btn btn-secondary">Xóa</button>
+          </div>
+          <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-3">
+              <input type="checkbox" id="save-text-toggle" class="h-4 w-4 rounded" checked>
+              <label for="save-text-toggle" class="cursor-pointer">Lưu văn bản</label>
+            </div>
+            <div class="flex items-center space-x-3">
+              <input type="checkbox" id="mode-toggle" class="h-4 w-4 rounded">
+              <label for="mode-toggle" class="cursor-pointer">Vietphrase nhiều nghĩa</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel p-6 flex flex-col">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-text-highlight">Name List</h2>
+          <div id="name-list-sort-container" class="relative">
+            <button id="name-list-sort-btn" title="Sắp xếp" class="btn btn-secondary !p-2 w-8 h-8">☰</button>
+            <div id="name-list-sort-dropdown"
+              class="hidden absolute right-0 mt-2 w-56 bg-bg-panel border border-border-color rounded-lg shadow-xl z-20">
+              <ul class="text-sm">
+                <li><button data-sort="newest"
+                    class="sort-option w-full text-left px-4 py-2 hover:bg-accent-color hover:text-bg-main">Thời
+                    gian (mới nhất)</button></li>
+                <li><button data-sort="oldest"
+                    class="sort-option w-full text-left px-4 py-2 hover:bg-accent-color hover:text-bg-main">Thời
+                    gian (cũ nhất)</button></li>
+                <li><button data-sort="vn-az"
+                    class="sort-option w-full text-left px-4 py-2 hover:bg-accent-color hover:text-bg-main">Tên
+                    Việt (A-Z)</button></li>
+                <li><button data-sort="vn-za"
+                    class="sort-option w-full text-left px-4 py-2 hover:bg-accent-color hover:text-bg-main">Tên
+                    Việt (Z-A)</button></li>
+                <li><button data-sort="cn-az"
+                    class="sort-option w-full text-left px-4 py-2 hover:bg-accent-color hover:text-bg-main">Tên
+                    Trung (A-Z)</button></li>
+                <li><button data-sort="cn-za"
+                    class="sort-option w-full text-left px-4 py-2 hover:bg-accent-color hover:text-bg-main">Tên
+                    Trung (Z-A)</button></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <textarea id="name-list-textarea" class="w-full flex-grow text-sm leading-relaxed"
+          placeholder="[Tiếng Trung]=[Tiếng Việt]..."></textarea>
+        <div class="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-2">
+          <button id="name-list-save" class="btn text-sm">Lưu</button>
+          <button id="name-list-delete" class="btn btn-secondary text-sm">Xóa</button>
+          <button id="name-list-export" class="btn btn-secondary text-sm">Xuất</button>
+          <button id="name-list-import" class="btn btn-secondary text-sm">Nhập</button>
+          <input type="file" id="name-list-file-input" class="hidden" accept=".txt">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel p-3" role="main">
+      <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
+        <h2 class="text-xl font-semibold text-text-highlight" aria-hidden="true">Kết quả dịch (Tiếng Việt)</h2>
+        <div class="flex items-center gap-4" aria-hidden="true">
+          <div class="flex items-center gap-2">
+            <button id="decrease-font-btn" title="Giảm cỡ chữ" class="btn btn-secondary !p-2 w-8 h-8">-</button>
+            <span id="font-size-label" class="text-sm w-12 text-center" title="Cỡ chữ hiện tại"></span>
+            <button id="increase-font-btn" title="Tăng cỡ chữ" class="btn btn-secondary !p-2 w-8 h-8">+</button>
+          </div>
+          <button id="copy-btn" class="btn btn-secondary">Copy</button>
+          <button id="export-btn" title="Xuất ra file .txt" class="btn btn-secondary !p-2 w-8 h-8">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+
+          <button id="settings-btn" title="Cài đặt hiển thị" class="btn btn-secondary !p-2 w-8 h-8">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+              </path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div id="output-panel"
+        class="w-full p-2 bg-bg-input border-t border-border-color text-lg leading-relaxed whitespace-pre-wrap"
+        aria-live="polite" aria-atomic="true" role="text">
+        Kết quả sẽ hiện ở đây...
+      </div>
+    </div>
+  </div>
+
+  <div id="edit-modal" aria-hidden="true">
+    <div class="modal-content relative">
+      <div class="flex justify-between items-center">
+        <h3 class="text-xl font-bold text-text-highlight">Thêm name/Chỉnh name</h3>
+        <div class="flex items-center gap-2">
+          <button id="edit-modal-lock-btn" title="Ghim bảng"
+            class="p-1 rounded-full text-text-color hover:bg-bg-input transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+            </svg>
+          </button>
+          <button id="close-edit-modal-btn"
+            class="p-1 rounded-full text-text-color hover:bg-bg-input transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-2 mb-3">
+        <label class="text-sm font-bold mb-1 block">Tiếng Trung:</label>
+        <div class="flex items-center gap-2">
+          <button id="expand-left-btn" title="Mở rộng sang trái"
+            class="btn btn-secondary !p-1.5 h-9 text-base">&lt;</button>
+          <input type="text" id="original-word-input" class="w-full">
+          <button id="expand-right-btn" title="Mở rộng sang phải"
+            class="btn btn-secondary !p-1.5 h-9 text-base">&gt;</button>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="text-sm font-bold">Hán Việt:</label>
+        <input type="text" id="hanviet-input" class="w-full mt-1">
+      </div>
+
+      <div class="mb-3">
+        <label class="text-sm font-bold">Vietphrase</label>
+        <div class="relative mt-1">
+          <input type="text" id="vietphrase-input" class="w-full">
+          <button id="vietphrase-toggle-btn"
+            class="absolute right-0 top-0 h-full px-3 text-text-color hover:text-text-highlight">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="text-sm font-bold">Nghĩa tùy chỉnh:</label>
+        <input type="text" id="custom-meaning" class="w-full mb-2 mt-1" placeholder="Nhập nghĩa bạn muốn lưu...">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button class="case-btn btn btn-secondary text-xs whitespace-nowrap" data-case="cap">Hoa chữ đầu</button>
+          <button class="case-btn btn btn-secondary text-xs whitespace-nowrap" data-case="cap2">Hoa 2 chữ đầu</button>
+          <button class="case-btn btn btn-secondary text-xs whitespace-nowrap" data-case="lowerLast">Thường Chữ
+            cuối</button>
+          <button class="case-btn btn btn-secondary text-xs whitespace-nowrap" data-case="upper">Hoa Toàn Bộ</button>
+        </div>
+      </div>
+
+      <div class="modal-footer-buttons">
+        <button id="add-temp-btn" class="btn btn-secondary">Thêm Tạm Thời</button>
+        <button id="add-to-name-list-btn" class="btn">Thêm vào Name</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="quick-edit-panel" aria-hidden="true"
+    class="absolute z-40 p-3 rounded-lg shadow-2xl border border-border-color hidden w-[360px] max-w-[90vw]"
+    style="background-color: var(--bg-panel);">
+    <div class="flex justify-between items-center pb-2 mb-2 border-b border-border-color">
+      <h3 class="text-lg font-bold text-text-highlight">Dịch nhanh</h3>
+      <div class="flex gap-2">
+        <button id="q-expand-left-btn" class="btn btn-secondary !p-1 h-8 w-full text-center text-xs">&lt; Mở
+          rộng</button>
+        <button id="q-expand-right-btn" class="btn btn-secondary !p-1 h-8 w-full text-center text-xs">Mở rộng
+          &gt;</button>
+      </div>
+    </div>
+
+    <div class="space-y-1">
+      <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
+        <label for="q-input-hv" class="font-bold text-sm text-accent-color">hv</label>
+        <input type="text" id="q-input-hv" class="w-full text-sm">
+        <div class="flex gap-1">
+          <button class="q-temp-add-btn" data-target="q-input-hv" title="Thêm tạm thời">✔️</button>
+          <button class="q-perm-add-btn" data-target="q-input-hv" title="Thêm vào Name">💾</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
+        <label for="q-input-HV" class="font-bold text-sm text-accent-color">HV</label>
+        <input type="text" id="q-input-HV" class="w-full text-sm">
+        <div class="flex gap-1">
+          <button class="q-temp-add-btn" data-target="q-input-HV" title="Thêm tạm thời">✔️</button>
+          <button class="q-perm-add-btn" data-target="q-input-HV" title="Thêm vào Name">💾</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
+        <label for="q-input-zw" class="font-bold text-sm text-accent-color">zw</label>
+        <input type="text" id="q-input-zw" class="w-full text-sm">
+        <div class="flex gap-2">
+          <button id="q-search-btn" title="Tìm kiếm trên Google" class="!p-0">🔍</button>
+          <button id="q-copy-btn" title="Sao chép chữ Hán" class="!p-0">📋</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
+        <label for="q-input-Vp" class="font-bold text-sm text-accent-color">Vp</label>
+        <input type="text" id="q-input-Vp" class="w-full text-sm">
+        <div class="flex gap-1">
+          <button class="q-temp-add-btn" data-target="q-input-Vp" title="Thêm tạm thời">✔️</button>
+          <button class="q-perm-add-btn" data-target="q-input-Vp" title="Thêm vào Name">💾</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
+        <label for="q-input-tc" class="font-bold text-sm text-accent-color">tc</label>
+        <input type="text" id="q-input-tc" class="w-full text-sm" placeholder="Nhập bản dịch của bạn...">
+        <div class="flex gap-1">
+          <button class="q-temp-add-btn" data-target="q-input-tc" title="Thêm tạm thời">✔️</button>
+          <button class="q-perm-add-btn" data-target="q-input-tc" title="Thêm vào Name">💾</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-between items-center pt-2 mt-2 border-t border-border-color">
+      <button id="q-add-name-btn" class="btn text-sm">Thêm Name...</button>
+      <div class="flex items-center gap-3">
+        <button id="q-lock-btn" title="Ghim bảng dịch nhanh" class="!p-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+          </svg>
+        </button>
+        <button id="q-close-btn" title="Đóng" class="!p-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="credits-container" aria-hidden="true">
+    <p>
+      <span id="live-clock" class="subtle-glowing-clock"></span>
+    </p>
+  </div>
+
+  <div id="import-options-modal" aria-hidden="true" class="fixed inset-0 flex items-center justify-center hidden">
+    <div
+      class="modal-content bg-bg-panel p-6 rounded-lg border border-border-color shadow-2xl w-[90%] max-w-[600px] text-center">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-text-highlight">Tùy chọn nhập từ điển</h3>
+        <button id="close-import-options-modal-btn"
+          class="p-1 rounded-full text-text-color hover:bg-bg-input transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="mb-6">Chọn phương thức nhập file.</p>
+      <div class="flex flex-col items-center gap-4">
+        <div class="flex flex-wrap justify-center gap-4">
+          <button id="import-vietphrase-btn" class="btn">Vietphrase</button>
+          <button id="import-phienam-btn" class="btn">Phiên Âm</button>
+          <button id="import-names-btn" class="btn">Names</button>
+          <button id="import-luatnhan-btn" class="btn">Luật Nhân</button>
+        </div>
+        <button id="import-multi-file-btn" class="btn btn-secondary">Nhập nhiều file</button>
+      </div>
+      <div id="import-modal-description" class="mt-6 pt-4 border-t border-border-color text-left">
+        <p class="font-bold mb-2" style="width: 100%; display: block;">Lưu ý:</p>
+        <ul class="list-disc list-inside space-y-2" style="width: 100%; display: block;">
+          <li>Ấn Xóa Từ Điển trước khi nhập để tránh các lỗi về dữ liệu</li>
+          <li>Chỉ nhập file có đuôi <code>.txt</code></li>
+          <li>Các nút <strong>Nhập file [...]</strong> sẽ thay thế hoàn toàn dữ liệu cũ bằng file mới, không phân biệt
+            tên file bạn chọn.</li>
+          <li>Chức năng <strong>[Nhập nhiều file]</strong> yêu cầu chọn file theo đúng tên đã định nghĩa (ví dụ:
+            <code>Vietphrase.txt</code>, <code>Names.txt</code>).
+          </li>
+          <li>Định dạng chung cho nội dung file là: <code>[Tiếng Trung]=[Nghĩa Tiếng Việt]</code>, mỗi mục một dòng.
+          </li>
+        </ul>
+        <p class="font-bold mt-4 mb-2" style="width: 100%; display: block;">Chi tiết định dạng file:</p>
+        <ul class="list-disc list-inside space-y-2" style="width: 100%; display: block;">
+          <li><code>Vietphrase.txt</code>: File Vietphrase.</li>
+          <li><code>PhienAm.txt</code>: (Phiên Âm) File này là từ điển ghi nghĩa của từng chữ tiếng Trung theo Hán Việt.
+          </li>
+          <li><code>Names.txt</code>, <code>Names2.txt</code>(nếu có): File chứa tên riêng.</li>
+          <li><code>LuatNhan.txt</code>: File Luật Nhân có cấu trúc như ví dụ sau: </br></br>
+            不比{0}强=không mạnh bằng {0}</br>
+            Trong đó: {0} là tham số sẽ được hệ thống tự động thay thế theo dữ liệu từ điển..</br></br>
+          </li>
+        </ul>
+        <p class="font-bold mt-4 mb-2" style="width: 100%; display: block;">Các file tùy chọn khác (nếu có):</p>
+        <ul class="list-disc list-inside space-y-2" style="width: 100%; display: block;">
+          <li><code>Pronouns.txt</code>: File chứa đại từ nhân xưng.</li>
+          <li><code>Blacklist.txt</code>: File này sẽ ghi lại các nội dung không cần thiết theo từng dòng để hệ thống có
+            thể loại bỏ chúng trong quá trình dịch.</li>
+          <li><code>Babylon.txt</code>: File từ điển Trung-Anh.</li>
+        </ul>
+      </div>
+      <div><br><br></div>
+    </div>
+  </div>
+
+  <div id="log-modal" aria-hidden="true" class="fixed inset-0 flex items-center justify-center hidden">
+    <div class="modal-content bg-bg-panel p-6 rounded-lg border border-border-color shadow-2xl w-[90%]">
+      <h3 class="text-xl font-bold mb-4 text-text-highlight">Tiến trình</h3>
+      <ul id="log-list" class="bg-bg-input p-4 rounded-md h-[300px] overflow-y-auto text-sm leading-relaxed">
+      </ul>
+      <div class="mt-4 flex justify-end">
+        <button id="close-log-modal-btn" class="btn btn-secondary">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="custom-dialog-modal" aria-hidden="true" class="fixed inset-0 flex items-center justify-center hidden">
+    <div id="custom-dialog-content"
+      class="modal-content bg-bg-panel p-6 rounded-lg border border-border-color shadow-2xl w-[90%] max-w-[450px]">
+      <h3 id="custom-dialog-title" class="text-xl font-bold mb-4 text-text-highlight">Thông báo</h3>
+      <p id="custom-dialog-message" class="text-text-color mb-6">Nội dung thông báo sẽ ở đây.</p>
+      <div id="custom-dialog-buttons" class="mt-4 flex justify-end gap-3">
+        <button id="custom-dialog-cancel-btn" class="btn btn-secondary">Hủy</button>
+        <button id="custom-dialog-ok-btn" class="btn">OK</button>
+      </div>
+    </div>
+  </div>
+  <div id="settings-panel" aria-hidden="true"
+    class="absolute z-40 p-4 rounded-lg shadow-2xl border hidden w-[320px] max-w-[90vw]"
+    style="background-color: var(--bg-panel); border-color: var(--border-color);">
+    <div class="flex justify-between items-center pb-2 mb-3 border-b" style="border-color: var(--border-color);">
+      <h3 class="text-lg font-bold text-text-highlight">Cài đặt hiển thị</h3>
+      <button id="settings-panel-close-btn" title="Đóng" class="p-1 hover:text-accent-color">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label class="font-semibold text-sm">Màu nền</label>
+          <input type="color" id="bg-color-picker" title="Chọn màu nền tùy chỉnh">
+        </div>
+        <div id="bg-color-presets" class="grid grid-cols-7 gap-2">
+          <button class="color-box" data-color="#2a2f41" style="background-color: #2a2f41;"></button>
+          <button class="color-box" data-color="#232627" style="background-color: #232627;"></button>
+          <button class="color-box" data-color="#1e1e1e" style="background-color: #1e1e1e;"></button>
+          <button class="color-box" data-color="#000000" style="background-color: #000000;"></button>
+          <button class="color-box" data-color="#f5f5dc" style="background-color: #f5f5dc;"></button>
+          <button class="color-box" data-color="#c1b7a4" style="background-color: #c1b7a4;"></button>
+          <button class="color-box" data-color="#ffffff" style="background-color: #ffffff;"></button>
+        </div>
+      </div>
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label class="font-semibold text-sm">Màu chữ</label>
+          <input type="color" id="text-color-picker" title="Chọn màu chữ tùy chỉnh">
+        </div>
+        <div id="text-color-presets" class="grid grid-cols-7 gap-2">
+          <div class="color-box" data-color="#a9b1d6" style="background-color: #a9b1d6;"></div>
+          <div class="color-box" data-color="#f7b7b7" style="background-color: #f7b7b7;"></div>
+          <div class="color-box" data-color="#333333" style="background-color: #333333;"></div>
+          <div class="color-box" data-color="#000000" style="background-color: #000000;"></div>
+          <div class="color-box" data-color="#2c3e50" style="background-color: #2c3e50;"></div>
+          <div class="color-box" data-color="#d35400" style="background-color: #d35400;"></div>
+          <div class="color-box" data-color="#ffffff" style="background-color: #ffffff;"></div>
+        </div>
+      </div>
+      <div>
+        <label for="font-family-select" class="font-semibold text-sm block mb-2">Font chữ</label>
+        <select id="font-family-select" class="w-full p-2 rounded"
+          style="background-color: var(--bg-input); border: 1px solid var(--border-color);">
+          <option value="Arial, 'Inter', 'Segoe UI', sans-serif">Arial</option>
+          <option value="'Be Vietnam Pro', sans-serif">Be Vietnam Pro</option>
+          <option value="Verdana, Geneva, sans-serif">Verdana</option>
+          <option value="Helvetica, sans-serif">Helvetica</option>
+          <option value="Open Sans, sans-serif">Open Sans</option>
+          <option value="Roboto, sans-serif">Roboto</option>
+          <option value="Tahoma, sans-serif">Tahoma</option>
+        </select>
+      </div>
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label for="line-height-input" class="font-semibold text-sm">Giãn dòng:</label>
+          <input type="number" id="line-height-input" min="1.2" max="2.5" step="0.1" value="1.6"
+            class="w-20 p-1 rounded text-right"
+            style="background-color: var(--bg-input); border: 1px solid var(--border-color);">
+        </div>
+        <input type="range" id="line-height-slider" min="1.2" max="2.5" step="0.1" value="1.6" class="w-full">
+      </div>
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label for="width-input" class="font-semibold text-sm">Chiều rộng (px):</label>
+          <input type="number" id="width-input" min="800" max="2000" step="1" value="1280"
+            class="w-20 p-1 rounded text-right"
+            style="background-color: var(--bg-input); border: 1px solid var(--border-color);">
+        </div>
+        <input type="range" id="width-slider" min="800" max="2000" step="1" value="1280" class="w-full">
+      </div>
+    </div>
+  </div>
+
+  <div id="vietphrase-options-container"
+    class="hidden border border-border-color rounded-md shadow-lg max-h-80 overflow-y-auto">
+  </div>
+
+  <input type="file" id="file-importer" multiple class="hidden" accept=".txt">
+  <input type="file" id="single-file-importer" class="hidden" accept=".txt">
+  <script type="module" src="src/js/main.js"></script>
+</body>
+
+</html>

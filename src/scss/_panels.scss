@@ -1,0 +1,107 @@
+@use 'variables' as *;
+
+.panel {
+    background-color: var(--bg-panel);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+#output-panel {
+    border-top: 1px solid var(--border-color);
+    resize: vertical;
+    overflow: auto;
+    height: 46rem;
+    min-height: 30rem;
+
+    p {
+        margin: 0;
+        padding: 0;
+
+        &+p {
+            margin-top: 1.4em;
+        }
+    }
+
+    .word {
+        padding: 0;
+        margin: 0;
+        border-radius: 3px;
+        transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+        display: inline;
+        cursor: text;
+
+        &:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-main);
+            cursor: pointer;
+        }
+    }
+
+    .untranslatable {
+        color: #7a88a9;
+
+        &:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-main);
+        }
+    }
+
+    .vietphrase-word {
+        color: #ff9e64;
+        font-style: italic;
+    }
+
+    // Responsive font size
+    @media (max-width: 640px) {
+        font-size: 16px;
+    }
+}
+
+#quick-edit-panel {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+    .grid {
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid var(--border-color);
+
+        &:last-of-type {
+            border-bottom: none;
+        }
+    }
+
+    label {
+        font-size: 0.9rem;
+    }
+
+    button {
+        border-radius: 4px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+
+    >div:first-child button {
+        padding: 4px 8px;
+        font-size: 18px;
+    }
+}
+
+#settings-panel {
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+// Loader is a full-screen panel
+#loader {
+    background-color: rgba(26, 27, 38, 0.9);
+    z-index: $z-index-loader;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}

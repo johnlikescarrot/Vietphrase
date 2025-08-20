@@ -1,0 +1,27 @@
+.spinner-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes subtle-glow {
+    0% {
+        text-shadow: 0 0 5px rgba(135, 206, 250, 0.4);
+    }
+
+    50% {
+        text-shadow: 0 0 15px rgba(135, 206, 250, 0.8);
+    }
+
+    100% {
+        text-shadow: 0 0 5px rgba(135, 206, 250, 0.4);
+    }
+}

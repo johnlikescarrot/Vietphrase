@@ -1,0 +1,25 @@
+// 1. Utilities (Công cụ)
+// Phải được nhập đầu tiên vì các tệp khác phụ thuộc vào chúng.
+@use 'variables';
+@use 'animations';
+
+// 2. Themes (Chủ đề)
+// Định nghĩa các biến màu sắc toàn cục.
+@use 'dark-theme';
+
+// 3. Base (Nền tảng)
+// Các kiểu cơ bản cho toàn bộ trang.
+@use 'base';
+@use 'typography';
+
+// 4. Layout (Bố cục)
+// Các quy tắc về cấu trúc và bố cục trang.
+@use 'header';
+@use 'layout';
+
+// 5. Components (Thành phần)
+// Các kiểu chi tiết cho từng thành phần UI.
+@use 'buttons';
+@use 'panels';
+@use 'forms';
+@use 'modals';
