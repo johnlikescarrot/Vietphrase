@@ -70,7 +70,6 @@ export function performTranslation(state, options = {}) {
   }
 
   const textToTranslate = options.forceText ?? DOMElements.inputText.value;
-
   const standardizedText = standardizeText(textToTranslate);
 
   if (!standardizedText.trim()) {
@@ -81,21 +80,41 @@ export function performTranslation(state, options = {}) {
     state.lastTranslatedText = standardizedText;
   }
 
+  // ==========================================================================
+  // LỚP 1: ĐỤC LỖ VĂN BẢN GỐC VỚI NAME LIST (ƯU TIÊN TUYỆT ĐỐI)
+  // ==========================================================================
+  let processedText = standardizedText;
+  const placeholders = new Map();
+  let placeholderId = 0;
+
+  const sortedNameKeys = [...nameDictionary.keys()].sort((a, b) => b.length - a.length);
+
+  for (const nameKey of sortedNameKeys) {
+    if (processedText.includes(nameKey)) {
+      const placeholder = `%%NAME_${placeholderId}%%`;
+      const nameValue = nameDictionary.get(nameKey);
+
+      // *** THAY ĐỔI 1: Lưu cả chữ Hán gốc (nameKey) và nghĩa (nameValue) ***
+      // Thay vì chỉ lưu nghĩa, ta lưu một đối tượng chứa cả hai thông tin.
+      placeholders.set(placeholder, { original: nameKey, translation: nameValue });
+
+      const escapedKey = escapeRegExp(nameKey);
+      processedText = processedText.replace(new RegExp(escapedKey, 'g'), placeholder);
+
+      placeholderId++;
+    }
+  }
+
+  // ==========================================================================
+  // LỚP 2: DỊCH PHẦN VĂN BẢN CÒN LẠI (ĐÃ BỊ ĐỤC LỖ)
+  // ==========================================================================
   const isVietphraseMode = DOMElements.modeToggle.checked;
-
-  // Dấu mở không gây nhầm lẫn (ngoặc các loại)
   const UNAMBIGUOUS_OPENING = new Set(['(', '[', '{', '“', '‘']);
-
-  // Dấu đóng và dấu phân cách không gây nhầm lẫn
   const UNAMBIGUOUS_CLOSING = new Set([')', ']', '}', '”', '’', ',', '.', '!', '?', ';', ':', '。', '：', '；', '，', '、', '！', '？', '……', '～']);
-
-  // Dấu trích dẫn cần xử lý trạng thái mở/đóng
   const AMBIGUOUS_QUOTES = new Set(['"', "'"]);
-
-  // Set tổng hợp tất cả các dấu câu
   const ALL_PUNCTUATION = new Set([...UNAMBIGUOUS_OPENING, ...UNAMBIGUOUS_CLOSING, ...AMBIGUOUS_QUOTES]);
 
-  const lines = standardizedText.split('\n');
+  const lines = processedText.split('\n');
 
   const translatedLineHtmls = lines.map(line => {
     if (line.trim() === '') return null;
@@ -108,6 +127,19 @@ export function performTranslation(state, options = {}) {
     let lastChar = '';
     let i = 0;
     while (i < line.length) {
+      const placeholderMatch = line.substring(i).match(/^%%NAME_\d+%%/);
+      if (placeholderMatch) {
+        const placeholder = placeholderMatch[0];
+        const span = document.createElement('span');
+        span.className = 'word';
+        span.dataset.original = placeholder;
+        span.textContent = placeholder;
+        lineHtml += (i === 0 ? '' : ' ') + span.outerHTML;
+        i += placeholder.length;
+        lastChar = placeholder.slice(-1);
+        continue;
+      }
+
       let bestMatch = null;
       if (temporaryNameDictionary.size > 0) {
         let longestKey = '';
@@ -135,12 +167,10 @@ export function performTranslation(state, options = {}) {
           const regexPattern = escapeRegExp(ruleKey).replace(/\\{0\\}/g, '([\u4e00-\u9fa5]+)');
           const regex = new RegExp(`^${regexPattern}$`);
           const match = originalWord.match(regex);
-
           if (match && match[1]) {
             const capturedWord = match[1];
             const translationOfCapturedWord = translateWord(capturedWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
             let finalTranslation = value.translation.replace('{0}', translationOfCapturedWord.best);
-
             if (capitalizeNextWord && /\p{L}/u.test(finalTranslation)) {
               finalTranslation = finalTranslation.charAt(0).toUpperCase() + finalTranslation.slice(1);
               capitalizeNextWord = false;
@@ -152,7 +182,6 @@ export function performTranslation(state, options = {}) {
             span.textContent = finalTranslation;
             let leadingSpace = ' ';
             const firstChar = originalWord.charAt(0);
-
             if (AMBIGUOUS_QUOTES.has(firstChar)) {
               const isDouble = firstChar === '"';
               const isSingle = firstChar === "'";
@@ -256,6 +285,9 @@ export function performTranslation(state, options = {}) {
         } else {
           nonMatchEnd = i + 1;
           while (nonMatchEnd < line.length) {
+            if (line.substring(nonMatchEnd).match(/^%%NAME_\d+%%/)) {
+              break;
+            }
             let isKnownWordAhead = false;
             if (temporaryNameDictionary.size > 0) {
               for (const key of temporaryNameDictionary.keys()) {
@@ -284,7 +316,6 @@ export function performTranslation(state, options = {}) {
 
         let leadingSpace = ' ';
         const firstChar = nonMatchBlock.charAt(0);
-
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
           const isDouble = firstChar === '"';
           const isSingle = firstChar === "'";
@@ -322,29 +353,19 @@ export function performTranslation(state, options = {}) {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = lineHtml.trim();
     const treeWalker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT);
-
-    let capitalizeNextLetter = true; // Cờ ghi nhớ: true = cần viết hoa chữ cái tiếp theo
+    let capitalizeNextLetter = true;
 
     while (treeWalker.nextNode()) {
       const node = treeWalker.currentNode;
       let text = node.nodeValue;
 
-      // Nếu cờ đang bật và chúng ta tìm thấy một chữ cái trong node này...
       if (capitalizeNextLetter && /\p{L}/u.test(text)) {
-        // ...thì viết hoa chữ cái đầu tiên tìm thấy.
         text = text.replace(/\p{L}/u, (letter) => letter.toUpperCase());
-        // Và tắt cờ đi vì đã hoàn thành nhiệm vụ.
         capitalizeNextLetter = false;
       }
 
-      // Xử lý riêng các câu bắt đầu và kết thúc bên trong cùng một node.
       text = text.replace(/([.!?:]\s*)(\p{L})/ug, (_, punctuationAndSpace, letter) => `${punctuationAndSpace}${letter.toUpperCase()}`);
-
-      // Cập nhật lại giá trị cho node
       node.nodeValue = text;
-
-      // Cuối cùng, cập nhật cờ cho node tiếp theo.
-      // Cờ sẽ được bật lên nếu node hiện tại kết thúc bằng dấu câu.
       const trimmedText = text.trim();
       if (trimmedText.length > 0 && /[.!?]$/.test(trimmedText)) {
         capitalizeNextLetter = true;
@@ -353,6 +374,20 @@ export function performTranslation(state, options = {}) {
     return `<p>${tempDiv.innerHTML}</p>`;
   }).filter(Boolean);
 
-  DOMElements.outputPanel.innerHTML = translatedLineHtmls.join('');
+  // ==========================================================================
+  // LỚP 3: LẮP RÁP KẾT QUẢ - THAY THẾ PLACEHOLDER BẰNG NGHĨA ĐÚNG
+  // ==========================================================================
+  let finalHtml = translatedLineHtmls.join('');
+  for (const [placeholder, data] of placeholders.entries()) {
+    const spanRegex = new RegExp(`<span class="word" data-original="${escapeRegExp(placeholder)}">${escapeRegExp(placeholder)}</span>`, 'g');
+
+    // *** THAY ĐỔI 2: Sử dụng thông tin đã lưu để tạo thẻ span chính xác ***
+    // data.original là chữ Hán, data.translation là nghĩa tiếng Việt.
+    const replacementSpan = `<span class="word" data-original="${data.original}">${data.translation}</span>`;
+
+    finalHtml = finalHtml.replace(spanRegex, replacementSpan);
+  }
+
+  DOMElements.outputPanel.innerHTML = finalHtml;
   temporaryNameDictionary.clear();
 }
