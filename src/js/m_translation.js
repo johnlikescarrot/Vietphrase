@@ -359,7 +359,7 @@ export function performTranslation(state, options = {}) {
       // Cuối cùng, cập nhật cờ cho node tiếp theo.
       // Cờ sẽ được bật lên nếu node hiện tại kết thúc bằng dấu câu.
       const trimmedText = text.trim();
-      if (trimmedText.length > 0 && /[“.!?]$/.test(trimmedText)) {
+      if (trimmedText.length > 0 && /[.!?]$/.test(trimmedText)) {
         capitalizeNextLetter = true;
       }
     }
