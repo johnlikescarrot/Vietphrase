@@ -102,6 +102,7 @@ export function performTranslation(state, options = {}) {
 
     let isInsideDoubleQuote = false;
     let isInsideSingleQuote = false;
+    let capitalizeNextWord = false;
 
     let lineHtml = '';
     let lastChar = '';
@@ -129,73 +130,61 @@ export function performTranslation(state, options = {}) {
 
       if (bestMatch) {
         const { key: originalWord, value } = bestMatch;
-
-        // Xử lý đặc biệt cho LuatNhan
         if (value.type === 'LuatNhan' && value.translation.includes('{0}')) {
-          const ruleKey = value.ruleKey; // Lấy quy tắc gốc đã lưu ở Bước 1
-          // Tạo một biểu thức chính quy (regex) để tìm ra phần chữ Hán tương ứng với {0}
+          const ruleKey = value.ruleKey;
           const regexPattern = escapeRegExp(ruleKey).replace(/\\{0\\}/g, '([\u4e00-\u9fa5]+)');
           const regex = new RegExp(`^${regexPattern}$`);
           const match = originalWord.match(regex);
 
-          // Nếu tìm thấy và có nội dung cho {0}
           if (match && match[1]) {
-            const capturedWord = match[1]; // Đây chính là chữ '我'
-            // Dịch phần chữ Hán đó
+            const capturedWord = match[1];
             const translationOfCapturedWord = translateWord(capturedWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
-            // Thay thế {0} bằng kết quả dịch
-            const finalTranslation = value.translation.replace('{0}', translationOfCapturedWord.best);
+            let finalTranslation = value.translation.replace('{0}', translationOfCapturedWord.best);
 
-            // Tạo thẻ span cho kết quả dịch
+            if (capitalizeNextWord && /\p{L}/u.test(finalTranslation)) {
+              finalTranslation = finalTranslation.charAt(0).toUpperCase() + finalTranslation.slice(1);
+              capitalizeNextWord = false;
+            }
+
             const span = document.createElement('span');
-            span.className = 'word'; // Giữ class 'word' để có thể bấm vào chỉnh sửa
-            span.dataset.original = originalWord; // QUAN TRỌNG: Giữ lại chữ Hán gốc
+            span.className = 'word';
+            span.dataset.original = originalWord;
             span.textContent = finalTranslation;
-
             let leadingSpace = ' ';
             const firstChar = originalWord.charAt(0);
 
-            // Logic xử lý trạng thái cho dấu ngoặc kép và ngoặc đơn
             if (AMBIGUOUS_QUOTES.has(firstChar)) {
               const isDouble = firstChar === '"';
               const isSingle = firstChar === "'";
 
-              // Kiểm tra xem đây là dấu MỞ hay ĐÓNG
               if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
-                // --- XỬ LÝ DẤU MỞ ---
-                // Mặc định là có khoảng trắng phía trước, trừ khi nó đứng sau 1 dấu mở khác
+                capitalizeNextWord = true;
                 if (UNAMBIGUOUS_OPENING.has(lastChar)) {
                   leadingSpace = '';
                 }
               } else {
-                // --- XỬ LÝ DẤU ĐÓNG ---
-                // Luôn không có khoảng trắng phía trước
                 leadingSpace = '';
               }
 
-              // Lật lại trạng thái (mở -> đóng, đóng -> mở)
               if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
               if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
 
             } else {
-              // Logic cho các ký tự không phải là dấu ngoặc kép/đơn
-              // Không có khoảng trắng nếu đứng sau dấu mở hoặc đứng trước dấu đóng/phân cách
               if (UNAMBIGUOUS_OPENING.has(lastChar) ||
-                (isInsideDoubleQuote && lastChar === '"') || // Xử lý trường hợp ngay sau dấu mở "
-                (isInsideSingleQuote && lastChar === "'") || // Xử lý trường hợp ngay sau dấu mở '
+                (isInsideDoubleQuote && lastChar === '"') ||
+                (isInsideSingleQuote && lastChar === "'") ||
                 UNAMBIGUOUS_CLOSING.has(firstChar)) {
                 leadingSpace = '';
               }
             }
 
-            // Quy tắc cuối cùng: Không bao giờ có khoảng trắng ở đầu dòng hoặc sau một khoảng trắng có sẵn
             if (i === 0 || /\s/.test(lastChar)) {
               leadingSpace = '';
             }
             lineHtml += leadingSpace + span.outerHTML;
             lastChar = originalWord.slice(-1);
             i += originalWord.length;
-            continue; // Bỏ qua các bước xử lý còn lại và tiếp tục vòng lặp
+            continue;
           }
         }
 
@@ -203,56 +192,56 @@ export function performTranslation(state, options = {}) {
           i += originalWord.length;
           continue;
         }
+
         const translationResult = translateWord(originalWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
         const span = document.createElement('span');
         span.className = 'word';
         span.dataset.original = originalWord;
+
+        let textForSpan;
         if (!translationResult.found) {
           span.classList.add('untranslatable');
-          span.textContent = originalWord;
+          textForSpan = originalWord;
         } else if (isVietphraseMode) {
           span.classList.add('vietphrase-word');
-          span.textContent = `(${translationResult.all.join('/')})`;
+          textForSpan = `(${translationResult.all.join('/')})`;
         } else {
-          span.textContent = translationResult.best;
+          textForSpan = translationResult.best;
         }
+
+        if (capitalizeNextWord && /\p{L}/u.test(textForSpan)) {
+          textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
+          capitalizeNextWord = false;
+        }
+        span.textContent = textForSpan;
+
         let leadingSpace = ' ';
         const firstChar = originalWord.charAt(0);
-
-        // Logic xử lý trạng thái cho dấu ngoặc kép và ngoặc đơn
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
           const isDouble = firstChar === '"';
           const isSingle = firstChar === "'";
 
-          // Kiểm tra xem đây là dấu MỞ hay ĐÓNG
           if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
-            // --- XỬ LÝ DẤU MỞ ---
-            // Mặc định là có khoảng trắng phía trước, trừ khi nó đứng sau 1 dấu mở khác
+            capitalizeNextWord = true;
             if (UNAMBIGUOUS_OPENING.has(lastChar)) {
               leadingSpace = '';
             }
           } else {
-            // --- XỬ LÝ DẤU ĐÓNG ---
-            // Luôn không có khoảng trắng phía trước
             leadingSpace = '';
           }
 
-          // Lật lại trạng thái (mở -> đóng, đóng -> mở)
           if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
           if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
 
         } else {
-          // Logic cho các ký tự không phải là dấu ngoặc kép/đơn
-          // Không có khoảng trắng nếu đứng sau dấu mở hoặc đứng trước dấu đóng/phân cách
           if (UNAMBIGUOUS_OPENING.has(lastChar) ||
-            (isInsideDoubleQuote && lastChar === '"') || // Xử lý trường hợp ngay sau dấu mở "
-            (isInsideSingleQuote && lastChar === "'") || // Xử lý trường hợp ngay sau dấu mở '
+            (isInsideDoubleQuote && lastChar === '"') ||
+            (isInsideSingleQuote && lastChar === "'") ||
             UNAMBIGUOUS_CLOSING.has(firstChar)) {
             leadingSpace = '';
           }
         }
 
-        // Quy tắc cuối cùng: Không bao giờ có khoảng trắng ở đầu dòng hoặc sau một khoảng trắng có sẵn
         if (i === 0 || /\s/.test(lastChar)) {
           leadingSpace = '';
         }
@@ -281,48 +270,46 @@ export function performTranslation(state, options = {}) {
           }
         }
         const nonMatchBlock = line.substring(i, nonMatchEnd);
-        const processedBlock = nonMatchBlock;
+        let textForSpan = nonMatchBlock;
+
+        if (capitalizeNextWord && /\p{L}/u.test(textForSpan)) {
+          textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
+          capitalizeNextWord = false;
+        }
+
         const span = document.createElement('span');
         span.className = 'word';
         span.dataset.original = nonMatchBlock;
-        span.textContent = processedBlock;
+        span.textContent = textForSpan;
+
         let leadingSpace = ' ';
         const firstChar = nonMatchBlock.charAt(0);
 
-        // Logic xử lý trạng thái cho dấu ngoặc kép và ngoặc đơn
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
           const isDouble = firstChar === '"';
           const isSingle = firstChar === "'";
 
-          // Kiểm tra xem đây là dấu MỞ hay ĐÓNG
           if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
-            // --- XỬ LÝ DẤU MỞ ---
-            // Mặc định là có khoảng trắng phía trước, trừ khi nó đứng sau 1 dấu mở khác
+            capitalizeNextWord = true;
             if (UNAMBIGUOUS_OPENING.has(lastChar)) {
               leadingSpace = '';
             }
           } else {
-            // --- XỬ LÝ DẤU ĐÓNG ---
-            // Luôn không có khoảng trắng phía trước
             leadingSpace = '';
           }
 
-          // Lật lại trạng thái (mở -> đóng, đóng -> mở)
           if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
           if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
 
         } else {
-          // Logic cho các ký tự không phải là dấu ngoặc kép/đơn
-          // Không có khoảng trắng nếu đứng sau dấu mở hoặc đứng trước dấu đóng/phân cách
           if (UNAMBIGUOUS_OPENING.has(lastChar) ||
-            (isInsideDoubleQuote && lastChar === '"') || // Xử lý trường hợp ngay sau dấu mở "
-            (isInsideSingleQuote && lastChar === "'") || // Xử lý trường hợp ngay sau dấu mở '
+            (isInsideDoubleQuote && lastChar === '"') ||
+            (isInsideSingleQuote && lastChar === "'") ||
             UNAMBIGUOUS_CLOSING.has(firstChar)) {
             leadingSpace = '';
           }
         }
 
-        // Quy tắc cuối cùng: Không bao giờ có khoảng trắng ở đầu dòng hoặc sau một khoảng trắng có sẵn
         if (i === 0 || /\s/.test(lastChar)) {
           leadingSpace = '';
         }
