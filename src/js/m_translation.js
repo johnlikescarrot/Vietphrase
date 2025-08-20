@@ -7,12 +7,12 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// NOTE: This function is not currently used by performTranslation but is kept for other potential features.
 function applyLuatNhan(text, state) {
   const luatNhanDict = state.dictionaries.get('LuatNhan')?.dict;
   if (!luatNhanDict || luatNhanDict.size === 0) {
     return text;
   }
-
   let processedText = text;
   const sortedRules = [...luatNhanDict.entries()].sort((a, b) => b[0].length - a[0].length);
   for (const [ruleKey, ruleValue] of sortedRules) {
@@ -29,7 +29,6 @@ function applyLuatNhan(text, state) {
       return match;
     });
   }
-
   return processedText;
 }
 
@@ -39,12 +38,8 @@ export function synthesizeCompoundTranslation(text, state) {
     return translationCache.get(text);
   }
   const segments = segmentText(text, state.masterKeySet);
-  if (segments.length <= 1) {
-    return [];
-  }
-  if (segments.length > 10) {
-    return [`${segments.join(' ')} - Quá dài để gợi ý`];
-  }
+  if (segments.length <= 1) return [];
+  if (segments.length > 10) return [`${segments.join(' ')} - Quá dài để gợi ý`];
   const segmentMeanings = segments.map(seg => {
     const translation = translateWord(seg, state.dictionaries, nameDictionary, temporaryNameDictionary);
     return translation.all;
@@ -64,14 +59,14 @@ export function synthesizeCompoundTranslation(text, state) {
 }
 
 export function performTranslation(state, options = {}) {
+  console.clear(); // Xóa log cũ
+
   if (!state || !state.dictionaries || !state.dictionaryTrie) {
-    DOMElements.outputPanel.textContent = 'Lỗi: Từ điển chưa được tải hoặc xử lý. Vui lòng thử lại.';
+    DOMElements.outputPanel.textContent = 'Lỗi: Từ điển chưa được tải hoặc xử lý.';
     return;
   }
-
   const textToTranslate = options.forceText ?? DOMElements.inputText.value;
   const standardizedText = standardizeText(textToTranslate);
-
   if (!standardizedText.trim()) {
     DOMElements.outputPanel.textContent = 'Kết quả sẽ hiện ở đây...';
     return;
@@ -80,49 +75,34 @@ export function performTranslation(state, options = {}) {
     state.lastTranslatedText = standardizedText;
   }
 
-  // ==========================================================================
-  // LỚP 1: ĐỤC LỖ VĂN BẢN GỐC VỚI NAME LIST (ƯU TIÊN TUYỆT ĐỐI)
-  // ==========================================================================
+  // LỚP 1: TÁCH NAME LIST RA XỬ LÝ RIÊNG BẰNG PLACEHOLDER
   let processedText = standardizedText;
   const placeholders = new Map();
   let placeholderId = 0;
-
   const sortedNameKeys = [...nameDictionary.keys()].sort((a, b) => b.length - a.length);
-
   for (const nameKey of sortedNameKeys) {
     if (processedText.includes(nameKey)) {
       const placeholder = `%%NAME_${placeholderId}%%`;
       const nameValue = nameDictionary.get(nameKey);
-
-      // *** THAY ĐỔI 1: Lưu cả chữ Hán gốc (nameKey) và nghĩa (nameValue) ***
-      // Thay vì chỉ lưu nghĩa, ta lưu một đối tượng chứa cả hai thông tin.
       placeholders.set(placeholder, { original: nameKey, translation: nameValue });
-
       const escapedKey = escapeRegExp(nameKey);
       processedText = processedText.replace(new RegExp(escapedKey, 'g'), placeholder);
-
       placeholderId++;
     }
   }
 
-  // ==========================================================================
-  // LỚP 2: DỊCH PHẦN VĂN BẢN CÒN LẠI (ĐÃ BỊ ĐỤC LỖ)
-  // ==========================================================================
+  // LỚP 2: DỊCH PHẦN VĂN BẢN CÒN LẠI VÀ XỬ LÝ LOGIC VIẾT HOA
   const isVietphraseMode = DOMElements.modeToggle.checked;
   const UNAMBIGUOUS_OPENING = new Set(['(', '[', '{', '“', '‘']);
   const UNAMBIGUOUS_CLOSING = new Set([')', ']', '}', '”', '’', ',', '.', '!', '?', ';', ':', '。', '：', '；', '，', '、', '！', '？', '……', '～']);
   const AMBIGUOUS_QUOTES = new Set(['"', "'"]);
   const ALL_PUNCTUATION = new Set([...UNAMBIGUOUS_OPENING, ...UNAMBIGUOUS_CLOSING, ...AMBIGUOUS_QUOTES]);
-
   const lines = processedText.split('\n');
-
   const translatedLineHtmls = lines.map(line => {
     if (line.trim() === '') return null;
-
     let isInsideDoubleQuote = false;
     let isInsideSingleQuote = false;
-    let capitalizeNextWord = false;
-
+    let capitalizeNextWord = false; // DÙNG CSS trong thẻ p text-transform: capitalize;
     let lineHtml = '';
     let lastChar = '';
     let i = 0;
@@ -130,281 +110,165 @@ export function performTranslation(state, options = {}) {
       const placeholderMatch = line.substring(i).match(/^%%NAME_\d+%%/);
       if (placeholderMatch) {
         const placeholder = placeholderMatch[0];
-
         let leadingSpace = ' ';
-        // Áp dụng quy tắc tương tự như các từ thông thường, dựa vào ký tự của token đứng trước
-        if (UNAMBIGUOUS_OPENING.has(lastChar) ||
-          (isInsideDoubleQuote && lastChar === '"') ||
-          (isInsideSingleQuote && lastChar === "'")) {
+        if (UNAMBIGUOUS_OPENING.has(lastChar) || (isInsideDoubleQuote && lastChar === '"') || (isInsideSingleQuote && lastChar === "'") || i === 0 || /\s/.test(lastChar)) {
           leadingSpace = '';
         }
-
-        // Không thêm space ở đầu dòng
-        if (i === 0 || /\s/.test(lastChar)) {
-          leadingSpace = '';
-        }
-
         const span = document.createElement('span');
         span.className = 'word';
         span.dataset.original = placeholder;
+        if (capitalizeNextWord) {
+          span.dataset.capitalize = 'true';
+          capitalizeNextWord = false;
+        }
         span.textContent = placeholder;
-
-        // Sử dụng biến leadingSpace đã được tính toán chính xác
         lineHtml += leadingSpace + span.outerHTML;
-
         i += placeholder.length;
         lastChar = placeholder.slice(-1);
         continue;
       }
-
       let bestMatch = null;
       if (temporaryNameDictionary.size > 0) {
         let longestKey = '';
         for (const [key] of temporaryNameDictionary.entries()) {
-          if (line.startsWith(key, i) && key.length > longestKey.length) {
-            longestKey = key;
-          }
+          if (line.startsWith(key, i) && key.length > longestKey.length) longestKey = key;
         }
-        if (longestKey) {
-          bestMatch = { key: longestKey, value: { translation: temporaryNameDictionary.get(longestKey), type: 'temp' } };
-        }
+        if (longestKey) bestMatch = { key: longestKey, value: { translation: temporaryNameDictionary.get(longestKey), type: 'temp' } };
       }
-
       if (!bestMatch) {
         const trieMatch = state.dictionaryTrie.findLongestMatch(line, i);
-        if (trieMatch) {
-          bestMatch = trieMatch;
-        }
+        if (trieMatch) bestMatch = trieMatch;
       }
-
       if (bestMatch) {
         const { key: originalWord, value } = bestMatch;
-        if (value.type === 'LuatNhan' && value.translation.includes('{0}')) {
-          const ruleKey = value.ruleKey;
-          const regexPattern = escapeRegExp(ruleKey).replace(/\\{0\\}/g, '([\u4e00-\u9fa5]+)');
-          const regex = new RegExp(`^${regexPattern}$`);
-          const match = originalWord.match(regex);
-          if (match && match[1]) {
-            const capturedWord = match[1];
-            const translationOfCapturedWord = translateWord(capturedWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
-            let finalTranslation = value.translation.replace('{0}', translationOfCapturedWord.best);
-            if (capitalizeNextWord && /\p{L}/u.test(finalTranslation)) {
-              finalTranslation = finalTranslation.charAt(0).toUpperCase() + finalTranslation.slice(1);
-              capitalizeNextWord = false;
-            }
-
-            const span = document.createElement('span');
-            span.className = 'word';
-            span.dataset.original = originalWord;
-            span.textContent = finalTranslation;
-            let leadingSpace = ' ';
-            const firstChar = originalWord.charAt(0);
-            if (AMBIGUOUS_QUOTES.has(firstChar)) {
-              const isDouble = firstChar === '"';
-              const isSingle = firstChar === "'";
-
-              if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
-                capitalizeNextWord = true;
-                if (UNAMBIGUOUS_OPENING.has(lastChar)) {
-                  leadingSpace = '';
-                }
-              } else {
-                leadingSpace = '';
-              }
-
-              if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
-              if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
-
-            } else {
-              if (UNAMBIGUOUS_OPENING.has(lastChar) ||
-                (isInsideDoubleQuote && lastChar === '"') ||
-                (isInsideSingleQuote && lastChar === "'") ||
-                UNAMBIGUOUS_CLOSING.has(firstChar)) {
-                leadingSpace = '';
-              }
-            }
-
-            if (i === 0 || /\s/.test(lastChar)) {
-              leadingSpace = '';
-            }
-            lineHtml += leadingSpace + span.outerHTML;
-            lastChar = originalWord.slice(-1);
-            i += originalWord.length;
-            continue;
-          }
-        }
 
         if (value.type === 'Blacklist' || value.translation === '') {
           i += originalWord.length;
           continue;
         }
-
         const translationResult = translateWord(originalWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
         const span = document.createElement('span');
         span.className = 'word';
         span.dataset.original = originalWord;
-
-        let textForSpan;
-        if (!translationResult.found) {
-          span.classList.add('untranslatable');
-          textForSpan = originalWord;
-        } else if (isVietphraseMode) {
-          span.classList.add('vietphrase-word');
-          textForSpan = `(${translationResult.all.join('/')})`;
-        } else {
-          textForSpan = translationResult.best;
-        }
-
+        let textForSpan = !translationResult.found ? originalWord : (isVietphraseMode ? `(${translationResult.all.join('/')})` : translationResult.best);
+        if (!translationResult.found) span.classList.add('untranslatable');
+        if (isVietphraseMode && translationResult.found) span.classList.add('vietphrase-word');
         if (capitalizeNextWord && /\p{L}/u.test(textForSpan)) {
           textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
           capitalizeNextWord = false;
         }
         span.textContent = textForSpan;
-
+        const trimmedText = textForSpan.trim();
+        if (/[.!?]$/.test(trimmedText)) {
+          capitalizeNextWord = true;
+        }
         let leadingSpace = ' ';
         const firstChar = originalWord.charAt(0);
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
           const isDouble = firstChar === '"';
           const isSingle = firstChar === "'";
-
-          if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
-            capitalizeNextWord = true;
-            if (UNAMBIGUOUS_OPENING.has(lastChar)) {
-              leadingSpace = '';
+          // CHỈ kích hoạt viết hoa nếu KÝ TỰ LÀ MỘT DẤU NGOẶC KÉP DUY NHẤT
+          if (originalWord.length === 1) {
+            if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
+              capitalizeNextWord = true;
             }
+          }
+          // Logic còn lại để xử lý khoảng trắng và trạng thái vẫn giữ nguyên
+          if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
+            if (UNAMBIGUOUS_OPENING.has(lastChar)) leadingSpace = '';
           } else {
             leadingSpace = '';
           }
-
           if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
           if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
-
         } else {
-          if (UNAMBIGUOUS_OPENING.has(lastChar) ||
-            (isInsideDoubleQuote && lastChar === '"') ||
-            (isInsideSingleQuote && lastChar === "'") ||
-            UNAMBIGUOUS_CLOSING.has(firstChar)) {
+          if (UNAMBIGUOUS_OPENING.has(lastChar) || (isInsideDoubleQuote && lastChar === '"') || (isInsideSingleQuote && lastChar === "'") || UNAMBIGUOUS_CLOSING.has(firstChar)) {
             leadingSpace = '';
           }
         }
-
-        if (i === 0 || /\s/.test(lastChar)) {
-          leadingSpace = '';
-        }
+        if (i === 0 || /\s/.test(lastChar)) leadingSpace = '';
         lineHtml += leadingSpace + span.outerHTML;
         lastChar = originalWord.slice(-1);
         i += originalWord.length;
       } else {
         const currentChar = line[i];
-        let nonMatchEnd;
-        if (ALL_PUNCTUATION.has(currentChar)) {
-          nonMatchEnd = i + 1;
-        } else {
-          nonMatchEnd = i + 1;
+        let nonMatchEnd = i + 1;
+        if (!ALL_PUNCTUATION.has(currentChar)) {
           while (nonMatchEnd < line.length) {
-            if (line.substring(nonMatchEnd).match(/^%%NAME_\d+%%/)) {
-              break;
-            }
+            if (line.substring(nonMatchEnd).match(/^%%NAME_\d+%%/)) break;
             let isKnownWordAhead = false;
             if (temporaryNameDictionary.size > 0) {
               for (const key of temporaryNameDictionary.keys()) {
                 if (line.startsWith(key, nonMatchEnd)) { isKnownWordAhead = true; break; }
               }
             }
-            if (!isKnownWordAhead && state.dictionaryTrie.findLongestMatch(line, nonMatchEnd)) {
-              isKnownWordAhead = true;
-            }
-            if (isKnownWordAhead || (nonMatchEnd < line.length && ALL_PUNCTUATION.has(line[nonMatchEnd]))) { break; }
+            if (!isKnownWordAhead && state.dictionaryTrie.findLongestMatch(line, nonMatchEnd)) isKnownWordAhead = true;
+            if (isKnownWordAhead || (nonMatchEnd < line.length && ALL_PUNCTUATION.has(line[nonMatchEnd]))) break;
             nonMatchEnd++;
           }
         }
         const nonMatchBlock = line.substring(i, nonMatchEnd);
         let textForSpan = nonMatchBlock;
-
         if (capitalizeNextWord && /\p{L}/u.test(textForSpan)) {
           textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
           capitalizeNextWord = false;
         }
-
         const span = document.createElement('span');
         span.className = 'word';
         span.dataset.original = nonMatchBlock;
         span.textContent = textForSpan;
-
+        const trimmedText = textForSpan.trim();
+        if (/[.!?]$/.test(trimmedText)) {
+          capitalizeNextWord = true;
+        }
         let leadingSpace = ' ';
         const firstChar = nonMatchBlock.charAt(0);
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
           const isDouble = firstChar === '"';
           const isSingle = firstChar === "'";
-
-          if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
-            capitalizeNextWord = true;
-            if (UNAMBIGUOUS_OPENING.has(lastChar)) {
-              leadingSpace = '';
+          // CHỈ kích hoạt viết hoa nếu TỪ GỐC LÀ MỘT DẤU NGOẶC KÉP DUY NHẤT
+          if (nonMatchBlock.length === 1) {
+            if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
+              capitalizeNextWord = true;
             }
+          }
+          // Logic còn lại để xử lý khoảng trắng và trạng thái vẫn giữ nguyên
+          if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
+            if (UNAMBIGUOUS_OPENING.has(lastChar)) leadingSpace = '';
           } else {
             leadingSpace = '';
           }
-
           if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
           if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
-
         } else {
-          if (UNAMBIGUOUS_OPENING.has(lastChar) ||
-            (isInsideDoubleQuote && lastChar === '"') ||
-            (isInsideSingleQuote && lastChar === "'") ||
-            UNAMBIGUOUS_CLOSING.has(firstChar)) {
+          if (UNAMBIGUOUS_OPENING.has(lastChar) || (isInsideDoubleQuote && lastChar === '"') || (isInsideSingleQuote && lastChar === "'") || UNAMBIGUOUS_CLOSING.has(firstChar)) {
             leadingSpace = '';
           }
         }
-
-        if (i === 0 || /\s/.test(lastChar)) {
-          leadingSpace = '';
-        }
+        if (i === 0 || /\s/.test(lastChar)) leadingSpace = '';
         lineHtml += leadingSpace + span.outerHTML;
         lastChar = nonMatchBlock.slice(-1);
         i = nonMatchEnd;
       }
     }
-
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = lineHtml.trim();
-    const treeWalker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT);
-    let capitalizeNextLetter = true;
-
-    while (treeWalker.nextNode()) {
-      const node = treeWalker.currentNode;
-      let text = node.nodeValue;
-
-      if (capitalizeNextLetter && /\p{L}/u.test(text)) {
-        text = text.replace(/\p{L}/u, (letter) => letter.toUpperCase());
-        capitalizeNextLetter = false;
-      }
-
-      text = text.replace(/([.!?:]\s*)(\p{L})/ug, (_, punctuationAndSpace, letter) => `${punctuationAndSpace}${letter.toUpperCase()}`);
-      node.nodeValue = text;
-      const trimmedText = text.trim();
-      if (trimmedText.length > 0 && /[.!?]$/.test(trimmedText)) {
-        capitalizeNextLetter = true;
-      }
-    }
-    return `<p>${tempDiv.innerHTML}</p>`;
+    return `<p>${lineHtml.trim()}</p>`;
   }).filter(Boolean);
 
-  // ==========================================================================
-  // LỚP 3: LẮP RÁP KẾT QUẢ - THAY THẾ PLACEHOLDER BẰNG NGHĨA ĐÚNG
-  // ==========================================================================
+  // LỚP 3: THAY THẾ PLACEHOLDER VÀ VIẾT HOA ĐẦU DÒNG
   let finalHtml = translatedLineHtmls.join('');
   for (const [placeholder, data] of placeholders.entries()) {
-    const spanRegex = new RegExp(`<span class="word" data-original="${escapeRegExp(placeholder)}">${escapeRegExp(placeholder)}</span>`, 'g');
-
-    // *** THAY ĐỔI 2: Sử dụng thông tin đã lưu để tạo thẻ span chính xác ***
-    // data.original là chữ Hán, data.translation là nghĩa tiếng Việt.
-    const replacementSpan = `<span class="word" data-original="${data.original}">${data.translation}</span>`;
-
-    finalHtml = finalHtml.replace(spanRegex, replacementSpan);
+    const spanRegex = new RegExp(`(<span class="word" data-original="${escapeRegExp(placeholder)}"[^>]*>)${escapeRegExp(placeholder)}(</span>)`, 'g');
+    finalHtml = finalHtml.replace(spanRegex, (match, openingTag) => {
+      let translation = data.translation;
+      if (openingTag.includes('data-capitalize="true"')) {
+        if (translation) translation = translation.charAt(0).toUpperCase() + translation.slice(1);
+      }
+      return `<span class="word" data-original="${data.original}">${translation}</span>`;
+    });
   }
+  const finalContainer = document.createElement('div');
+  finalContainer.innerHTML = finalHtml;
 
-  DOMElements.outputPanel.innerHTML = finalHtml;
+  DOMElements.outputPanel.innerHTML = finalContainer.innerHTML;
   temporaryNameDictionary.clear();
 }

@@ -257,6 +257,9 @@ body {
 #output-panel p + p {
   margin-top: 1.4em;
 }
+#output-panel p::first-letter {
+  text-transform: capitalize;
+}
 #output-panel .word {
   padding: 0;
   margin: 0;

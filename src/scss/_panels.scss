@@ -21,6 +21,10 @@
         &+p {
             margin-top: 1.4em;
         }
+
+        &::first-letter {
+            text-transform: capitalize;
+        }
     }
 
     .word {
