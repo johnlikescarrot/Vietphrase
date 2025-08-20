@@ -1,5 +1,5 @@
 import DOMElements from './m_dom.js';
-import { getHanViet, translateWord, segmentText } from './m_dictionary.js';
+import { getHanViet, translateWord, segmentText, getAllMeanings } from './m_dictionary.js';
 import { nameDictionary, temporaryNameDictionary, saveNameDictionaryToStorage, renderNameList, rebuildMasterData } from './m_nameList.js';
 import { synthesizeCompoundTranslation, performTranslation } from './m_translation.js';
 
@@ -155,34 +155,30 @@ function showQuickEditPanel(selection, state) {
 
 function populateQuickEditPanel(text, state) {
   DOMElements.qInputZw.value = text;
-  const hanViet = getHanViet(text, state.dictionaries);
-  if (hanViet) {
-    DOMElements.qInputHv.value = hanViet.toLowerCase();
-    DOMElements.qInputHV.value = hanViet.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+  // Lấy tất cả các nghĩa bằng hàm mới
+  const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
+
+  // Điền Hán Việt
+  if (allMeanings.hanviet) {
+    const hanvietLower = allMeanings.hanviet.toLowerCase();
+    DOMElements.qInputHv.value = hanvietLower;
+    DOMElements.qInputHV.value = hanvietLower.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   } else {
     DOMElements.qInputHv.value = '';
     DOMElements.qInputHV.value = '';
   }
 
-  const segments = segmentText(text, state.masterKeySet);
-  const vietphraseParts = segments.map(segment => {
-    if (!/[\u4e00-\u9fa5]/.test(segment)) {
-      return segment;
-    }
+  // Điền Vietphrase - ưu tiên hiển thị nghĩa Vietphrase nếu có
+  if (allMeanings.vietphrase.length > 0) {
+    DOMElements.qInputVp.value = allMeanings.vietphrase.join('/');
+  } else {
+    // Nếu không có Vietphrase, thử lấy nghĩa từ Name List
+    DOMElements.qInputVp.value = allMeanings.name || '';
+  }
 
-    const translation = translateWord(segment, state.dictionaries, nameDictionary, temporaryNameDictionary);
-
-    if (translation.found && translation.all.length > 1) {
-      return `(${translation.all.join('/')})`;
-    } else if (translation.found) {
-
-      return translation.best;
-    } else {
-      return segment;
-    }
-  });
-  DOMElements.qInputVp.value = vietphraseParts.join(' ');
-  DOMElements.qInputTc.value = '';
+  // Ô tùy chỉnh sẽ ưu tiên Name List > Vietphrase > Hán Việt
+  DOMElements.qInputTc.value = allMeanings.name || (allMeanings.vietphrase[0] || allMeanings.hanviet || '');
 }
 
 function hideQuickEditPanel() {
@@ -550,35 +546,51 @@ function updateOldModalFields(text, state) {
     return;
   }
 
-  const baseHanViet = getHanViet(text, state.dictionaries);
-  hanvietInput.value = baseHanViet ? baseHanViet.toLowerCase() : 'Không tìm thấy Hán Việt.';
+  // Sử dụng hàm mới để lấy tất cả các nghĩa
+  const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
 
-  const finalTranslation = translateWord(text, state.dictionaries, nameDictionary, temporaryNameDictionary);
-  let allMeanings = finalTranslation.found ? [...new Set(finalTranslation.all)] : [];
-  if (text.length > 1) {
-    const synthesized = synthesizeCompoundTranslation(text, state);
-    synthesized.forEach(m => { if (!allMeanings.includes(m)) allMeanings.push(m); });
+  // Điền Hán Việt
+  hanvietInput.value = allMeanings.hanviet ? allMeanings.hanviet.toLowerCase() : 'Không tìm thấy Hán Việt.';
+
+  // Gộp tất cả các nghĩa tìm được vào một danh sách để hiển thị
+  const combinedMeanings = [];
+  if (allMeanings.name) {
+    combinedMeanings.push(`(Name) ${allMeanings.name}`);
+  }
+  if (allMeanings.vietphrase.length > 0) {
+    allMeanings.vietphrase.forEach(meaning => {
+      const formattedMeaning = `(Vp) ${meaning}`;
+      if (!combinedMeanings.includes(formattedMeaning)) {
+        combinedMeanings.push(formattedMeaning);
+      }
+    });
   }
 
+  // Xóa các gợi ý cũ và điền gợi ý mới
   optionsContainer.innerHTML = '';
-  if (allMeanings.length > 0) {
-    allMeanings.forEach(meaning => {
+  if (combinedMeanings.length > 0) {
+    combinedMeanings.forEach(meaning => {
       const optionEl = document.createElement('div');
       optionEl.className = 'vietphrase-option';
       optionEl.textContent = meaning;
       optionEl.title = meaning;
       optionEl.addEventListener('click', () => {
-        vietphraseInput.value = meaning;
-        customMeaningInput.value = meaning;
+        // Khi chọn, loại bỏ phần (Name) hoặc (Vp)
+        const cleanMeaning = meaning.substring(meaning.indexOf(' ') + 1);
+        vietphraseInput.value = cleanMeaning;
+        customMeaningInput.value = cleanMeaning;
         optionsContainer.classList.add('hidden');
       });
       optionsContainer.appendChild(optionEl);
     });
-    const firstMeaning = allMeanings[0];
-    vietphraseInput.value = firstMeaning;
-    customMeaningInput.value = firstMeaning;
+
+    // Ưu tiên điền vào ô input theo thứ tự: Name List -> Vietphrase
+    const bestMeaning = allMeanings.name || allMeanings.vietphrase[0] || '';
+    vietphraseInput.value = bestMeaning;
+    customMeaningInput.value = bestMeaning;
+
   } else {
-    optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Không tìm thấy Vietphrase</div>';
+    optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Không tìm thấy Vietphrase/Name</div>';
     vietphraseInput.value = '';
     customMeaningInput.value = text;
   }

@@ -326,7 +326,7 @@ export async function loadSingleDictionaryFromFile(file, dictionaryId, currentDi
   });
 }
 
-export function getTranslationFromPrioritizedDicts(word, dictionaries) {
+export function getTranslationFromPrioritizedDicts(word, dictionaries, nameDict) {
   if (!dictionaries) return null;
   const sortedDicts = [...dictionaries.values()].sort((a, b) => a.priority - b.priority);
   for (const dictInfo of sortedDicts) {
@@ -398,7 +398,7 @@ export function segmentText(text, masterKeySet) {
   return segments;
 }
 
-export function translateWord(word, dictionaries, nameDict, tempDict) {
+export function translateWord(word, dictionaries, nameDict, tempDict, getAllMeanings) {
   let meaningsStr;
   let found = false;
   let fromUserDict = false;
@@ -431,4 +431,30 @@ export function translateWord(word, dictionaries, nameDict, tempDict) {
   const bestMeaning = allMeaningsFlat[0] ?? '';
 
   return { best: bestMeaning, all: allMeaningsFlat, found: true };
+}
+
+export function getAllMeanings(word, dictionaries, nameDict) {
+  const allMeanings = {
+    name: null,
+    vietphrase: [],
+    hanviet: null,
+  };
+
+  // 1. Lấy nghĩa từ Name List (nếu có)
+  if (nameDict.has(word)) {
+    allMeanings.name = nameDict.get(word);
+  }
+
+  // 2. Lấy nghĩa từ Vietphrase (nếu có)
+  const vpDict = dictionaries.get('Vietphrase')?.dict;
+  if (vpDict && vpDict.has(word)) {
+    const vpMeanings = vpDict.get(word);
+    // Tách các nghĩa khác nhau ra (phân tách bằng ; hoặc /)
+    allMeanings.vietphrase = vpMeanings.split(/[;/]/).map(m => m.trim()).filter(Boolean);
+  }
+
+  // 3. Lấy nghĩa Hán Việt
+  allMeanings.hanviet = getHanViet(word, dictionaries);
+
+  return allMeanings;
 }
