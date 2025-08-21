@@ -7,32 +7,51 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// === BẮT ĐẦU ĐOẠN LUẬT NHÂN ===
 function applyLuatNhan(text, state) {
   const luatNhanDict = state.dictionaries.get('LuatNhan')?.dict;
   if (!luatNhanDict || luatNhanDict.size === 0) {
-    return text;
+    return text; // Trả về ngay nếu không có luật nào
   }
+
   let processedText = text;
+
+  // Sắp xếp các luật theo độ dài của key giảm dần để ưu tiên luật dài hơn
   const sortedRules = [...luatNhanDict.entries()].sort((a, b) => b[0].length - a[0].length);
+
   for (const [ruleKey, ruleValue] of sortedRules) {
+    // Bỏ qua nếu luật không chứa tham số {0}
     if (!ruleKey.includes('{0}')) continue;
 
-    const escapedKey = escapeRegExp(ruleKey).replace('\\{0\\}', '([\u4e00-\u9fa5]+)');
-    const regex = new RegExp(escapedKey, 'g');
+    // Tách luật thành phần trước và sau {0}
+    const parts = ruleKey.split('{0}');
+    const prefix = parts[0];
+    const suffix = parts[1];
+
+    // Thoát khỏi các ký tự đặc biệt trong regex để tránh lỗi
+    const escapedPrefix = escapeRegExp(prefix);
+    const escapedSuffix = escapeRegExp(suffix);
+
+    // Tạo biểu thức chính quy (regex) để tìm kiếm nội dung
+    // (.+?) sẽ tìm kiếm BẤT KỲ ký tự nào (chữ, số,...) một cách "lười biếng",
+    // nghĩa là nó sẽ dừng ở lần khớp suffix đầu tiên.
+    const regex = new RegExp(escapedPrefix + '(.+?)' + escapedSuffix, 'g');
 
     processedText = processedText.replace(regex, (match, capturedWord) => {
-      // Luôn cố gắng dịch phần bên trong {0}
+      // Dịch phần nội dung được bắt vào bên trong {0}
       const translationResult = translateWord(capturedWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
 
-      // Nếu dịch được thì dùng kết quả, không thì dùng lại chính chữ Hán gốc
+      // Nếu dịch được thì dùng kết quả, nếu không thì giữ nguyên nội dung gốc (chữ Hán, số,...)
       const translatedCapturedWord = translationResult.found ? translationResult.best : capturedWord;
 
-      // Áp dụng luật với phần đã được dịch
+      // Thay thế {0} trong giá trị của luật bằng nội dung đã được dịch
       return ruleValue.replace('{0}', translatedCapturedWord);
     });
   }
+
   return processedText;
 }
+// === KẾT THÚC LUẬT NHÂN ===
 
 const translationCache = new Map();
 export function synthesizeCompoundTranslation(text, state) {
