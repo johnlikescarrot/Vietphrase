@@ -7,7 +7,6 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// NOTE: This function is not currently used by performTranslation but is kept for other potential features.
 function applyLuatNhan(text, state) {
   const luatNhanDict = state.dictionaries.get('LuatNhan')?.dict;
   if (!luatNhanDict || luatNhanDict.size === 0) {
@@ -17,16 +16,19 @@ function applyLuatNhan(text, state) {
   const sortedRules = [...luatNhanDict.entries()].sort((a, b) => b[0].length - a[0].length);
   for (const [ruleKey, ruleValue] of sortedRules) {
     if (!ruleKey.includes('{0}')) continue;
+
     const escapedKey = escapeRegExp(ruleKey).replace('\\{0\\}', '([\u4e00-\u9fa5]+)');
     const regex = new RegExp(escapedKey, 'g');
+
     processedText = processedText.replace(regex, (match, capturedWord) => {
-      if (state.masterKeySet.has(capturedWord)) {
-        const translationResult = translateWord(capturedWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
-        if (translationResult && translationResult.found) {
-          return ruleValue.replace('{0}', translationResult.best);
-        }
-      }
-      return match;
+      // Luôn cố gắng dịch phần bên trong {0}
+      const translationResult = translateWord(capturedWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
+
+      // Nếu dịch được thì dùng kết quả, không thì dùng lại chính chữ Hán gốc
+      const translatedCapturedWord = translationResult.found ? translationResult.best : capturedWord;
+
+      // Áp dụng luật với phần đã được dịch
+      return ruleValue.replace('{0}', translatedCapturedWord);
     });
   }
   return processedText;
@@ -90,6 +92,9 @@ export function performTranslation(state, options = {}) {
       placeholderId++;
     }
   }
+
+  // LỚP 1.5: ÁP DỤNG LUẬT NHÂN TRƯỚC KHI DỊCH
+  processedText = applyLuatNhan(processedText, state);
 
   // LỚP 2: DỊCH PHẦN VĂN BẢN CÒN LẠI VÀ XỬ LÝ LOGIC VIẾT HOA
   const isVietphraseMode = DOMElements.modeToggle.checked;
