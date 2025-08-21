@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         DOMElements.translateBtn.disabled = false;
         DOMElements.modeToggle.disabled = false;
         DOMElements.loader.style.display = 'none';
-      }, 100); // Cho trình duyệt 100ms để "thở" và cập nhật UI
+      }, 500); // Cho trình duyệt 0.5s để "thở" và cập nhật UI
     }
   };
 
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Dùng setTimeout để đảm bảo trình duyệt kịp hiển thị text mới trước khi bắt đầu tác vụ nặng
     setTimeout(() => {
       updateState(db);
-    }, 50);
+    }, 500);
   } else {
     // Nếu không có từ điển, không cần xử lý gì, ẩn màn hình chờ ngay
     DOMElements.loader.style.display = 'none';
