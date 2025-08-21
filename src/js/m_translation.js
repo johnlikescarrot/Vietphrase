@@ -268,7 +268,7 @@ export function performTranslation(state, options = {}) {
       if (openingTag.includes('data-capitalize="true"')) {
         if (translation) translation = translation.charAt(0).toUpperCase() + translation.slice(1);
       }
-      return `<span class="word" data-original="${data.original}">${translation}</span>`;
+      return `<span class="word from-name-list" data-original="${data.original}">${translation}</span>`;
     });
   }
   const finalContainer = document.createElement('div');

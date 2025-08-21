@@ -173,6 +173,8 @@ body {
 .q-perm-add-btn,
 #q-search-btn,
 #q-copy-btn,
+#q-delete-btn,
+#edit-modal-delete-btn,
 #q-lock-btn,
 #q-close-btn {
   background: none;
@@ -187,6 +189,8 @@ body {
 .q-perm-add-btn:hover,
 #q-search-btn:hover,
 #q-copy-btn:hover,
+#q-delete-btn:hover,
+#edit-modal-delete-btn:hover,
 #q-lock-btn:hover,
 #q-close-btn:hover {
   opacity: 1;
@@ -198,6 +202,14 @@ body {
 #edit-modal-lock-btn.is-locked {
   color: var(--accent-color);
   opacity: 1;
+}
+
+#q-delete-btn:disabled,
+#edit-modal-delete-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+  color: var(--text-color);
 }
 
 #hanviet-options-container button {
@@ -284,6 +296,10 @@ body {
   color: #ff9e64;
   font-style: italic;
 }
+#output-panel .from-name-list:hover {
+  background-color: #af4c4c;
+  color: #ffffff !important;
+}
 @media (max-width: 640px) {
   #output-panel {
     font-size: 16px;
@@ -311,7 +327,7 @@ body {
 }
 #quick-edit-panel > div:first-child button {
   padding: 4px 8px;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 #settings-panel {
@@ -572,8 +588,8 @@ input[type=color]::-moz-color-swatch {
 .modal-content .btn-secondary {
   margin: 0.25rem;
   flex-grow: 1;
-  min-width: 60px;
-  font-size: 1rem;
+  min-width: 50px;
+  font-size: 0.97rem;
   font-weight: 600;
 }
 .modal-content > div:last-child:has(button) {

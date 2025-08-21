@@ -162,6 +162,16 @@
       <div class="flex justify-between items-center">
         <h3 class="text-xl font-bold text-text-highlight">Thêm name/Chỉnh name</h3>
         <div class="flex items-center gap-2">
+          <button id="edit-modal-delete-btn" title="Xóa khỏi Name List"
+            class="p-1 rounded-full text-text-color hover:bg-bg-input transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
           <button id="edit-modal-lock-btn" title="Ghim bảng"
             class="p-1 rounded-full text-text-color hover:bg-bg-input transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -224,8 +234,8 @@
       </div>
 
       <div class="modal-footer-buttons">
-        <button id="add-temp-btn" class="btn btn-secondary">Thêm Tạm Thời</button>
-        <button id="add-to-name-list-btn" class="btn">Thêm vào Name</button>
+        <button id="add-temp-btn" class="btn btn-secondary">Tạm Thời</button>
+        <button id="add-to-name-list-btn" class="btn">Thêm Name</button>
       </div>
     </div>
   </div>
@@ -271,10 +281,6 @@
       <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
         <label for="q-input-Vp" class="font-bold text-sm text-accent-color">Vp</label>
         <input type="text" id="q-input-Vp" class="w-full text-sm">
-        <div class="flex gap-1">
-          <button class="q-temp-add-btn" data-target="q-input-Vp" title="Thêm tạm thời">✔️</button>
-          <button class="q-perm-add-btn" data-target="q-input-Vp" title="Thêm vào Name">💾</button>
-        </div>
       </div>
       <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
         <label for="q-input-tc" class="font-bold text-sm text-accent-color">tc</label>
@@ -289,6 +295,15 @@
     <div class="flex justify-between items-center pt-2 mt-2 border-t border-border-color">
       <button id="q-add-name-btn" class="btn text-sm">Thêm Name...</button>
       <div class="flex items-center gap-3">
+        <button id="q-delete-btn" title="Xóa khỏi Name List" class="!p-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+          </svg>
+        </button>
         <button id="q-lock-btn" title="Ghim bảng dịch nhanh" class="!p-0">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

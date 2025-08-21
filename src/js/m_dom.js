@@ -52,6 +52,8 @@ const DOMElements = {
   qInputTc: document.getElementById('q-input-tc'),
   qSearchBtn: document.getElementById('q-search-btn'),
   qCopyBtn: document.getElementById('q-copy-btn'),
+  editModalDeleteBtn: document.getElementById('edit-modal-delete-btn'),
+  qDeleteBtn: document.getElementById('q-delete-btn'),
   qLockBtn: document.getElementById('q-lock-btn'),
   qCloseBtn: document.getElementById('q-close-btn'),
 };

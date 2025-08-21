@@ -46,6 +46,8 @@
 .q-perm-add-btn,
 #q-search-btn,
 #q-copy-btn,
+#q-delete-btn,
+#edit-modal-delete-btn,
 #q-lock-btn,
 #q-close-btn {
     background: none;
@@ -67,6 +69,14 @@
 #edit-modal-lock-btn.is-locked {
     color: var(--accent-color);
     opacity: 1;
+}
+
+#q-delete-btn:disabled,
+#edit-modal-delete-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+    color: var(--text-color);
 }
 
 // Hanviet options buttons

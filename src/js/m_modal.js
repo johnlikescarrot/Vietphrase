@@ -1,7 +1,8 @@
 import DOMElements from './m_dom.js';
 import { getHanViet, translateWord, segmentText, getAllMeanings } from './m_dictionary.js';
-import { nameDictionary, temporaryNameDictionary, saveNameDictionaryToStorage, renderNameList, rebuildMasterData } from './m_nameList.js';
+import { nameDictionary, temporaryNameDictionary, saveNameDictionaryToStorage, renderNameList, rebuildMasterData, updateMasterDataForDeletion } from './m_nameList.js';
 import { synthesizeCompoundTranslation, performTranslation } from './m_translation.js';
+import { customConfirm } from './m_dialog.js';
 
 // XỬ LÝ VIỆC THÊM NAME
 function addPermanentName(cn, vn, state) {
@@ -18,6 +19,24 @@ function addPermanentName(cn, vn, state) {
 
   // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi
   performTranslation(state, { forceText: state.lastTranslatedText });
+}
+
+// XỬ LÝ VIỆC XÓA NAME
+async function deletePermanentName(cn, state) {
+  if (!cn || !nameDictionary.has(cn)) return;
+
+  if (await customConfirm(`Bạn có chắc muốn xóa "${cn}" khỏi Bảng Thuật Ngữ?`)) {
+    // 1. Cập nhật từ điển và lưu trữ
+    nameDictionary.delete(cn);
+    saveNameDictionaryToStorage();
+    renderNameList();
+
+    // 2. Cập nhật lại "bộ não" dịch (theo cách tối ưu)
+    updateMasterDataForDeletion(cn, state);
+
+    // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi
+    performTranslation(state, { forceText: state.lastTranslatedText });
+  }
 }
 
 function debounce(func, delay) {
@@ -169,22 +188,33 @@ function populateQuickEditPanel(text, state) {
     DOMElements.qInputHV.value = '';
   }
 
-  // Gộp các nghĩa từ Vietphrase, Names, Names2 vào một chỗ để hiển thị
-  const quickVpParts = [];
-  if (allMeanings.vietphrase.length > 0) {
-    quickVpParts.push(`(Vp) ${allMeanings.vietphrase.join('/')}`);
+  // Xử lý hiển thị cho mục Vp theo logic mới
+  let vpDisplayValue = '';
+  const vpMeaningsForFullPhrase = allMeanings.vietphrase;
+
+  // Ưu tiên 1: Hiển thị nghĩa của cả cụm từ nếu có.
+  if (vpMeaningsForFullPhrase.length > 0) {
+    vpDisplayValue = vpMeaningsForFullPhrase.join('/');
   }
-  if (allMeanings.names.length > 0) {
-    quickVpParts.push(`(Names) ${allMeanings.names.join('/')}`);
-  }
-  if (allMeanings.names2.length > 0) {
-    quickVpParts.push(`(Names2) ${allMeanings.names2.join('/')}`);
+  // Ưu tiên 2: Nếu là từ ghép (>1 ký tự) và không có nghĩa chung, thì ghép nghĩa của từng ký tự.
+  else if (text.length > 1) {
+    const charMeaningsList = text.split('')
+      .filter(char => /[\u4e00-\u9fa5]/.test(char)) // Chỉ xử lý ký tự tiếng Trung
+      .map(char => {
+        const meanings = getAllMeanings(char, state.dictionaries, nameDictionary).vietphrase;
+        return meanings.length > 0 ? meanings.join('/') : null; // Trả về null nếu ký tự không có nghĩa
+      })
+      .filter(Boolean); // Lọc bỏ các kết quả null
+
+    vpDisplayValue = charMeaningsList.join(' | ');
   }
 
-  DOMElements.qInputVp.value = quickVpParts.join('; ');
+  DOMElements.qInputVp.value = vpDisplayValue;
 
   // Ô tùy chỉnh vẫn ưu tiên Name List đầu tiên
-  DOMElements.qInputTc.value = allMeanings.name || (allMeanings.vietphrase[0] || allMeanings.names[0] || allMeanings.names2[0] || allMeanings.hanviet || '');
+  DOMElements.qInputTc.value = allMeanings.name || '';
+  // Vô hiệu hóa nút xóa nếu từ không có trong Name List
+  DOMElements.qDeleteBtn.disabled = !nameDictionary.has(text);
 }
 
 function hideQuickEditPanel() {
@@ -298,6 +328,16 @@ export function initializeModal(state) {
   });
 
   DOMElements.qCloseBtn.addEventListener('click', hideQuickEditPanel);
+
+  DOMElements.qDeleteBtn.addEventListener('click', () => {
+    const cn = DOMElements.qInputZw.value.trim();
+    deletePermanentName(cn, state);
+  });
+
+  DOMElements.editModalDeleteBtn.addEventListener('click', () => {
+    const cn = DOMElements.originalWordInput.value.trim();
+    deletePermanentName(cn, state);
+  });
 
   function updateLockIcon(button, isLocked, tooltips) {
     button.classList.toggle('is-locked', isLocked);
@@ -616,4 +656,6 @@ function updateOldModalFields(text, state) {
     vietphraseInput.value = '';
     customMeaningInput.value = text;
   }
+  // Vô hiệu hóa nút xóa nếu từ không có trong Name List
+  DOMElements.editModalDeleteBtn.disabled = !nameDictionary.has(text);
 }

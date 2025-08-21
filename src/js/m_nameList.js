@@ -259,3 +259,18 @@ export function rebuildMasterData(state) {
   state.dictionaryTrie = dictionaryTrie; // Lưu Trie vào state
   console.timeEnd('TrieBuiding'); // Kết thúc đếm thời gian
 }
+
+// Hàm tối ưu chỉ để xóa một từ khỏi Trie và Set mà không cần rebuild toàn bộ
+export function updateMasterDataForDeletion(cn, state) {
+  if (!state || !state.masterKeySet || !state.dictionaryTrie) {
+    console.warn("updateMasterDataForDeletion được gọi nhưng state chưa sẵn sàng.");
+    return;
+  }
+
+  // Chỉ cần xóa khỏi Set
+  state.masterKeySet.delete(cn);
+
+  // Và "xóa" khỏi Trie bằng cách ghi đè giá trị của nó thành null.
+  // Thao tác này cực kỳ nhanh so với việc build lại toàn bộ Trie.
+  state.dictionaryTrie.insert(cn, null, true);
+}

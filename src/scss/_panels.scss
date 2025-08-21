@@ -56,6 +56,11 @@
         font-style: italic;
     }
 
+    .from-name-list:hover {
+        background-color: #af4c4c; // Một màu xanh lá cây #4caf50
+        color: #ffffff !important; // Chữ màu trắng để nổi bật
+    }
+
     // Responsive font size
     @media (max-width: 640px) {
         font-size: 16px;
@@ -87,7 +92,7 @@
 
     >div:first-child button {
         padding: 4px 8px;
-        font-size: 18px;
+        font-size: 16px;
     }
 }
 
