@@ -552,47 +552,43 @@ function updateOldModalFields(text, state) {
     return;
   }
 
-  // Sử dụng hàm nâng cấp để lấy tất cả các nghĩa
+  // Giới hạn ký tự
+  const CHAR_LIMIT = 30;
+  if (text.length > CHAR_LIMIT) {
+    hanvietInput.value = getHanViet(text, state.dictionaries)?.toLowerCase() || '...';
+    vietphraseInput.value = '';
+    customMeaningInput.value = text;
+    optionsContainer.innerHTML = '<div class="vietphrase-option text-red-400">[Câu quá dài, vượt giới hạn ký tự]</div>';
+    return;
+  }
+
+  hanvietInput.value = getHanViet(text, state.dictionaries) ? getHanViet(text, state.dictionaries).toLowerCase() : 'Không tìm thấy Hán Việt.';
+
+  const uniqueMeanings = new Set();
   const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
 
-  // Điền Hán Việt (như cũ)
-  hanvietInput.value = allMeanings.hanviet ? allMeanings.hanviet.toLowerCase() : 'Không tìm thấy Hán Việt.';
+  if (allMeanings.name) uniqueMeanings.add(allMeanings.name);
+  if (allMeanings.names2.length > 0) allMeanings.names2.forEach(m => uniqueMeanings.add(m));
+  if (allMeanings.names.length > 0) allMeanings.names.forEach(m => uniqueMeanings.add(m));
+  if (allMeanings.vietphrase.length > 0) allMeanings.vietphrase.forEach(m => uniqueMeanings.add(m));
 
-  // Gộp tất cả các nghĩa tìm được vào một danh sách để hiển thị
-  const combinedMeanings = [];
-  if (allMeanings.name) {
-    combinedMeanings.push(`(Name) ${allMeanings.name}`); // Name List của bạn
-  }
-  // Thêm Names2
-  if (allMeanings.names2.length > 0) {
-    allMeanings.names2.forEach(meaning => {
-      const formattedMeaning = `(Names2) ${meaning}`;
-      if (!combinedMeanings.includes(formattedMeaning)) {
-        combinedMeanings.push(formattedMeaning);
-      }
-    });
-  }
-  // Thêm Names
-  if (allMeanings.names.length > 0) {
-    allMeanings.names.forEach(meaning => {
-      const formattedMeaning = `(Names) ${meaning}`;
-      if (!combinedMeanings.includes(formattedMeaning)) {
-        combinedMeanings.push(formattedMeaning);
-      }
-    });
-  }
-  // Thêm Vietphrase
-  if (allMeanings.vietphrase.length > 0) {
-    allMeanings.vietphrase.forEach(meaning => {
-      const formattedMeaning = `(Vp) ${meaning}`;
-      if (!combinedMeanings.includes(formattedMeaning)) {
-        combinedMeanings.push(formattedMeaning);
+  const segments = segmentText(text, state.masterKeySet);
+  let synthesisError = null;
+
+  if (segments.length > 1) {
+    const sentenceSuggestions = synthesizeCompoundTranslation(text, state);
+    sentenceSuggestions.forEach(suggestion => {
+      if (suggestion.includes(' - Quá dài') || suggestion.includes(' - Số lượng tổ hợp')) {
+        synthesisError = suggestion.substring(suggestion.indexOf(' - ') + 3);
+      } else {
+        uniqueMeanings.add(suggestion);
       }
     });
   }
 
-  // Xóa các gợi ý cũ và điền gợi ý mới
+  const combinedMeanings = Array.from(uniqueMeanings);
   optionsContainer.innerHTML = '';
+
   if (combinedMeanings.length > 0) {
     combinedMeanings.forEach(meaning => {
       const optionEl = document.createElement('div');
@@ -600,21 +596,23 @@ function updateOldModalFields(text, state) {
       optionEl.textContent = meaning;
       optionEl.title = meaning;
       optionEl.addEventListener('click', () => {
-        const cleanMeaning = meaning.substring(meaning.indexOf(' ') + 1);
-        vietphraseInput.value = cleanMeaning;
-        customMeaningInput.value = cleanMeaning;
+        vietphraseInput.value = meaning;
+        customMeaningInput.value = meaning;
         optionsContainer.classList.add('hidden');
       });
       optionsContainer.appendChild(optionEl);
     });
 
-    // Ưu tiên điền vào ô input: Name List -> Names2 -> Names -> Vietphrase
-    const bestMeaning = allMeanings.name || allMeanings.names2[0] || allMeanings.names[0] || allMeanings.vietphrase[0] || '';
+    const bestMeaning = combinedMeanings[0] || '';
     vietphraseInput.value = bestMeaning;
     customMeaningInput.value = bestMeaning;
 
   } else {
-    optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Không tìm thấy Vietphrase/Name</div>';
+    if (synthesisError) {
+      optionsContainer.innerHTML = `<div class="vietphrase-option text-red-400">[${synthesisError}]</div>`;
+    } else {
+      optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Không tìm thấy Vietphrase/Name</div>';
+    }
     vietphraseInput.value = '';
     customMeaningInput.value = text;
   }
