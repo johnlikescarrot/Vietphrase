@@ -276,6 +276,28 @@ function expandOldModalSelection(direction, state) {
 }
 
 export function initializeModal(state) {
+
+  let isDoubleClick = false;
+  // === DOUBLE CLICK ===
+  DOMElements.outputPanel.addEventListener('dblclick', (e) => {
+    const targetSpan = e.target.closest('.word');
+    if (targetSpan) {
+      isDoubleClick = true; // Bật cờ lên báo hiệu vừa có double click
+      e.preventDefault();
+
+      const allSpans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
+      const clickedIndex = allSpans.indexOf(targetSpan);
+      if (clickedIndex === -1) return;
+
+      selectionState.spans = allSpans;
+      selectionState.startIndex = clickedIndex;
+      selectionState.endIndex = clickedIndex;
+      selectionState.originalText = targetSpan.dataset.original;
+
+      openOldModal(state);
+    }
+  });
+
   // Cập nhật trạng thái icon khóa khi tải trang
   if (isPanelLocked) {
     const lockIcon = DOMElements.qLockBtn;
@@ -307,6 +329,10 @@ export function initializeModal(state) {
     }
 
     setTimeout(() => {
+      if (isDoubleClick) {
+        isDoubleClick = false; // Reset lại cờ cho lần sau
+        return; // Dừng lại, không chạy code mở bảng Dịch nhanh nữa
+      }
       const selection = window.getSelection();
       const targetSpan = e.target.closest('.word');
 
