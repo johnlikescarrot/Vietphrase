@@ -15,6 +15,7 @@
 耏=nhi
 耐=nại
 耑=chuyên
+đoan
 耒=lỗi
 耔=tỷ
 耕=canh
@@ -7360,7 +7361,6 @@
 冄=nhiễm
 内=nội
 円=viên
-冇=mão
 冈=cương
 冉=nhiễm
 冊=sách
@@ -8702,7 +8702,6 @@
 垦=khẩn
 垧=thưởng
 垨=thú
-垩=ác
 垫=điếm
 垭=ô
 垮=khoa
@@ -14917,7 +14916,6 @@
 皁=tạo
 皂=tạo
 皃=mạo
-的=
 皆=giai
 皇=hoàng
 皈=quy
