@@ -72,7 +72,13 @@ function applyCase(caseType) {
     case 'lowerLast':
       const words = text.split(' ');
       if (words.length > 1) {
-        text = words.slice(0, -1).join(' ') + ' ' + words[words.length - 1].toLowerCase();
+        const firstPart = words.slice(0, -1)
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(' ');
+        const lastPart = words[words.length - 1].toLowerCase();
+        text = `${firstPart} ${lastPart}`;
+      } else {
+        text = text.toLowerCase();
       }
       break;
     case 'hanviet-upper':
