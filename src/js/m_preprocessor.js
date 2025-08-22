@@ -3,48 +3,59 @@
  * Chuyển đổi từ dấu câu tiếng Trung (full-width) sang tiếng Anh (half-width).
  */
 const punctuationMap = new Map([
+
+  // Dấu câu cơ bản
   ['。', '.'],
   ['、', ','],
   ['，', ','],
-  ['～', '~'],
   ['：', ':'],
   ['；', ';'],
   ['？', '?'],
   ['！', '!'],
-  ['——', '——'], ['—', '—'],
-  ['……', '...'], ['…', '...'],
-  // Ngoặc, nháy
+  ['～', '~'],
+
+  // Dấu gạch dài và chấm lửng
+  ['——', '——'],
+  ['—', '—'],
+  ['……', '...'],
+  ['…', '...'],
+
+  // Các loại ngoặc kép (dùng cho trích dẫn và tên tác phẩm)
   ['“', '"'],
   ['”', '"'],
-  ['‘', "'"],
-  ['’', "'"],
+  ['«', '"'],
+  ['»', '"'],
+  ['『', '"'],
+  ['』', '"'],
+  ['「', '"'],
+  ['」', '"'],
+  ['《', '"'],
+  ['》', '"'],
+
+  // Các loại ngoặc đơn
   ['（', '('],
   ['）', ')'],
-  ['〔', '('],
-  ['〕', ')'],
-  ['『', '('],
-  ['』', ')'],
-  ['「', '('],
-  ['」', ')'],
-  ['【', '('],
-  ['】', ')'],
-  ['〖', '('],
-  ['〗', ')'],
-  ['《', '('],
-  ['》', ')']
+  ['‘', "'"],
+  ['’', "'"],
+
+  // Các loại ngoặc vuông (dùng cho ghi chú, nhấn mạnh)
+  ['【', '['],
+  ['】', ']'],
+  ['〖', '['],
+  ['〗', ']'],
+  ['〔', '['],
+  ['〕', ']']
 ]);
 
 // Tạo một biểu thức chính quy (regex) từ các key của bảng quy đổi
 const puncRegexForConvert = new RegExp(
-  Array.from(punctuationMap.keys()).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'),
-  'g'
+  Array.from(punctuationMap.keys()).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g'
 );
 
 // Tạo một danh sách TẤT CẢ các ký tự dấu câu (cả Trung và Anh) để xử lý khoảng trắng
 const allPuncChars = [...new Set([...punctuationMap.keys(), ...punctuationMap.values()])];
 const puncRegexForSpacing = new RegExp(
-  `[ \\t]*([${allPuncChars.map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('')}])[ \\t]*`,
-  'g'
+  `[ \\t]*([${allPuncChars.map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('')}])[ \\t]*`, 'g'
 );
 
 
@@ -83,6 +94,9 @@ export function standardizeDictionaryLine(line) {
     const key = parts[0];
     const value = parts.slice(1).join('='); // Giữ nguyên 100% phần nghĩa
     const standardizedKey = standardizeText(key);
-    return `${standardizedKey}=${value}`;
+
+    return `${standardizedKey}=${value}`; // Chuẩn hóa [A]
+    //return `${standardizedKey}=${standardizeText(value)}`; // Chuẩn hóa [A] [B] - LỖI KHOẢNG TRẮNG [B]
+
   }
 }
