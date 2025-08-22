@@ -281,6 +281,10 @@
       <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
         <label for="q-input-Vp" class="font-bold text-sm text-accent-color">Vp</label>
         <input type="text" id="q-input-Vp" class="w-full text-sm">
+        <div class="flex gap-1">
+          <button class="q-temp-add-btn" data-target="q-input-Vp" title="Thêm tạm thời">✔️</button>
+          <button class="q-perm-add-btn" data-target="q-input-Vp" title="Thêm vào Name">💾</button>
+        </div>
       </div>
       <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
         <label for="q-input-tc" class="font-bold text-sm text-accent-color">tc</label>
@@ -433,8 +437,8 @@
           <input type="color" id="bg-color-picker" title="Chọn màu nền tùy chỉnh">
         </div>
         <div id="bg-color-presets" class="grid grid-cols-7 gap-2">
-          <button class="color-box" data-color="#2a2f41" style="background-color: #2a2f41;"></button>
           <button class="color-box" data-color="#232627" style="background-color: #232627;"></button>
+          <button class="color-box" data-color="#2a2f41" style="background-color: #2a2f41;"></button>
           <button class="color-box" data-color="#1e1e1e" style="background-color: #1e1e1e;"></button>
           <button class="color-box" data-color="#000000" style="background-color: #000000;"></button>
           <button class="color-box" data-color="#f5f5dc" style="background-color: #f5f5dc;"></button>
@@ -448,8 +452,8 @@
           <input type="color" id="text-color-picker" title="Chọn màu chữ tùy chỉnh">
         </div>
         <div id="text-color-presets" class="grid grid-cols-7 gap-2">
-          <div class="color-box" data-color="#a9b1d6" style="background-color: #a9b1d6;"></div>
           <div class="color-box" data-color="#f7b7b7" style="background-color: #f7b7b7;"></div>
+          <div class="color-box" data-color="#a9b1d6" style="background-color: #a9b1d6;"></div>
           <div class="color-box" data-color="#333333" style="background-color: #333333;"></div>
           <div class="color-box" data-color="#000000" style="background-color: #000000;"></div>
           <div class="color-box" data-color="#2c3e50" style="background-color: #2c3e50;"></div>

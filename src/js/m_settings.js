@@ -19,8 +19,8 @@ const widthValue = document.getElementById('width-value');
 
 // Đối tượng lưu trữ cài đặt
 let settings = {
-  bgColor: '#2a2f41',
-  textColor: '#a9b1d6',
+  bgColor: '#232627',
+  textColor: '#f7b7b7',
   fontFamily: "Arial, 'Inter', 'Segoe UI', sans-serif",
   lineHeight: 1.6,
   width: 1400

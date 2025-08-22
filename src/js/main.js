@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     localStorage.removeItem('savedInputText');
   });
 
-  let currentFontSize = parseInt(localStorage.getItem('translatorFontSize') || '18');
+  let currentFontSize = parseInt(localStorage.getItem('translatorFontSize') || '36');
   const baseFontSize = 18;
 
   const updateFontSize = () => {
