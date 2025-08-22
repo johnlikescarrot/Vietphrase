@@ -252,6 +252,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Gán nội dung đó vào ô văn bản. Thao tác này sẽ tự động XÓA nội dung cũ.
         DOMElements.inputText.value = textFromClipboard;
 
+        // Lưu ngay vào cache nếu người dùng đã bật chức năng lưu
+        if (DOMElements.saveTextToggle.checked) {
+          localStorage.setItem('savedInputText', textFromClipboard);
+        }
+
         // Gọi hàm dịch ngay lập tức
         performTranslation(state);
       }
