@@ -231,6 +231,37 @@ document.addEventListener('DOMContentLoaded', async () => {
       performTranslation(state);
     }
   });
+
+  // "Dán và Dịch" khi nhấn chuột phải
+  DOMElements.translateBtn.addEventListener('contextmenu', async (e) => {
+    // Ngăn không cho menu chuột phải mặc định của trình duyệt hiện ra
+    e.preventDefault();
+
+    // Kiểm tra xem đã có từ điển hay chưa, tương tự như khi nhấn chuột trái
+    if (!state.dictionaries || state.dictionaries.size === 0) {
+      customAlert('Vui lòng tải Từ Điển trước khi dịch.');
+      return;
+    }
+
+    try {
+      // Đọc văn bản đang có trong clipboard (bộ nhớ tạm)
+      const textFromClipboard = await navigator.clipboard.readText();
+
+      // Nếu clipboard có nội dung
+      if (textFromClipboard) {
+        // Gán nội dung đó vào ô văn bản. Thao tác này sẽ tự động XÓA nội dung cũ.
+        DOMElements.inputText.value = textFromClipboard;
+
+        // Gọi hàm dịch ngay lập tức
+        performTranslation(state);
+      }
+    } catch (err) {
+      // Thông báo lỗi nếu không thể truy cập clipboard
+      console.error('Lỗi khi dán từ clipboard:', err);
+      customAlert('Không thể dán văn bản. Vui lòng kiểm tra quyền truy cập clipboard của trình duyệt.');
+    }
+  });
+
   DOMElements.clearBtn.addEventListener('click', () => {
     DOMElements.inputText.value = '';
   });
