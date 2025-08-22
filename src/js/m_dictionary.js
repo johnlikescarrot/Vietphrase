@@ -30,9 +30,9 @@ const DICTIONARY_FILES = [
   {
     id: 'Pronouns',
     names: [
-      'Pronouns.txt',
-      'DaiTu', 'DaiTuNhanXung', 'Dai Tu', 'Dai Tu Nhan Xung',
-      'Pronouns-Dai Tu Nhan Xung.txt'
+      'Pronouns.txt', 'DaiTu.txt', 'DaiTuNhanXung.txt',
+      'Dai Tu.txt', 'Dai Tu Nhan Xung.txt', 'dai-tu-nhan-xung.txt', 'dai-tu.txt',
+      'Pronouns-DaiTuNhanXung.txt'
     ],
     priority: 6
   },
