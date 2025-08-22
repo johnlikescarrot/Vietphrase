@@ -186,7 +186,7 @@ export async function loadDictionariesFromServer(logHandler) {
       if (e.data.status === 'success') {
         logHandler.update(processingLi, 'Xử lý và lưu trữ hoàn tất.', 'success');
 
-        // Tải lại dữ liệu mới nhất từ CSDL
+        // Tải lại dữ liệu mới nhất từ CSDL 
         const finalLi = logHandler.append('Đang nạp từ điển vào ứng dụng...', 'loading');
         const newDictionaries = await initializeDictionaries();
         logHandler.update(finalLi, 'Đã nạp xong.', 'success');
