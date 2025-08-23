@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Xử lý nút Xuất file txt
   DOMElements.exportBtn.addEventListener('click', () => {
     const outputPanel = DOMElements.outputPanel;
-    const textToExport = outputPanel.innerText; // Dùng innerText để có định dạng xuống dòng
+    const textToExport = outputPanel.innerText;
 
     // Kiểm tra xem có nội dung để xuất không
     if (textToExport.trim().length === 0 || textToExport.trim() === 'Kết quả sẽ hiện ở đây...') {
@@ -319,11 +319,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-    const fileName = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}.txt`;
+
+    // Bước 1: Lấy dòng đầu tiên và xóa khoảng trắng ở 2 ĐẦU
+    const firstLine = textToExport.split('\n')[0].trim();
+
+    // Bước 2: Xóa khoảng trắng thừa Ở GIỮA
+    const singleSpacedLine = firstLine.replace(/\s+/g, ' ');
+
+    // Bước 3: Loại bỏ các ký tự không hợp lệ trong tên file
+    const sanitizedFirstLine = singleSpacedLine.replace(/[\\/:*?"<>|]/g, '');
+
+    // Bước 4: Giới hạn độ dài còn 80 ký tự
+    const truncatedFirstLine = sanitizedFirstLine.substring(0, 80);
+
+    // Bước 5: Tạo tên file cuối cùng
+    const fileName = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}_${truncatedFirstLine}.txt`;
 
     // Tạo một đối tượng Blob (dữ liệu file)
     const blob = new Blob([textToExport], { type: 'text/plain;charset=utf-8' });
-
     // Tạo một đường link ẩn để kích hoạt tải file
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
