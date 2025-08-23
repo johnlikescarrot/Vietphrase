@@ -1,5 +1,9 @@
 ﻿BLACKLIST Sẽ lọc và xóa theo dòng
 ######LẺ######
+的
+冇
+了
+垩
 ※
 ######CỤM######
 确定投票
