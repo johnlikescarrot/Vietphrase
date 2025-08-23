@@ -19,7 +19,7 @@ const widthValue = document.getElementById('width-value');
 
 // Đối tượng lưu trữ cài đặt
 let settings = {
-  bgColor: '#232627',
+  bgColor: '#1e1e1e',
   textColor: '#f7b7b7',
   fontFamily: "Arial, 'Inter', 'Segoe UI', sans-serif",
   lineHeight: 1.6,

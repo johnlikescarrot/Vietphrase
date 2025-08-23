@@ -36,18 +36,18 @@
         cursor: text;
 
         &:hover {
-            background-color: var(--accent-color);
-            color: var(--bg-main);
+            background-color: #3c3c3c; // Nền xám nhẹ khi di chuột
+            color: #ffffff; // Chữ màu trắng
             cursor: pointer;
         }
     }
 
     .untranslatable {
-        color: #7a88a9;
+        color: #888888;
 
         &:hover {
-            background-color: var(--accent-color);
-            color: var(--bg-main);
+            background-color: #3c3c3c; // Nền xám nhẹ khi di chuột
+            color: #ffffff; // Chữ màu trắng
         }
     }
 
@@ -102,7 +102,7 @@
 
 // Loader is a full-screen panel
 #loader {
-    background-color: rgba(26, 27, 38, 0.9);
+    background-color: rgba(18, 18, 18, 0.9);
     z-index: $z-index-loader;
     display: flex;
     flex-direction: column;

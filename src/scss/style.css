@@ -12,23 +12,23 @@
 }
 @keyframes subtle-glow {
   0% {
-    text-shadow: 0 0 5px rgba(135, 206, 250, 0.4);
+    text-shadow: 0 0 5px rgba(138, 180, 248, 0.4);
   }
   50% {
-    text-shadow: 0 0 15px rgba(135, 206, 250, 0.8);
+    text-shadow: 0 0 15px rgba(138, 180, 248, 0.6);
   }
   100% {
-    text-shadow: 0 0 5px rgba(135, 206, 250, 0.4);
+    text-shadow: 0 0 5px rgba(138, 180, 248, 0.4);
   }
 }
 :root {
-  --bg-main: #1a1b26;
-  --bg-panel: #24283b;
-  --bg-input: #2a2f41;
-  --text-color: #a9b1d6;
-  --text-highlight: #c0caf5;
-  --accent-color: #7aa2f7;
-  --border-color: #414868;
+  --bg-main: #1f1f1f;
+  --bg-panel: #1e1e1e;
+  --bg-input: #2d2d2d;
+  --text-color: #e0e0e0;
+  --text-highlight: #ffffff;
+  --accent-color: #8ab4f8;
+  --border-color: #3c3c3c;
 }
 
 body {
@@ -43,7 +43,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #212536;
+  background: var(--bg-panel);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -52,7 +52,17 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-color);
+  background: #606060;
+}
+
+::-moz-selection {
+  background-color: #555555;
+  color: var(--text-highlight);
+}
+
+::selection {
+  background-color: #555555;
+  color: var(--text-highlight);
 }
 
 @media (max-width: 640px) {
@@ -83,8 +93,8 @@ body {
 .subtle-glowing-clock {
   font-family: "Courier New", Courier, monospace;
   font-size: 1rem;
-  color: #e0f2fe;
-  background-color: #1a1b26;
+  color: var(--text-color);
+  background-color: var(--bg-main);
   padding: 4px 8px;
   border-radius: 4px;
   animation: subtle-glow 4s ease-in-out infinite;
@@ -131,8 +141,8 @@ body {
 }
 
 .btn {
-  background-color: var(--accent-color);
-  color: var(--bg-main);
+  background-color: rgba(59, 131, 246, 0.6509803922);
+  color: #FFFFFF;
   font-weight: 600;
   padding: 10px 20px;
   border-radius: 8px;
@@ -144,10 +154,10 @@ body {
 }
 .btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(122, 162, 247, 0.4);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
 }
 .btn:disabled {
-  background-color: #414868;
+  background-color: #3a3a3a;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -155,12 +165,12 @@ body {
 }
 
 .btn-secondary {
-  background-color: #414868;
+  background-color: #3a3a3a;
   color: var(--text-highlight);
   font-weight: 600;
 }
 .btn-secondary:hover:not(:disabled) {
-  box-shadow: 0 4px 8px rgba(65, 72, 104, 0.4);
+  box-shadow: 0 4px 8px rgba(45, 45, 45, 0.5);
 }
 
 .case-btn {
@@ -281,16 +291,16 @@ body {
   cursor: text;
 }
 #output-panel .word:hover {
-  background-color: var(--accent-color);
-  color: var(--bg-main);
+  background-color: #3c3c3c;
+  color: #ffffff;
   cursor: pointer;
 }
 #output-panel .untranslatable {
-  color: #7a88a9;
+  color: #888888;
 }
 #output-panel .untranslatable:hover {
-  background-color: var(--accent-color);
-  color: var(--bg-main);
+  background-color: #3c3c3c;
+  color: #ffffff;
 }
 #output-panel .vietphrase-word {
   color: #ff9e64;
@@ -335,7 +345,7 @@ body {
 }
 
 #loader {
-  background-color: rgba(26, 27, 38, 0.9);
+  background-color: rgba(18, 18, 18, 0.9);
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -367,11 +377,11 @@ textarea:focus,
 input:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(122, 162, 247, 0.3);
+  box-shadow: 0 0 0 3px rgba(138, 180, 248, 0.25);
 }
 
 input:disabled {
-  background-color: #31364a;
+  background-color: #3a3a3a;
   cursor: not-allowed;
 }
 
@@ -380,24 +390,24 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
   margin: 0;
 }
 input::-moz-placeholder {
-  color: #7a88a9;
+  color: #888888;
 }
 input::placeholder {
-  color: #7a88a9;
+  color: #888888;
 }
 input::-ms-clear, input::-ms-reveal {
   display: none;
 }
 
 input::-moz-selection, textarea::-moz-selection {
-  background-color: var(--accent-color);
-  color: var(--bg-main);
+  background-color: #555555;
+  color: var(--text-highlight);
 }
 
 input::selection,
 textarea::selection {
-  background-color: var(--accent-color);
-  color: var(--bg-main);
+  background-color: #555555;
+  color: var(--text-highlight);
 }
 
 input:-webkit-autofill,
@@ -555,7 +565,7 @@ input[type=color]::-moz-color-swatch {
 #edit-modal,
 #log-modal,
 #import-options-modal {
-  background-color: rgba(26, 27, 38, 0.7);
+  background-color: rgba(18, 18, 18, 0.8);
 }
 
 #custom-dialog-modal {
@@ -700,6 +710,7 @@ input[type=color]::-moz-color-swatch {
   color: #f87171;
 }
 #log-list li.log-loading {
-  color: #a9b1d6;
+  color: var(--text-color);
   font-style: italic;
+  opacity: 0.8;
 }/*# sourceMappingURL=style.css.map */

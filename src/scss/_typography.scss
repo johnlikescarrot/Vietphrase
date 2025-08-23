@@ -31,8 +31,8 @@
 .subtle-glowing-clock {
     font-family: 'Courier New', Courier, monospace;
     font-size: 1rem;
-    color: #e0f2fe;
-    background-color: #1a1b26;
+    color: var(--text-color);
+    background-color: var(--bg-main);
     padding: 4px 8px;
     border-radius: 4px;
     animation: subtle-glow 4s ease-in-out infinite;

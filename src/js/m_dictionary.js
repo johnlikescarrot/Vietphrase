@@ -192,7 +192,7 @@ export async function loadDictionariesFromServer(logHandler) {
         logHandler.update(finalLi, 'Đã nạp xong.', 'success');
 
         worker.terminate();
-        logHandler.append('Quá trình hoàn tất.', 'info');
+        logHandler.append('Quá trình hoàn tất.', 'complete');
         resolve(newDictionaries);
       }
     };
@@ -259,7 +259,7 @@ export async function loadDictionariesFromFile(files, currentDictionaries, logHa
         logHandler.update(finalLi, 'Đã nạp xong.', 'success');
 
         worker.terminate();
-        logHandler.append('Quá trình hoàn tất.', 'info');
+        logHandler.append('Quá trình hoàn tất.', 'complete');
         resolve(newDictionaries);
       }
     };
@@ -313,7 +313,7 @@ export async function loadSingleDictionaryFromFile(file, dictionaryId, currentDi
         logHandler.update(finalLi, 'Đã nạp xong.', 'success');
 
         worker.terminate();
-        logHandler.append('Quá trình hoàn tất.', 'info');
+        logHandler.append('Quá trình hoàn tất.', 'complete');
         resolve(newDictionaries);
       }
     };

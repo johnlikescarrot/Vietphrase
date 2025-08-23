@@ -1,6 +1,6 @@
 .btn {
-    background-color: var(--accent-color);
-    color: var(--bg-main);
+    background-color: #3b83f6a6;
+    color: #FFFFFF;
     font-weight: 600;
     padding: 10px 20px;
     border-radius: 8px;
@@ -12,11 +12,11 @@
 
     &:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(122, 162, 247, 0.4);
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
     }
 
     &:disabled {
-        background-color: #414868;
+        background-color: #3a3a3a;
         cursor: not-allowed;
         transform: none;
         box-shadow: none;
@@ -25,12 +25,12 @@
 }
 
 .btn-secondary {
-    background-color: #414868;
+    background-color: #3a3a3a;
     color: var(--text-highlight);
     font-weight: 600;
 
     &:hover:not(:disabled) {
-        box-shadow: 0 4px 8px rgba(65, 72, 104, 0.4);
+        box-shadow: 0 4px 8px rgba(45, 45, 45, 0.5);
     }
 }
 

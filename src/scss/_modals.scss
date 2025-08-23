@@ -4,7 +4,7 @@
 #edit-modal,
 #log-modal,
 #import-options-modal {
-    background-color: rgba(26, 27, 38, 0.7);
+    background-color: rgba(18, 18, 18, 0.8);
 }
 
 #custom-dialog-modal {
@@ -165,7 +165,8 @@
     }
 
     &.log-loading {
-        color: #a9b1d6;
+        color: var(--text-color);
         font-style: italic;
+        opacity: 0.8;
     }
 }

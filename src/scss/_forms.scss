@@ -17,12 +17,12 @@ textarea:focus,
 input:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(122, 162, 247, 0.3);
+    box-shadow: 0 0 0 3px rgba(138, 180, 248, 0.25);
 }
 
 // Single, definitive rule for disabled inputs
 input:disabled {
-    background-color: #31364a;
+    background-color: #3a3a3a;
     cursor: not-allowed;
 }
 
@@ -36,7 +36,7 @@ input {
     }
 
     &::placeholder {
-        color: #7a88a9;
+        color: #888888;
     }
 
     &::-ms-clear,
@@ -48,8 +48,8 @@ input {
 // Selection styles
 input::selection,
 textarea::selection {
-    background-color: var(--accent-color);
-    color: var(--bg-main);
+    background-color: #555555;
+    color: var(--text-highlight);
 }
 
 // Autofill styles
