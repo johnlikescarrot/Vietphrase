@@ -350,7 +350,7 @@ export function getHanViet(word, dictionaries) {
   const tokens = word.match(/[\u4e00-\u9fa5]+|[^\u4e00-\u9fa5]+/g) || [];
   const translatedTokens = tokens.map(token => {
     if (/[\u4e00-\u9fa5]/.test(token)) {
-      return [...token].map(getSingleCharHanViet).join(' ');
+      return [...token].map(getSingleCharHanViet).filter(Boolean).join(' ');
     } else {
       return token;
     }
