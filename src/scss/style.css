@@ -93,7 +93,7 @@ body {
 .subtle-glowing-clock {
   font-family: "Courier New", Courier, monospace;
   font-size: 1rem;
-  color: var(--text-color);
+  color: var(--text-highlight);
   background-color: var(--bg-main);
   padding: 4px 8px;
   border-radius: 4px;
