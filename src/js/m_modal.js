@@ -421,7 +421,7 @@ export function initializeModal(state) {
 
   DOMElements.qSearchBtn.addEventListener('click', () => {
     const text = DOMElements.qInputZw.value.trim();
-    if (text) window.open(`https://www.google.com/search?q=${encodeURIComponent(text)}`, '_blank');
+    if (text) window.open(`https://translate.google.com/?sl=zh-CN&tl=vi&text=${encodeURIComponent(text)}`, '_blank');
   });
   DOMElements.qCopyBtn.addEventListener('click', () => {
     const text = DOMElements.qInputZw.value.trim();
