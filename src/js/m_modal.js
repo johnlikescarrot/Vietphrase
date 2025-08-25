@@ -322,26 +322,24 @@ export function initializeModal(state) {
     const quickEditPanel = DOMElements.quickEditPanel;
     const optionsContainer = DOMElements.vietphraseOptionsContainer;
 
-    if (isPanelVisible && !isPanelLocked && !quickEditPanel.contains(e.target) && !outputPanel.contains(e.target)) {
+    if (isPanelVisible && !isPanelLocked && !quickEditPanel.contains(e.target) && !outputPanel.contains(e.target) && !optionsContainer.contains(e.target)) {
       hideQuickEditPanel();
     }
-
-    if (!optionsContainer.classList.contains('hidden') && !optionsContainer.contains(e.target) && !DOMElements.vietphraseToggleBtn.contains(e.target) && !DOMElements.vietphraseInput.contains(e.target)) {
+    if (!optionsContainer.classList.contains('hidden') && !optionsContainer.contains(e.target) && !e.target.closest('#vietphrase-toggle-btn') && !e.target.closest('#vietphrase-input') && !e.target.closest('#q-input-Vp')) {
       optionsContainer.classList.add('hidden');
     }
-
     if (!outputPanel.contains(e.target) || quickEditPanel.contains(e.target)) {
       return;
     }
 
     setTimeout(() => {
+
       if (isDoubleClick) {
         isDoubleClick = false; // Reset lại cờ cho lần sau
         return; // Dừng lại, không chạy code mở bảng Dịch nhanh nữa
       }
       const selection = window.getSelection();
       const targetSpan = e.target.closest('.word');
-
       if (targetSpan && selection.isCollapsed) {
         const range = document.createRange();
         range.selectNode(targetSpan);
@@ -412,6 +410,14 @@ export function initializeModal(state) {
     populateQuickEditPanel(newText, state);
   }, 250);
   DOMElements.qInputZw.addEventListener('input', debouncedPopulateQuickEdit);
+
+  DOMElements.qInputVp.addEventListener('contextmenu', (e) => {
+    e.preventDefault(); // Ngăn menu chuột phải mặc định của trình duyệt
+    const zwText = DOMElements.qInputZw.value.trim();
+    if (zwText) {
+      showVpOptionsForQuickEdit(e.target, zwText, state);
+    }
+  });
 
   const debouncedUpdateOldModal = debounce(() => {
     const newText = DOMElements.originalWordInput.value;
@@ -608,6 +614,88 @@ export function initializeModal(state) {
     e.stopPropagation(); // Ngăn nó tự đóng khi bấm vào chính nó
   });
 
+}
+
+function showVpOptionsForQuickEdit(anchorElement, text, state) {
+  const optionsContainer = DOMElements.vietphraseOptionsContainer;
+  const targetInput = DOMElements.qInputTc;
+
+  // 1. Lấy danh sách gợi ý
+  const uniqueMeanings = new Set();
+  const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
+  if (allMeanings.name) uniqueMeanings.add(allMeanings.name);
+  if (allMeanings.names2.length > 0) allMeanings.names2.forEach(m => uniqueMeanings.add(m));
+  if (allMeanings.names.length > 0) allMeanings.names.forEach(m => uniqueMeanings.add(m));
+  if (allMeanings.vietphrase.length > 0) allMeanings.vietphrase.forEach(m => uniqueMeanings.add(m));
+
+  const segments = segmentText(text, state.masterKeySet);
+  if (segments.length > 1) {
+    const sentenceSuggestions = synthesizeCompoundTranslation(text, state);
+    sentenceSuggestions.forEach(suggestion => {
+      if (!suggestion.includes(' - Quá dài') && !suggestion.includes(' - Số lượng tổ hợp')) {
+        uniqueMeanings.add(suggestion);
+      }
+    });
+  }
+
+  const combinedMeanings = Array.from(uniqueMeanings);
+  optionsContainer.innerHTML = '';
+
+  // 2. Tạo các tùy chọn mới
+  if (combinedMeanings.length > 0) {
+    combinedMeanings.forEach(meaning => {
+      const optionEl = document.createElement('div');
+      optionEl.className = 'vietphrase-option';
+      optionEl.textContent = meaning;
+      optionEl.title = meaning;
+      optionEl.addEventListener('click', () => {
+        targetInput.value = meaning;
+        optionsContainer.classList.add('hidden');
+      });
+      optionsContainer.appendChild(optionEl);
+    });
+  } else {
+    optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Không tìm thấy gợi ý</div>';
+  }
+
+  // 3. ĐỊNH VỊ ỔN ĐỊNH
+  // Reset vị trí của container ra ngoài màn hình để đo kích thước thật của nó
+  optionsContainer.style.position = 'fixed';
+  optionsContainer.style.left = '-9999px';
+  optionsContainer.style.top = '-9999px';
+  optionsContainer.classList.remove('hidden');
+
+  // Lấy kích thước thật và các thông số cần thiết
+  const containerHeight = optionsContainer.offsetHeight;
+  const containerWidth = optionsContainer.offsetWidth;
+  const inputRect = anchorElement.getBoundingClientRect();
+  const viewportHeight = window.innerHeight;
+  const viewportWidth = window.innerWidth;
+  const margin = 5;
+
+  // --- Tính toán vị trí TOP (Trên/Dưới) ---
+  let finalTop;
+  const hasSpaceBelow = (inputRect.bottom + containerHeight + margin) < viewportHeight;
+  const hasSpaceAbove = (inputRect.top - containerHeight - margin) > 0;
+
+  if (hasSpaceBelow || !hasSpaceAbove) {
+    finalTop = inputRect.bottom + margin;
+  } else {
+    finalTop = inputRect.top - containerHeight - margin;
+  }
+
+  // --- Tính toán vị trí LEFT (Trái/Phải) ---
+  let finalLeft = inputRect.left;
+  if (finalLeft + containerWidth + margin > viewportWidth) {
+    finalLeft = viewportWidth - containerWidth - margin;
+  }
+  if (finalLeft < margin) {
+    finalLeft = margin;
+  }
+
+  // Áp dụng vị trí cuối cùng
+  optionsContainer.style.top = `${finalTop}px`;
+  optionsContainer.style.left = `${finalLeft}px`;
 }
 
 function updateOldModalFields(text, state) {
