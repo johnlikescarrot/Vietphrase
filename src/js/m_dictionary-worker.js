@@ -106,17 +106,10 @@ self.onmessage = async function (e) {
       }
       const newDict = parseDictionary(contentToParse, fileInfo.style);
 
-      // Lấy từ điển hiện có hoặc tạo mới
-      const existingDict = dictionaries.get(dictionaryId) || { priority: fileInfo.priority, dict: new Map() };
-
-      // Thêm dữ liệu mới vào
-      newDict.forEach((value, key) => {
-        existingDict.dict.set(key, value);
-      });
-
-      // Cập nhật lại vào Map chính
-      dictionaries.set(dictionaryId, existingDict);
+      // Luôn ghi đè từ điển cũ bằng dữ liệu mới từ file
+      dictionaries.set(dictionaryId, { priority: fileInfo.priority, dict: newDict });
     });
+
     // Bước 4: Chuẩn bị dữ liệu để lưu vào IndexedDB
     const storableDicts = Array.from(dictionaries.entries()).map(([name, data]) => {
       return [name, {
