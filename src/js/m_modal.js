@@ -67,7 +67,7 @@ function applyCase(caseType) {
     case 'upper': text = text.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '); break;
     case 'cap2':
       const words2 = text.split(' ');
-      text = words2.slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') + (words2.length > 2 ? ' ' + words2.slice(2).join(' ') : '');
+      text = words2.slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') + (words2.length > 2 ? ' ' + words2.slice(2).map(word => word.toLowerCase()).join(' ') : '');
       break;
     case 'lowerLast':
       const words = text.split(' ');
@@ -677,7 +677,7 @@ function updateOldModalFields(text, state) {
 
     const bestMeaning = combinedMeanings[0] || '';
     vietphraseInput.value = bestMeaning;
-    customMeaningInput.value = bestMeaning;
+    customMeaningInput.value = hanvietInput.value !== 'Không tìm thấy Hán Việt.' ? hanvietInput.value : bestMeaning;
 
   } else {
     if (synthesisError) {
@@ -686,7 +686,7 @@ function updateOldModalFields(text, state) {
       optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Không tìm thấy Vietphrase/Name</div>';
     }
     vietphraseInput.value = '';
-    customMeaningInput.value = text;
+    customMeaningInput.value = hanvietInput.value !== 'Không tìm thấy Hán Việt.' ? hanvietInput.value : text;
   }
   // Vô hiệu hóa nút xóa nếu từ không có trong Name List
   DOMElements.editModalDeleteBtn.disabled = !nameDictionary.has(text);
