@@ -89,7 +89,15 @@ self.onmessage = async function (e) {
     }
 
     // Bước 2B: Chuẩn hóa nội dung các file từ điển cần thiết
-    const dictionariesToStandardize = new Set(['Vietphrase', 'Names', 'Names2', 'Blacklist']);
+    const dictionariesToStandardize = new Set([
+      'Chapter', 'Number',
+      'Names2', 'Names',
+      'LuatNhan',
+      'Vietphrase',
+      'Pronouns', 'PhienAm',
+      'English',
+      'Blacklist'
+    ]);
 
     // Bước 3: Phân tích (Parse) nội dung các file mới và cập nhật
     filesContent.forEach(item => {

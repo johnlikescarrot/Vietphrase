@@ -1,31 +1,35 @@
 const HAN_VIET_DICT_NAME = 'PhienAm';
 const DICTIONARY_FILES = [
   {
+    id: 'Chapter',
+    names: ['Chapter.txt'],
+    priority: 10
+  },
+  {
+    id: 'Number',
+    names: ['Number.txt'],
+    priority: 11
+  },
+  {
     id: 'Names2',
     names: ['Names2.txt', 'Name2.txt', 'Names3.txt', 'Name3.txt'],
-    priority: 1
+    priority: 20
   },
   {
     id: 'Names',
     names: ['Names.txt', 'Name.txt'],
-    priority: 2
-  },
-  {
-    id: 'Blacklist',
-    names: ['IgnoredChinesePhrases.txt', 'IgnoreList.txt', 'Blacklist.txt'],
-    priority: 3,
-    style: 'Blacklist-Style'
+    priority: 21
   },
   {
     id: 'LuatNhan',
     names: ['LuatNhan.txt', 'Luat Nhan.txt'],
-    priority: 4,
+    priority: 30,
     style: 'LuatNhan-Style'
   },
   {
     id: 'Vietphrase',
     names: ['Vietphrase.txt', 'Vietphrase-custom.txt', 'VP.txt', 'VietPhrase_hadesloki.txt'],
-    priority: 5
+    priority: 40
   },
   {
     id: 'Pronouns',
@@ -34,7 +38,7 @@ const DICTIONARY_FILES = [
       'Dai Tu.txt', 'Dai Tu Nhan Xung.txt', 'dai-tu-nhan-xung.txt', 'dai-tu.txt',
       'Pronouns-DaiTuNhanXung.txt'
     ],
-    priority: 6
+    priority: 50
   },
   {
     id: 'PhienAm',
@@ -44,13 +48,19 @@ const DICTIONARY_FILES = [
       'HanViet.txt', 'HV.txt', 'Han Viet.txt', 'H V.txt',
       'ChinesePhienAmWords-Han Viet.txt'
     ],
-    priority: 7
+    priority: 60
   },
   {
     id: 'English',
     names: ['English.txt', 'Babylon.txt', 'babylon-vn.txt'],
-    priority: 8
+    priority: 98
   },
+  {
+    id: 'Blacklist',
+    names: ['IgnoredChinesePhrases.txt', 'IgnoreList.txt', 'Blacklist.txt'],
+    priority: 99,
+    style: 'Blacklist-Style'
+  }
 ];
 
 const REQUIRED_FILES = [

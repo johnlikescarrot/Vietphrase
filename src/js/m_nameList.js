@@ -235,8 +235,14 @@ export function rebuildMasterData(state) {
   // 2. Khởi tạo Trie và định nghĩa độ ưu tiên của từ điển
   const dictionaryTrie = new Trie();
   const priorityOrder = [
-    'NamesUser', 'Names2', 'Names', 'LuatNhan', 'Vietphrase', 'PhienAm',
-    'Pronouns', 'English', 'Blacklist'
+    'NamesUser',
+    'Chapter', 'Number',
+    'Names2', 'Names',
+    'LuatNhan',
+    'Vietphrase',
+    'Pronouns', 'PhienAm',
+    'English',
+    'Blacklist'
   ];
 
   const allDictionaries = new Map(state.dictionaries);
