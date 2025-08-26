@@ -41,7 +41,8 @@ export function synthesizeCompoundTranslation(text, state) {
   }
   const segments = segmentText(text, state.masterKeySet);
   if (segments.length <= 1) return [];
-  if (segments.length > 10) return [`${segments.join(' ')} - Quá dài để gợi ý`];
+  // Giới hạn PHÂN ĐOẠN
+  if (segments.length > 7) return [`${segments.join(' ')} - Quá dài để gợi ý`];
   const segmentMeanings = segments.map(seg => {
     const translation = translateWord(seg, state.dictionaries, nameDictionary, temporaryNameDictionary);
     return translation.all;
@@ -54,7 +55,8 @@ export function synthesizeCompoundTranslation(text, state) {
     return [`${text} - Số lượng tổ hợp quá nhiều`];
   }
   const uniqueCombinations = [...new Set(combinations)];
-  const MAX_SUGGESTIONS = 50;
+  // Giới hạn Nghĩa Dịch Nhanh
+  const MAX_SUGGESTIONS = 15;
   const finalSuggestions = uniqueCombinations.slice(0, MAX_SUGGESTIONS);
   translationCache.set(text, finalSuggestions);
   return finalSuggestions;

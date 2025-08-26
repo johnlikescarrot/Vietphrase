@@ -712,8 +712,8 @@ function updateOldModalFields(text, state) {
     return;
   }
 
-  // Giới hạn ký tự
-  const CHAR_LIMIT = 30;
+  // Giới hạn ký tự | DỊCH CHÍNH
+  const CHAR_LIMIT = 25;
   if (text.length > CHAR_LIMIT) {
     hanvietInput.value = getHanViet(text, state.dictionaries)?.toLowerCase() || '...';
     vietphraseInput.value = '';
