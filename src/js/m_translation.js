@@ -41,7 +41,7 @@ export function synthesizeCompoundTranslation(text, state) {
   }
   const segments = segmentText(text, state.masterKeySet);
   if (segments.length <= 1) return [];
-  if (segments.length > 15) return [`${segments.join(' ')} - Quá dài để gợi ý`];
+  if (segments.length > 10) return [`${segments.join(' ')} - Quá dài để gợi ý`];
   const segmentMeanings = segments.map(seg => {
     const translation = translateWord(seg, state.dictionaries, nameDictionary, temporaryNameDictionary);
     return translation.all;
