@@ -2,12 +2,12 @@ const HAN_VIET_DICT_NAME = 'PhienAm';
 const DICTIONARY_FILES = [
   {
     id: 'Chapter',
-    names: ['Chapter.txt'],
+    names: ['X_Chapter.txt'],
     priority: 10
   },
   {
     id: 'Number',
-    names: ['Number.txt'],
+    names: ['X_Number.txt'],
     priority: 11
   },
   {
