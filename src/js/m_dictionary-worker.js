@@ -90,10 +90,9 @@ self.onmessage = async function (e) {
 
     // Bước 2B: Chuẩn hóa nội dung các file từ điển cần thiết
     const dictionariesToStandardize = new Set([
-      'Chapter', 'Number',
       'Names2', 'Names',
       'LuatNhan',
-      'Vietphrase',
+      'Chapter', 'Number', 'Vietphrase',
       'Pronouns', 'PhienAm',
       'English',
       'Blacklist'

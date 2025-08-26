@@ -236,10 +236,9 @@ export function rebuildMasterData(state) {
   const dictionaryTrie = new Trie();
   const priorityOrder = [
     'NamesUser',
-    'Chapter', 'Number',
     'Names2', 'Names',
     'LuatNhan',
-    'Vietphrase',
+    'Chapter', 'Number', 'Vietphrase',
     'Pronouns', 'PhienAm',
     'English',
     'Blacklist'

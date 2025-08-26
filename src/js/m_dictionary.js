@@ -1,16 +1,6 @@
 const HAN_VIET_DICT_NAME = 'PhienAm';
 const DICTIONARY_FILES = [
   {
-    id: 'Chapter',
-    names: ['X_Chapter.txt'],
-    priority: 10
-  },
-  {
-    id: 'Number',
-    names: ['X_Number.txt'],
-    priority: 11
-  },
-  {
     id: 'Names2',
     names: ['Names2.txt', 'Name2.txt', 'Names3.txt', 'Name3.txt'],
     priority: 20
@@ -25,6 +15,16 @@ const DICTIONARY_FILES = [
     names: ['LuatNhan.txt', 'Luat Nhan.txt'],
     priority: 30,
     style: 'LuatNhan-Style'
+  },
+  {
+    id: 'Chapter',
+    names: ['X_Chapter.txt'],
+    priority: 38
+  },
+  {
+    id: 'Number',
+    names: ['X_Number.txt'],
+    priority: 39
   },
   {
     id: 'Vietphrase',
