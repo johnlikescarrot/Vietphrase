@@ -18,41 +18,32 @@ const DICTIONARY_FILES = [
   },
   {
     id: 'Chapter',
-    names: ['X_Chapter.txt'],
+    names: ['Chapter.txt', 'X_Chapter.txt', 'Vietphrase_Chapter.txt'],
     priority: 38
   },
   {
     id: 'Number',
-    names: ['X_Number.txt'],
+    names: ['Number.txt', 'X_Number.txt', 'Vietphrase_Number.txt'],
     priority: 39
   },
   {
     id: 'Vietphrase',
-    names: ['Vietphrase.txt', 'Vietphrase-custom.txt', 'VP.txt', 'VietPhrase_hadesloki.txt'],
+    names: ['Vietphrase.txt', 'VP.txt', 'VietPhrase_hadesloki.txt'],
     priority: 40
   },
   {
     id: 'Pronouns',
-    names: [
-      'Pronouns.txt', 'DaiTu.txt', 'DaiTuNhanXung.txt',
-      'Dai Tu.txt', 'Dai Tu Nhan Xung.txt', 'dai-tu-nhan-xung.txt', 'dai-tu.txt',
-      'Pronouns-DaiTuNhanXung.txt'
-    ],
+    names: ['Pronouns.txt', 'DaiTu.txt', 'DaiTuNhanXung.txt', 'dai-tu-nhan-xung.txt'],
     priority: 50
   },
   {
     id: 'PhienAm',
-    names: [
-      'ChinesePhienAmWords.txt',
-      'PhienAm.txt', 'Phien Am.txt',
-      'HanViet.txt', 'HV.txt', 'Han Viet.txt', 'H V.txt',
-      'ChinesePhienAmWords-Han Viet.txt'
-    ],
+    names: ['ChinesePhienAmWords.txt', 'PhienAm.txt', 'HanViet.txt', 'HV.txt'],
     priority: 60
   },
   {
     id: 'English',
-    names: ['English.txt', 'Babylon.txt', 'babylon-vn.txt'],
+    names: ['English.txt', 'Babylon.txt'],
     priority: 98
   },
   {
