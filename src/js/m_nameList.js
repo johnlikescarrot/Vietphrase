@@ -238,7 +238,7 @@ export function rebuildMasterData(state) {
     'NamesUser',
     'Names2', 'Names',
     'LuatNhan',
-    'Chapter', 'Number', 'Vietphrase',
+    'Vietphrase', 'Chapter', 'Number',
     'Pronouns', 'PhienAm',
     'English',
     'Blacklist'

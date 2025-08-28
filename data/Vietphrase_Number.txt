@@ -114898,3 +114898,5 @@
 五月十一号=ngày 11 tháng 5
 五月十一日=ngày mười một tháng năm/ngày 11 tháng 5
 八万八千八百八十八两=88,888 lượng
+分二十二秒=phút hai mươi hai giây
+分五十二秒=phút năm mươi hai giây

@@ -17,19 +17,19 @@ const DICTIONARY_FILES = [
     style: 'LuatNhan-Style'
   },
   {
+    id: 'Vietphrase',
+    names: ['Vietphrase.txt', 'VP.txt', 'VietPhrase_hadesloki.txt'],
+    priority: 40
+  },
+  {
     id: 'Chapter',
     names: ['Chapter.txt', 'X_Chapter.txt', 'Vietphrase_Chapter.txt'],
-    priority: 38
+    priority: 41
   },
   {
     id: 'Number',
     names: ['Number.txt', 'X_Number.txt', 'Vietphrase_Number.txt'],
-    priority: 39
-  },
-  {
-    id: 'Vietphrase',
-    names: ['Vietphrase.txt', 'VP.txt', 'VietPhrase_hadesloki.txt'],
-    priority: 40
+    priority: 42
   },
   {
     id: 'Pronouns',

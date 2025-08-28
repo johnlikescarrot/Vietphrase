@@ -92,7 +92,7 @@ self.onmessage = async function (e) {
     const dictionariesToStandardize = new Set([
       'Names2', 'Names',
       'LuatNhan',
-      'Chapter', 'Number', 'Vietphrase',
+      'Vietphrase', 'Chapter', 'Number',
       'Pronouns', 'PhienAm',
       'English',
       'Blacklist'
