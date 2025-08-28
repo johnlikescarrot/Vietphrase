@@ -57,7 +57,6 @@ const DICTIONARY_FILES = [
 const REQUIRED_FILES = [
   'Vietphrase',
   HAN_VIET_DICT_NAME,
-  'LuatNhan',
   'Names',
 ];
 
