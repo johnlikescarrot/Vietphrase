@@ -627,6 +627,8 @@ function showVpOptionsForQuickEdit(anchorElement, text, state) {
   if (allMeanings.names2.length > 0) allMeanings.names2.forEach(m => uniqueMeanings.add(m));
   if (allMeanings.names.length > 0) allMeanings.names.forEach(m => uniqueMeanings.add(m));
   if (allMeanings.vietphrase.length > 0) allMeanings.vietphrase.forEach(m => uniqueMeanings.add(m));
+  if (allMeanings.chapter.length > 0) allMeanings.chapter.forEach(m => uniqueMeanings.add(m));
+  if (allMeanings.number.length > 0) allMeanings.number.forEach(m => uniqueMeanings.add(m));
 
   const segments = segmentText(text, state.masterKeySet);
   if (segments.length > 1) {
@@ -731,6 +733,8 @@ function updateOldModalFields(text, state) {
   if (allMeanings.names2.length > 0) allMeanings.names2.forEach(m => uniqueMeanings.add(m));
   if (allMeanings.names.length > 0) allMeanings.names.forEach(m => uniqueMeanings.add(m));
   if (allMeanings.vietphrase.length > 0) allMeanings.vietphrase.forEach(m => uniqueMeanings.add(m));
+  if (allMeanings.chapter.length > 0) allMeanings.chapter.forEach(m => uniqueMeanings.add(m));
+  if (allMeanings.number.length > 0) allMeanings.number.forEach(m => uniqueMeanings.add(m));
 
   const segments = segmentText(text, state.masterKeySet);
   let synthesisError = null;

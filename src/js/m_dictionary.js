@@ -439,6 +439,8 @@ export function getAllMeanings(word, dictionaries, nameDict) {
     names: [],        // Dành cho Names.txt
     names2: [],       // Dành cho Names2.txt
     vietphrase: [],   // Dành cho Vietphrase.txt
+    chapter: [],      // Dành cho Vietphrase_Chapter.txt
+    number: [],       // Dành cho Vietphrase_Number.txt
     hanviet: null,
   };
 
@@ -466,6 +468,20 @@ export function getAllMeanings(word, dictionaries, nameDict) {
   if (vpDict && vpDict.has(word)) {
     const vpMeanings = vpDict.get(word);
     allMeanings.vietphrase = vpMeanings.split(/[;/]/).map(m => m.trim()).filter(Boolean);
+  }
+
+  // 4.1 Lấy nghĩa từ Vietphrase_Chapter (nếu có)
+  const chapterDict = dictionaries.get('Chapter')?.dict;
+  if (chapterDict && chapterDict.has(word)) {
+    const chapterMeanings = chapterDict.get(word);
+    allMeanings.chapter = chapterMeanings.split(/[;/]/).map(m => m.trim()).filter(Boolean);
+  }
+
+  // 4.2 Lấy nghĩa từ Vietphrase_Number (nếu có)
+  const numberDict = dictionaries.get('Number')?.dict;
+  if (numberDict && numberDict.has(word)) {
+    const numberMeanings = numberDict.get(word);
+    allMeanings.number = numberMeanings.split(/[;/]/).map(m => m.trim()).filter(Boolean);
   }
 
   // 5. Lấy nghĩa Hán Việt
