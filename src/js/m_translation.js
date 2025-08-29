@@ -69,6 +69,11 @@ export function performTranslation(state, options = {}) {
     DOMElements.outputPanel.textContent = 'Lỗi: Từ điển chưa được tải hoặc xử lý.';
     return;
   }
+
+  if (!options.preserveTempDict) {
+    temporaryNameDictionary.clear();
+  }
+
   const textToTranslate = options.forceText ?? DOMElements.inputText.value;
   const standardizedText = standardizeText(textToTranslate);
   if (!standardizedText.trim()) {
@@ -277,7 +282,4 @@ export function performTranslation(state, options = {}) {
   finalContainer.innerHTML = finalHtml;
 
   DOMElements.outputPanel.innerHTML = finalContainer.innerHTML;
-  if (!options.preserveTempDict) {
-    temporaryNameDictionary.clear();
-  }
 }

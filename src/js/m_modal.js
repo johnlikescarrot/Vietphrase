@@ -538,9 +538,17 @@ export function initializeModal(state) {
   document.querySelectorAll('.q-temp-add-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const targetInputId = e.target.dataset.target;
-      const text = document.getElementById(targetInputId).value;
-      if (typeof text === 'string' && selectionState.originalText) {
-        updateTranslationInPlace(text);
+      const vnText = document.getElementById(targetInputId).value; // Lấy nghĩa Tiếng Việt
+      const cnText = selectionState.originalText; // Lấy chữ Hán gốc đang chọn
+
+      if (typeof vnText === 'string' && cnText) {
+        // Lưu cặp "Tiếng Trung = Tiếng Việt" vào bộ nhớ tạm
+        temporaryNameDictionary.set(cnText, vnText);
+
+        // Cập nhật ngay lập-tức tại vị trí đang chọn
+        updateTranslationInPlace(vnText);
+
+        // Ẩn bảng dịch nhanh sau khi hoàn tất
         hideQuickEditPanel();
       }
     });
