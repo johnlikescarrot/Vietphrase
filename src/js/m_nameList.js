@@ -139,14 +139,17 @@ export function initializeNameList(state) {
 
       DOMElements.nameListSaveBtn.disabled = false;
     }, 1500);
+    // Dịch lại toàn bộ văn bản sau khi lưu
     performTranslation(state, { forceText: state.lastTranslatedText });
   });
+
   DOMElements.nameListDeleteBtn.addEventListener('click', async () => {
     if (await customConfirm('Bạn có chắc muốn xóa toàn bộ Bảng Thuật Ngữ? Hành động này không thể hoàn tác.')) {
       nameDictionary.clear();
       saveNameDictionaryToStorage();
       renderNameList();
       rebuildMasterData(state);
+      // Dịch lại toàn bộ văn bản sau khi xóa
       performTranslation(state, { forceText: state.lastTranslatedText });
     }
 

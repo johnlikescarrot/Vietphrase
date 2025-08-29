@@ -277,5 +277,7 @@ export function performTranslation(state, options = {}) {
   finalContainer.innerHTML = finalHtml;
 
   DOMElements.outputPanel.innerHTML = finalContainer.innerHTML;
-  temporaryNameDictionary.clear();
+  if (!options.preserveTempDict) {
+    temporaryNameDictionary.clear();
+  }
 }

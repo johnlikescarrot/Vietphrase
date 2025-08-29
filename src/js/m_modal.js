@@ -17,8 +17,8 @@ function addPermanentName(cn, vn, state) {
   state.masterKeySet.add(cn);
   state.dictionaryTrie.insert(cn, { translation: vn, type: 'name' }, true);
 
-  // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi
-  performTranslation(state, { forceText: state.lastTranslatedText });
+  // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi, giữ lại từ điển tạm thời
+  performTranslation(state, { forceText: state.lastTranslatedText, preserveTempDict: true });
 }
 
 // XỬ LÝ VIỆC XÓA NAME
@@ -34,8 +34,8 @@ async function deletePermanentName(cn, state) {
     // 2. Cập nhật lại "bộ não" dịch (theo cách tối ưu)
     updateMasterDataForDeletion(cn, state);
 
-    // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi
-    performTranslation(state, { forceText: state.lastTranslatedText });
+    // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi, giữ lại từ điển tạm thời
+    performTranslation(state, { forceText: state.lastTranslatedText, preserveTempDict: true });
   }
 }
 
@@ -576,7 +576,7 @@ export function initializeModal(state) {
     const vn = DOMElements.customMeaningInput.value.trim();
     if (cn) {
       temporaryNameDictionary.set(cn, vn);
-      performTranslation(state, { forceText: state.lastTranslatedText });
+      performTranslation(state, { forceText: state.lastTranslatedText, preserveTempDict: true });
       closeOldModal();
     }
   });
