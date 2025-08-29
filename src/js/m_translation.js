@@ -70,10 +70,6 @@ export function performTranslation(state, options = {}) {
     return;
   }
 
-  if (!options.preserveTempDict) {
-    temporaryNameDictionary.clear();
-  }
-
   const textToTranslate = options.forceText ?? DOMElements.inputText.value;
   const standardizedText = standardizeText(textToTranslate);
   if (!standardizedText.trim()) {
@@ -282,4 +278,7 @@ export function performTranslation(state, options = {}) {
   finalContainer.innerHTML = finalHtml;
 
   DOMElements.outputPanel.innerHTML = finalContainer.innerHTML;
+  if (!options.preserveTempDict) {
+    temporaryNameDictionary.clear();
+  }
 }

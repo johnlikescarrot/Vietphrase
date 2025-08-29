@@ -1,7 +1,7 @@
 import DOMElements from './m_dom.js';
 import { initializeDictionaries, clearAllDictionaries, loadDictionariesFromFile, loadDictionariesFromServer, loadSingleDictionaryFromFile } from './m_dictionary.js';
 import { customAlert, customConfirm } from './m_dialog.js';
-import { initializeNameList, rebuildMasterData, renderNameList } from './m_nameList.js';
+import { initializeNameList, rebuildMasterData, renderNameList, temporaryNameDictionary } from './m_nameList.js';
 import { initializeModal } from './m_modal.js';
 import { performTranslation } from './m_translation.js';
 import { updateClock } from './m_ui.js';
@@ -232,6 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!state.dictionaries || state.dictionaries.size === 0) {
       customAlert('Vui lòng tải Từ Điển trước khi dịch.');
     } else {
+      temporaryNameDictionary.clear();
       performTranslation(state);
     }
   });
