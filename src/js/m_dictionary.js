@@ -345,7 +345,7 @@ export function getHanViet(word, dictionaries) {
     if (hanVietDict.has(char)) {
       return hanVietDict.get(char).split('/')[0].split(';')[0].trim();
     }
-    return char;
+    return '';
   };
   const tokens = word.match(/[\u4e00-\u9fa5]+|[^\u4e00-\u9fa5]+/g) || [];
   const translatedTokens = tokens.map(token => {
@@ -419,13 +419,13 @@ export function translateWord(word, dictionaries, nameDict, tempDict, getAllMean
   }
 
   if (!found) {
-    return { best: word, all: [word], found: false };
+    return { best: word, all: [], found: false };
   }
 
   const allMeaningsRaw = meaningsStr.split(';').flatMap(m => m.split('/')).map(m => m.trim());
   const allMeaningsFlat = fromUserDict ? allMeaningsRaw : allMeaningsRaw.filter(Boolean);
   if (allMeaningsFlat.length === 0 && !fromUserDict) {
-    return { best: word, all: [word], found: false };
+    return { best: word, all: [], found: false };
   }
 
   const bestMeaning = allMeaningsFlat[0] ?? '';

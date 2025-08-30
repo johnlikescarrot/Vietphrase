@@ -43,14 +43,19 @@ export function synthesizeCompoundTranslation(text, state) {
   if (segments.length <= 1) return [];
   // Giới hạn PHÂN ĐOẠN
   if (segments.length > 7) return [`${segments.join(' ')} - Quá dài để gợi ý`];
+  // Bước 1: Lấy nghĩa của từng đoạn, nếu đoạn nào không có nghĩa (như '的')
+  // thì tạm thời coi nó là một chuỗi rỗng [''] để không làm hỏng phép tính tổ hợp.
   const segmentMeanings = segments.map(seg => {
     const translation = translateWord(seg, state.dictionaries, nameDictionary, temporaryNameDictionary);
-    return translation.all;
+    return translation.all.length > 0 ? translation.all : [''];
   });
+
   const cartesian = (...a) => a.reduce((acc, val) => acc.flatMap(d => val.map(e => [d, e].flat())));
   let combinations = [];
   try {
-    combinations = cartesian(...segmentMeanings).map(combo => combo.join(' '));
+    // Bước 2: Tạo ra tất cả các tổ hợp, sau đó loại bỏ các chuỗi rỗng '' đã thêm ở bước 1
+    // rồi mới ghép lại thành câu hoàn chỉnh.
+    combinations = cartesian(...segmentMeanings).map(combo => combo.filter(Boolean).join(' '));
   } catch (e) {
     return [`${text} - Số lượng tổ hợp quá nhiều`];
   }
@@ -151,14 +156,27 @@ export function performTranslation(state, options = {}) {
         const { key: originalWord, value } = bestMatch;
 
         if (value.type === 'Blacklist' || value.translation === '') {
+          // Tạo một span ẩn để giữ lại data-original
+          const span = document.createElement('span');
+          span.className = 'word blacklisted-word'; // Thêm class để nhận biết nếu cần
+
+          // Quan trọng: Giữ lại chữ Hán gốc để các bảng dịch có thể lấy được
+          span.dataset.original = originalWord;
+
+          // Quan trọng: Không hiển thị chữ này ra kết quả dịch
+          span.textContent = '';
+
+          lineHtml += span.outerHTML; // Thêm thẻ ẩn vào kết quả
+          lastChar = originalWord.slice(-1);
           i += originalWord.length;
-          continue;
+          continue; // Tiếp tục vòng lặp
         }
+
         const translationResult = translateWord(originalWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
         const span = document.createElement('span');
         span.className = 'word';
         span.dataset.original = originalWord;
-        let textForSpan = !translationResult.found ? originalWord : (isVietphraseMode ? `(${translationResult.all.join('/')})` : translationResult.best);
+        let textForSpan = !translationResult.found ? '' : (isVietphraseMode ? `(${translationResult.all.join('/')})` : translationResult.best);
         if (!translationResult.found) span.classList.add('untranslatable');
         if (isVietphraseMode && translationResult.found) span.classList.add('vietphrase-word');
         if (capitalizeNextWord && /\p{L}/u.test(textForSpan)) {
@@ -166,6 +184,7 @@ export function performTranslation(state, options = {}) {
           capitalizeNextWord = false;
         }
         span.textContent = textForSpan;
+        if (textForSpan.trim() === '') { leadingSpace = ''; }
         const trimmedText = textForSpan.trim();
         if (/[.!?]$/.test(trimmedText)) {
           capitalizeNextWord = true;
@@ -216,6 +235,20 @@ export function performTranslation(state, options = {}) {
           }
         }
         const nonMatchBlock = line.substring(i, nonMatchEnd);
+
+        // Giữ lại data-original để các bảng Dịch nhanh/Chỉnh sửa name không bị mất chữ,
+        // nhưng không hiển thị chữ đó ra kết quả dịch cuối cùng.
+        if (/^[\u4e00-\u9fa5]+$/.test(nonMatchBlock)) {
+          const span = document.createElement('span');
+          span.className = 'word untranslatable';
+          span.dataset.original = nonMatchBlock;
+          span.textContent = ''; // Quan trọng: không hiển thị ra kết quả
+          lineHtml += span.outerHTML;
+          lastChar = nonMatchBlock.slice(-1);
+          i = nonMatchEnd;
+          continue;
+        }
+
         let textForSpan = nonMatchBlock;
         if (capitalizeNextWord && /\p{L}/u.test(textForSpan)) {
           textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
