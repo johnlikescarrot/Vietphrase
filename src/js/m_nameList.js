@@ -43,6 +43,25 @@ class Trie {
     }
     return longestMatch;
   }
+
+  findAllMatches(text, startIndex) {
+    let node = this.root;
+    const matches = [];
+    for (let i = startIndex; i < text.length; i++) {
+      const char = text[i];
+      if (!node.children[char]) {
+        break;
+      }
+      node = node.children[char];
+      if (node.value !== null) {
+        matches.push({
+          key: text.substring(startIndex, i + 1),
+          value: node.value,
+        });
+      }
+    }
+    return matches;
+  }
 }
 
 import DOMElements from './m_dom.js';
