@@ -111,9 +111,11 @@ export function performTranslation(state, options = {}) {
   for (const nameKey of sortedCombinedKeys) {
     if (processedText.includes(nameKey)) {
       const placeholder = `%%NAME_${placeholderId}%%`;
-      // Lấy nghĩa từ Map đã hợp nhất (đã chứa sẵn nghĩa đúng theo độ ưu tiên)
-      const nameValue = combinedNameMap.get(nameKey);
-      placeholders.set(placeholder, { original: nameKey, translation: nameValue });
+      // Lấy nghĩa từ Map đã hợp nhất
+      const fullMeaning = combinedNameMap.get(nameKey);
+      // Tách chuỗi bằng dấu / hoặc ; và chỉ lấy nghĩa đầu tiên
+      const firstMeaning = fullMeaning.split(/[;/]/)[0].trim();
+      placeholders.set(placeholder, { original: nameKey, translation: firstMeaning });
       const escapedKey = escapeRegExp(nameKey);
       processedText = processedText.replace(new RegExp(escapedKey, 'g'), placeholder);
       placeholderId++;

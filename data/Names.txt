@@ -48,7 +48,6 @@
 阿凡=A Phàm
 阿芳=A Phương
 阿房=A Phòng
-阿飞=A Phi
 阿菲=Afi
 阿风=A Phong
 阿峰=A Phong
@@ -61,7 +60,6 @@
 阿刚=A Cương
 阿格=A Cách
 阿根=A Căn
-阿公=A Công
 阿光=A Quang
 阿广=A Quảng
 阿鬼=A Quỷ
@@ -75,7 +73,6 @@
 阿河=A Hà
 阿黑=A Hắc
 阿恒=A Hằng
-阿訇=Iman
 阿红=A Hồng
 阿宏=A Hoành
 阿虎=A Hổ
@@ -91,7 +88,7 @@
 阿娇=A Kiều
 阿胶=A Giao
 阿杰=A Kiệt
-阿金=A Kim
+阿金=A Kim/Gin
 阿妗=A Cấm
 阿静=A Tĩnh
 阿九=A Cửu
@@ -113,9 +110,9 @@
 阿乐=A Nhạc
 阿冷=A Lãnh
 阿狸=A Ly
-阿里=A Lí
+阿里=A Lý/Ali
 阿丽=Ari
-阿利=Aly
+阿利=Aly/Alito
 阿连=A Liên
 阿莲=A Liên/Ariene
 阿廉=A Liêm
@@ -141,7 +138,6 @@
 阿梅=A Mai
 阿美=A Mỹ
 阿魅=A Mị
-阿门=Amen
 阿蒙=A Mông
 阿米=Ami
 阿喵=A Miêu
@@ -166,7 +162,7 @@
 阿平=Arpin
 阿破=A Phá
 阿噗=A Phốc
-阿普=A Phổ
+阿普=A Phổ/Apoo
 阿七=A Thất
 阿齐=Azib
 阿奇=A Kỳ
@@ -1153,7 +1149,7 @@
 冰螭=Băng Ly
 冰島=Iceland
 冰帝=Băng Đế
-冰儿=Băng nhi
+冰儿=Băng Nhi
 冰风=Băng Phong
 冰凤=Băng Phượng
 冰苻=Băng Phù
@@ -1198,7 +1194,6 @@
 冰妖=Băng Yêu
 冰姨=Băng Di
 冰逸=Băng Dật
-冰翼=Băng Dực
 冰油=Băng Du
 冰羽=Băng Vũ
 冰月=Băng Nguyệt
@@ -1206,7 +1201,6 @@
 冰主=Băng Chủ
 兵灵=Binh Linh
 丙丑=Bính Sửu
-丙等=Bính đẳng
 丙丁=Bính Đinh
 丙火=Bính Hỏa
 丙午=Bính Ngọ
@@ -1214,7 +1208,6 @@
 柄康=Bính Khang
 炳天=Bỉnh Thiên
 并州=Tịnh Châu
-病虎=Bệnh Hổ
 病龙=Bệnh Long
 波巴=Ba Ba
 波德=Pod
@@ -1229,7 +1222,7 @@
 波鸿=Bochum
 波鴻=Bochum
 波卡=Poca
-波兰=Ba Lan
+波兰=Ba Lan/Poland
 波蘭=Ba Lan
 波丽=Ba Lệ
 波利=Bori
@@ -1250,7 +1243,6 @@
 波兹=Poz
 玻爾=Bohr
 剥洁=Bác Khiết
-嶓冢=Ba Trủng
 播州=Bá Châu
 伯安=Bá An
 伯德=Bode/Byrd
@@ -1290,7 +1282,7 @@
 伯玉=Bá Ngọc
 伯渊=Bá Uyên
 勃海=Bột Hải
-勃劳=Bảo Lộc
+勃劳=Bảo Lộc/Blao
 勃伦=Blen
 博比=Bác Bỉ/Bobbie
 博尔=Bor
@@ -1305,7 +1297,6 @@
 博内=Bonnet
 博尼=Bony
 博诺=Bono
-博派=phái Bác Ái
 博蓬=Beaupont
 博乔=Bocsa
 博涉=Bác Thiệp
@@ -1336,7 +1327,7 @@
 布策=Bucer
 布彻=Butcher
 布达=Bố Đạt
-布恩=Bố Ân
+布恩=Bố Ân/Boone
 布尔=Borr/Bur
 布冯=Bố Phùng/Bush
 布夫=Buff
@@ -44957,8 +44948,6 @@ IS 学园=học viện IS
 蒙吕尔=Montluel
 蒙茅斯=Monmouth
 蒙梅尔=Montmerle
-蒙其 d 龙=Monkey D. Dragon
-蒙其d龙=Monkey D. Dragon
 蒙亲王=Mông thân vương
 蒙塞夫=Moncef
 蒙山茶=trà Mông Sơn
@@ -65688,7 +65677,7 @@ ON AIR 海贼团=băng hải tặc On Air
 玛丽•璐=Mary-Lou
 梅 · 帕克=May Parker 
 蒙其. d. 龙=Monkey D. Dragon
-蒙奇 ·D· 龙=Monkey D. Dragon
+蒙奇·D·龙=Monkey D. Dragon
 欧 ~ 尼酱=onii ~ chan
 乔 • 基南=Joe Keenan
 让 • 阿兰=Jean-Alain
