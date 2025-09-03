@@ -36552,7 +36552,6 @@ IS 学园=học viện IS
 节度使=Tiết Độ Sứ
 节乾昆=Tiết Càn Côn
 劫惊雷=Kiếp Kinh Lôi
-劫云中=kiếp vân trong
 杰巴斯=Balaji
 杰布森=Jebson
 杰出级=Kiệt Xuất cấp

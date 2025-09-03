@@ -120,16 +120,47 @@ function closeOldModal() {
 function showQuickEditPanel(selection, state) {
   const range = selection.getRangeAt(0);
   const allSpans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
-  const selectedSpans = allSpans.filter(span => selection.containsNode(span, true) && span.textContent.trim() !== '');
-  if (selectedSpans.length === 0) {
+
+  // Lấy tất cả các span nằm trong vùng người dùng chọn
+  const initiallySelectedSpans = allSpans.filter(span => selection.containsNode(span, true));
+
+  // Nếu không chọn được span nào thì thoát
+  if (initiallySelectedSpans.length === 0) {
     if (isPanelVisible && !isPanelLocked) hideQuickEditPanel();
     return;
   }
 
-  selectionState.startIndex = allSpans.indexOf(selectedSpans[0]);
-  selectionState.endIndex = allSpans.indexOf(selectedSpans[selectedSpans.length - 1]);
+  // Xác định chỉ số bắt đầu và kết thúc ban đầu
+  let startIndex = allSpans.indexOf(initiallySelectedSpans[0]);
+  let endIndex = allSpans.indexOf(initiallySelectedSpans[initiallySelectedSpans.length - 1]);
+
+  // Tự động mở rộng vùng chọn sang trái để bao gồm các từ ẩn/không dịch
+  while (startIndex > 0) {
+    const precedingSpan = allSpans[startIndex - 1];
+    if (precedingSpan.textContent.trim() === '' && precedingSpan.dataset.original) {
+      startIndex--;
+    } else {
+      break; // Dừng lại khi gặp từ có thể nhìn thấy
+    }
+  }
+
+  // Tự động mở rộng vùng chọn sang phải
+  while (endIndex < allSpans.length - 1) {
+    const followingSpan = allSpans[endIndex + 1];
+    if (followingSpan.textContent.trim() === '' && followingSpan.dataset.original) {
+      endIndex++;
+    } else {
+      break; // Dừng lại khi gặp từ có thể nhìn thấy
+    }
+  }
+
+  // Cập nhật lại trạng thái với vùng chọn đã được mở rộng
+  selectionState.startIndex = startIndex;
+  selectionState.endIndex = endIndex;
   selectionState.spans = allSpans;
-  selectionState.originalText = selectedSpans.map(s => s.dataset.original).join('');
+  const finalSpans = allSpans.slice(startIndex, endIndex + 1);
+  selectionState.originalText = finalSpans.map(s => s.dataset.original).join('');
+
   populateQuickEditPanel(selectionState.originalText, state);
 
   // ===== CĂN LỀ BẢNG DỊCH NHANH =====
