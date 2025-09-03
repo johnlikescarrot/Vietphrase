@@ -306,7 +306,7 @@ body {
   color: #ff9e64;
   font-style: italic;
 }
-#output-panel .from-name-list:hover {
+#output-panel .from-name-dict:hover {
   background-color: #af4c4c;
   color: #ffffff !important;
 }

@@ -85,15 +85,34 @@ export function performTranslation(state, options = {}) {
     state.lastTranslatedText = standardizedText;
   }
 
-  // LỚP 1: TÁCH NAME LIST RA XỬ LÝ RIÊNG BẰNG PLACEHOLDER
+  // LỚP 1: TÁCH TẤT CẢ CÁC TỪ ĐIỂN NAME RA XỬ LÝ RIÊNG BẰNG PLACEHOLDER
   let processedText = standardizedText;
   const placeholders = new Map();
   let placeholderId = 0;
-  const sortedNameKeys = [...nameDictionary.keys()].sort((a, b) => b.length - a.length);
-  for (const nameKey of sortedNameKeys) {
+
+  // Lấy từ điển Names và Names2 từ state, nếu không có thì tạo Map rỗng để tránh lỗi
+  const namesDict = state.dictionaries.get('Names')?.dict || new Map();
+  const names2Dict = state.dictionaries.get('Names2')?.dict || new Map();
+
+  // Hợp nhất tất cả các từ điển name theo thứ tự ưu tiên:
+  // Names -> Names2 -> NameList (nameDictionary).
+  // Mục được thêm sau sẽ ghi đè lên mục trước đó nếu có key (chữ Hán) trùng lặp.
+  const combinedNameMap = new Map([
+    ...namesDict.entries(),
+    ...names2Dict.entries(),
+    ...nameDictionary.entries() // nameDictionary là Name List của người dùng, có ưu tiên cao nhất
+  ]);
+
+  // Sắp xếp các key (chữ Hán) đã hợp nhất theo độ dài giảm dần.
+  // Điều này cực kỳ quan trọng để ưu tiên khớp các cụm từ dài trước (ví dụ: "Lý Phù Trần" trước "Lý Phù").
+  const sortedCombinedKeys = [...combinedNameMap.keys()].sort((a, b) => b.length - a.length);
+
+  // Bắt đầu quá trình "đục lỗ" với danh sách key đã được hợp nhất và sắp xếp
+  for (const nameKey of sortedCombinedKeys) {
     if (processedText.includes(nameKey)) {
       const placeholder = `%%NAME_${placeholderId}%%`;
-      const nameValue = nameDictionary.get(nameKey);
+      // Lấy nghĩa từ Map đã hợp nhất (đã chứa sẵn nghĩa đúng theo độ ưu tiên)
+      const nameValue = combinedNameMap.get(nameKey);
       placeholders.set(placeholder, { original: nameKey, translation: nameValue });
       const escapedKey = escapeRegExp(nameKey);
       processedText = processedText.replace(new RegExp(escapedKey, 'g'), placeholder);
@@ -336,7 +355,7 @@ export function performTranslation(state, options = {}) {
       if (openingTag.includes('data-capitalize="true"')) {
         if (translation) translation = translation.charAt(0).toUpperCase() + translation.slice(1);
       }
-      return `<span class="word from-name-list" data-original="${data.original}">${translation}</span>`;
+      return `<span class="word from-name-dict" data-original="${data.original}">${translation}</span>`;
     });
   }
   const finalContainer = document.createElement('div');

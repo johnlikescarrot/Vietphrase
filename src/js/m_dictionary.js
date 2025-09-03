@@ -2,7 +2,7 @@ const HAN_VIET_DICT_NAME = 'PhienAm';
 const DICTIONARY_FILES = [
   {
     id: 'Names2',
-    names: ['Names2.txt', 'Name2.txt', 'Names3.txt', 'Name3.txt'],
+    names: ['Names2.txt', 'Name2.txt'],
     priority: 20
   },
   {
