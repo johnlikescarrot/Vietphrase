@@ -134,26 +134,6 @@ function showQuickEditPanel(selection, state) {
   let startIndex = allSpans.indexOf(initiallySelectedSpans[0]);
   let endIndex = allSpans.indexOf(initiallySelectedSpans[initiallySelectedSpans.length - 1]);
 
-  // Tự động mở rộng vùng chọn sang trái để bao gồm các từ ẩn/không dịch
-  while (startIndex > 0) {
-    const precedingSpan = allSpans[startIndex - 1];
-    if (precedingSpan.textContent.trim() === '' && precedingSpan.dataset.original) {
-      startIndex--;
-    } else {
-      break; // Dừng lại khi gặp từ có thể nhìn thấy
-    }
-  }
-
-  // Tự động mở rộng vùng chọn sang phải
-  while (endIndex < allSpans.length - 1) {
-    const followingSpan = allSpans[endIndex + 1];
-    if (followingSpan.textContent.trim() === '' && followingSpan.dataset.original) {
-      endIndex++;
-    } else {
-      break; // Dừng lại khi gặp từ có thể nhìn thấy
-    }
-  }
-
   // Cập nhật lại trạng thái với vùng chọn đã được mở rộng
   selectionState.startIndex = startIndex;
   selectionState.endIndex = endIndex;
