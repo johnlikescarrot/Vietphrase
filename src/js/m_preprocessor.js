@@ -45,7 +45,7 @@ const punctuationMap = new Map([
   ['—', '—'],
   ['……', '...'],
   ['…', '...'],
-  ['•', '•'],
+  ['•', '·'],
   ['·', '·'],
 
   // Ký tự full-width (toàn giác)
