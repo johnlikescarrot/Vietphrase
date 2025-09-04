@@ -61,7 +61,7 @@ export function synthesizeCompoundTranslation(text, state) {
   }
   const uniqueCombinations = [...new Set(combinations)];
   // Giới hạn Nghĩa Dịch Nhanh
-  const MAX_SUGGESTIONS = 15;
+  const MAX_SUGGESTIONS = 100;
   const finalSuggestions = uniqueCombinations.slice(0, MAX_SUGGESTIONS);
   translationCache.set(text, finalSuggestions);
   return finalSuggestions;
