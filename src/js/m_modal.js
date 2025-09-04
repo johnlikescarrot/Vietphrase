@@ -141,7 +141,7 @@ function showQuickEditPanel(selection, state) {
   const finalSpans = allSpans.slice(startIndex, endIndex + 1);
   selectionState.originalText = finalSpans.map(s => s.dataset.original).join('');
 
-  populateQuickEditPanel(selectionState.originalText, state);
+  populateQuickEditPanel(selectionState.originalText, state, true);
 
   // ===== CĂN LỀ BẢNG DỊCH NHANH =====
   const panel = DOMElements.quickEditPanel;
@@ -189,12 +189,10 @@ function showQuickEditPanel(selection, state) {
   isPanelVisible = true;
 }
 
-function populateQuickEditPanel(text, state) {
+function populateQuickEditPanel(text, state, isInitialLoad = false) {
   DOMElements.qInputZw.value = text;
-
   // Lấy tất cả các nghĩa bằng hàm đã được nâng cấp
   const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
-
   // Điền Hán Việt
   if (allMeanings.hanviet) {
     const hanvietLower = allMeanings.hanviet.toLowerCase();
@@ -205,31 +203,34 @@ function populateQuickEditPanel(text, state) {
     DOMElements.qInputHV.value = '';
   }
 
-  // Xử lý hiển thị cho mục Vp theo logic mới
-  let vpDisplayValue = '';
-  const vpMeaningsForFullPhrase = allMeanings.vietphrase;
+  // Chỉ điền [Vp] và [tc] khi bảng được mở lần đầu
+  if (isInitialLoad) {
+    // Xử lý hiển thị cho mục Vp theo logic mới
+    let vpDisplayValue = '';
+    const vpMeaningsForFullPhrase = allMeanings.vietphrase;
 
-  // Ưu tiên 1: Hiển thị nghĩa của cả cụm từ nếu có.
-  if (vpMeaningsForFullPhrase.length > 0) {
-    vpDisplayValue = vpMeaningsForFullPhrase.join('/');
+    // Ưu tiên 1: Hiển thị nghĩa của cả cụm từ nếu có.
+    if (vpMeaningsForFullPhrase.length > 0) {
+      vpDisplayValue = vpMeaningsForFullPhrase.join('/');
+    }
+    // Ưu tiên 2: Nếu là từ ghép (>1 ký tự) và không có nghĩa chung, thì ghép nghĩa của từng ký tự.
+    else if (text.length > 1) {
+      const charMeaningsList = text.split('')
+        .filter(char => /[\u4e00-\u9fa5]/.test(char)) // Chỉ xử lý ký tự tiếng Trung
+        .map(char => {
+          const meanings = getAllMeanings(char, state.dictionaries, nameDictionary).vietphrase;
+          return meanings.length > 0 ? meanings.join('/') : null; // Trả về null nếu ký tự không có nghĩa
+        })
+        .filter(Boolean); // Lọc bỏ các kết quả null
+
+      vpDisplayValue = charMeaningsList.join(' | ');
+    }
+
+    DOMElements.qInputVp.value = vpDisplayValue;
+    // Ô tùy chỉnh vẫn ưu tiên Name List đầu tiên
+    DOMElements.qInputTc.value = allMeanings.name || '';
   }
-  // Ưu tiên 2: Nếu là từ ghép (>1 ký tự) và không có nghĩa chung, thì ghép nghĩa của từng ký tự.
-  else if (text.length > 1) {
-    const charMeaningsList = text.split('')
-      .filter(char => /[\u4e00-\u9fa5]/.test(char)) // Chỉ xử lý ký tự tiếng Trung
-      .map(char => {
-        const meanings = getAllMeanings(char, state.dictionaries, nameDictionary).vietphrase;
-        return meanings.length > 0 ? meanings.join('/') : null; // Trả về null nếu ký tự không có nghĩa
-      })
-      .filter(Boolean); // Lọc bỏ các kết quả null
 
-    vpDisplayValue = charMeaningsList.join(' | ');
-  }
-
-  DOMElements.qInputVp.value = vpDisplayValue;
-
-  // Ô tùy chỉnh vẫn ưu tiên Name List đầu tiên
-  DOMElements.qInputTc.value = allMeanings.name || '';
   // Vô hiệu hóa nút xóa nếu từ không có trong Name List
   DOMElements.qDeleteBtn.disabled = !nameDictionary.has(text);
 }
@@ -262,13 +263,22 @@ function expandQuickSelection(direction, state) {
   selection.removeAllRanges();
   selection.addRange(newRange);
 
-  populateQuickEditPanel(selectionState.originalText, state);
+  populateQuickEditPanel(selectionState.originalText, state, true);
 }
 
 function populateOldModal(text, state) {
   const originalWordInput = document.getElementById('original-word-input');
   originalWordInput.value = text;
-  updateOldModalFields(text, state);
+  const bestMeaning = updateOldModalFields(text, state); // Lấy nghĩa gợi ý
+
+  // Đặt giá trị ban đầu cho ô "Nghĩa tùy chỉnh"
+  const hanvietValue = document.getElementById('hanviet-input').value;
+  // Ưu tiên điền Hán Việt nếu có, nếu không thì điền nghĩa Vietphrase tốt nhất
+  if (hanvietValue && hanvietValue !== 'Không tìm thấy Hán Việt.') {
+    DOMElements.customMeaningInput.value = hanvietValue;
+  } else {
+    DOMElements.customMeaningInput.value = bestMeaning;
+  }
 }
 
 function openOldModal(state) {
@@ -418,7 +428,7 @@ export function initializeModal(state) {
 
   const debouncedPopulateQuickEdit = debounce(() => {
     const newText = DOMElements.qInputZw.value;
-    populateQuickEditPanel(newText, state);
+    populateQuickEditPanel(newText, state, false);
   }, 250);
   DOMElements.qInputZw.addEventListener('input', debouncedPopulateQuickEdit);
 
@@ -729,8 +739,7 @@ function updateOldModalFields(text, state) {
     hanvietInput.value = '';
     vietphraseInput.value = '';
     optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Nhập Tiếng Trung để xem gợi ý</div>';
-    customMeaningInput.value = '';
-    return;
+    return ''; // Trả về chuỗi rỗng
   }
 
   // Giới hạn ký tự | DỊCH CHÍNH
@@ -738,16 +747,15 @@ function updateOldModalFields(text, state) {
   if (text.length > CHAR_LIMIT) {
     hanvietInput.value = getHanViet(text, state.dictionaries)?.toLowerCase() || '...';
     vietphraseInput.value = '';
-    customMeaningInput.value = text;
     optionsContainer.innerHTML = '<div class="vietphrase-option text-red-400">[Câu quá dài, vượt giới hạn ký tự]</div>';
-    return;
+    return ''; // Trả về chuỗi rỗng
   }
 
-  hanvietInput.value = getHanViet(text, state.dictionaries) ? getHanViet(text, state.dictionaries).toLowerCase() : 'Không tìm thấy Hán Việt.';
+  hanvietInput.value = getHanViet(text, state.dictionaries) ?
+    getHanViet(text, state.dictionaries).toLowerCase() : 'Không tìm thấy Hán Việt.';
 
   const uniqueMeanings = new Set();
   const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
-
   if (allMeanings.name) uniqueMeanings.add(allMeanings.name);
   if (allMeanings.names2.length > 0) allMeanings.names2.forEach(m => uniqueMeanings.add(m));
   if (allMeanings.names.length > 0) allMeanings.names.forEach(m => uniqueMeanings.add(m));
@@ -757,7 +765,6 @@ function updateOldModalFields(text, state) {
 
   const segments = segmentText(text, state.masterKeySet);
   let synthesisError = null;
-
   if (segments.length > 1) {
     const sentenceSuggestions = synthesizeCompoundTranslation(text, state);
     sentenceSuggestions.forEach(suggestion => {
@@ -771,6 +778,7 @@ function updateOldModalFields(text, state) {
 
   const combinedMeanings = Array.from(uniqueMeanings);
   optionsContainer.innerHTML = '';
+  let bestMeaning = ''; // Biến để lưu nghĩa tốt nhất
 
   if (combinedMeanings.length > 0) {
     combinedMeanings.forEach(meaning => {
@@ -786,10 +794,8 @@ function updateOldModalFields(text, state) {
       optionsContainer.appendChild(optionEl);
     });
 
-    const bestMeaning = combinedMeanings[0] || '';
+    bestMeaning = combinedMeanings[0] || '';
     vietphraseInput.value = bestMeaning;
-    customMeaningInput.value = hanvietInput.value !== 'Không tìm thấy Hán Việt.' ? hanvietInput.value : bestMeaning;
-
   } else {
     if (synthesisError) {
       optionsContainer.innerHTML = `<div class="vietphrase-option text-red-400">[${synthesisError}]</div>`;
@@ -797,8 +803,9 @@ function updateOldModalFields(text, state) {
       optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Không tìm thấy Vietphrase/Name</div>';
     }
     vietphraseInput.value = '';
-    customMeaningInput.value = hanvietInput.value !== 'Không tìm thấy Hán Việt.' ? hanvietInput.value : text;
   }
   // Vô hiệu hóa nút xóa nếu từ không có trong Name List
   DOMElements.editModalDeleteBtn.disabled = !nameDictionary.has(text);
+
+  return bestMeaning; // Trả về nghĩa gợi ý tốt nhất
 }
