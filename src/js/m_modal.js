@@ -203,30 +203,31 @@ function populateQuickEditPanel(text, state, isInitialLoad = false) {
     DOMElements.qInputHV.value = '';
   }
 
-  // Chỉ điền [Vp] và [tc] khi bảng được mở lần đầu
+  // Luôn cập nhật [Vp] mỗi khi chữ Hán thay đổi
+  let vpDisplayValue = '';
+  const vpMeaningsForFullPhrase = allMeanings.vietphrase;
+
+  // Ưu tiên 1: Hiển thị nghĩa của cả cụm từ nếu có.
+  if (vpMeaningsForFullPhrase.length > 0) {
+    vpDisplayValue = vpMeaningsForFullPhrase.join('/');
+  }
+
+  // Ưu tiên 2: Nếu là từ ghép (>1 ký tự) và không có nghĩa chung, thì ghép nghĩa của từng ký tự.
+  else if (text.length > 1) {
+    const charMeaningsList = text.split('')
+      .filter(char => /[\u4e00-\u9fa5]/.test(char)) // Chỉ xử lý ký tự tiếng Trung
+      .map(char => {
+        const meanings = getAllMeanings(char, state.dictionaries, nameDictionary).vietphrase;
+        return meanings.length > 0 ? meanings.join('/') : null; // Trả về null nếu ký tự không có nghĩa
+      })
+      .filter(Boolean);// Lọc bỏ các kết quả null
+    vpDisplayValue = charMeaningsList.join(' | ');
+  }
+
+  DOMElements.qInputVp.value = vpDisplayValue;
+
+  // Chỉ điền [tc] khi bảng được mở lần đầu để không ghi đè nội dung người dùng đã sửa
   if (isInitialLoad) {
-    // Xử lý hiển thị cho mục Vp theo logic mới
-    let vpDisplayValue = '';
-    const vpMeaningsForFullPhrase = allMeanings.vietphrase;
-
-    // Ưu tiên 1: Hiển thị nghĩa của cả cụm từ nếu có.
-    if (vpMeaningsForFullPhrase.length > 0) {
-      vpDisplayValue = vpMeaningsForFullPhrase.join('/');
-    }
-    // Ưu tiên 2: Nếu là từ ghép (>1 ký tự) và không có nghĩa chung, thì ghép nghĩa của từng ký tự.
-    else if (text.length > 1) {
-      const charMeaningsList = text.split('')
-        .filter(char => /[\u4e00-\u9fa5]/.test(char)) // Chỉ xử lý ký tự tiếng Trung
-        .map(char => {
-          const meanings = getAllMeanings(char, state.dictionaries, nameDictionary).vietphrase;
-          return meanings.length > 0 ? meanings.join('/') : null; // Trả về null nếu ký tự không có nghĩa
-        })
-        .filter(Boolean); // Lọc bỏ các kết quả null
-
-      vpDisplayValue = charMeaningsList.join(' | ');
-    }
-
-    DOMElements.qInputVp.value = vpDisplayValue;
     // Ô tùy chỉnh vẫn ưu tiên Name List đầu tiên
     DOMElements.qInputTc.value = allMeanings.name || '';
   }
