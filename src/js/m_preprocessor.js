@@ -13,8 +13,8 @@ const punctuationMap = new Map([
   ['～', '~'],
 
   // Các loại ngoặc kép (dùng cho trích dẫn và tên tác phẩm)
-  ['“', '"'],
-  ['”', '"'],
+  ['“', '“'],
+  ['”', '”'],
   ['«', '«'],
   ['»', '»'],
   ['『', '『'],
@@ -29,8 +29,8 @@ const punctuationMap = new Map([
   // Các loại ngoặc đơn, nháy đơn
   ['（', '('],
   ['）', ')'],
-  ['‘', "'"],
-  ['’', "'"],
+  ['‘', "‘"],
+  ['’', "’"],
 
   // Các loại ngoặc vuông (dùng cho ghi chú, nhấn mạnh)
   ['【', '['],

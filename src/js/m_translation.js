@@ -215,6 +215,11 @@ export function performTranslation(state, options = {}) {
         if (/[.!?]$/.test(trimmedText)) {
           capitalizeNextWord = true;
         }
+
+        if (UNAMBIGUOUS_OPENING.has(originalWord)) {
+          capitalizeNextWord = true;
+        }
+
         let leadingSpace = ' ';
         const firstChar = originalWord.charAt(0);
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
@@ -288,6 +293,11 @@ export function performTranslation(state, options = {}) {
         if (/[.!?]$/.test(trimmedText)) {
           capitalizeNextWord = true;
         }
+
+        if (UNAMBIGUOUS_OPENING.has(nonMatchBlock)) {
+          capitalizeNextWord = true;
+        }
+
         let leadingSpace = ' ';
         const firstChar = nonMatchBlock.charAt(0);
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
