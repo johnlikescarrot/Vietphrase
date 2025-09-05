@@ -20255,11 +20255,9 @@
 元刹=Nguyên Sát
 元煞=Nguyên Sát
 元圣=Nguyên Thánh
-元师=Nguyên Sư
-元石=Nguyên thạch
 元士=Nguyên Sĩ
 元戍=Nguyên Thú
-元树=Nguyên thụ
+元树=nguyên thụ
 元松=Nguyên Tùng
 元宿=Nguyên Túc
 元天=Nguyên Thiên
