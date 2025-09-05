@@ -141,7 +141,7 @@ async function deletePermanentName(cn, state) {
 }
 //1 END
 
-//2 (Chậm nhưng chuẩn)
+//2 Cập nhật lại cả NAME tạm thời
 // XỬ LÝ VIỆC XÓA NAME
 async function deletePermanentName(cn, state) {
     if (!cn || !nameDictionary.has(cn)) return;

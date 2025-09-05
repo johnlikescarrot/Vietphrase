@@ -31,8 +31,8 @@ async function deletePermanentName(cn, state) {
     saveNameDictionaryToStorage();
     renderNameList();
 
-    // 2. Cập nhật lại "bộ não" dịch LẠI HOÀN TOÀN
-    rebuildMasterData(state);
+    // 2. Cập nhật lại "bộ não" dịch (theo cách tối ưu)
+    updateMasterDataForDeletion(cn, state);
 
     // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi, giữ lại từ điển tạm thời
     performTranslation(state, { forceText: state.lastTranslatedText, preserveTempDict: true });
