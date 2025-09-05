@@ -105,7 +105,23 @@ export function performTranslation(state, options = {}) {
 
   // Sắp xếp các key (chữ Hán) đã hợp nhất theo độ dài giảm dần.
   // Điều này cực kỳ quan trọng để ưu tiên khớp các cụm từ dài trước (ví dụ: "Lý Phù Trần" trước "Lý Phù").
-  const sortedCombinedKeys = [...combinedNameMap.keys()].sort((a, b) => b.length - a.length);
+  const sortedCombinedKeys = [...combinedNameMap.keys()].sort((a, b) => {
+    // Ưu tiên 1: Sắp xếp theo độ dài giảm dần
+    if (b.length !== a.length) {
+      return b.length - a.length;
+    }
+    // Ưu tiên 2: Nếu cùng độ dài, ưu tiên tuyệt đối cho Name List của người dùng
+    const aInUserList = nameDictionary.has(a);
+    const bInUserList = nameDictionary.has(b);
+    if (aInUserList && !bInUserList) {
+      return -1; // a đứng trước b
+    }
+    if (!aInUserList && bInUserList) {
+      return 1; // b đứng trước a
+    }
+    // Nếu cả hai đều có hoặc không có trong Name List, giữ nguyên thứ tự
+    return 0;
+  });
 
   // Bắt đầu quá trình "đục lỗ" với danh sách key đã được hợp nhất và sắp xếp
   for (const nameKey of sortedCombinedKeys) {
