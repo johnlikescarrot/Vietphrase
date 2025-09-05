@@ -118,3 +118,47 @@ so sánh "Tổng Độ Dài Tối Ưu"
 
 
 **/
+
+m_modal.js
+
+//1 (Lỗi nghĩa khi XÓA)
+// XỬ LÝ VIỆC XÓA NAME
+async function deletePermanentName(cn, state) {
+    if (!cn || !nameDictionary.has(cn)) return;
+
+    if (await customConfirm(`Bạn có chắc muốn xóa "${cn}" khỏi Bảng Thuật Ngữ?`)) {
+        // 1. Cập nhật từ điển và lưu trữ
+        nameDictionary.delete(cn);
+        saveNameDictionaryToStorage();
+        renderNameList();
+
+        // 2. Cập nhật lại "bộ não" dịch (theo cách tối ưu)
+        updateMasterDataForDeletion(cn, state);
+
+        // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi, giữ lại từ điển tạm thời
+        performTranslation(state, { forceText: state.lastTranslatedText, preserveTempDict: true });
+    }
+}
+//1 END
+
+//2 (Chậm nhưng chuẩn)
+// XỬ LÝ VIỆC XÓA NAME
+async function deletePermanentName(cn, state) {
+    if (!cn || !nameDictionary.has(cn)) return;
+
+    if (await customConfirm(`Bạn có chắc muốn xóa "${cn}" khỏi Bảng Thuật Ngữ?`)) {
+        // 1. Cập nhật từ điển và lưu trữ
+        nameDictionary.delete(cn);
+        saveNameDictionaryToStorage();
+        renderNameList();
+
+        // 2. Cập nhật lại "bộ não" dịch LẠI HOÀN TOÀN
+        rebuildMasterData(state);
+
+        // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi, giữ lại từ điển tạm thời
+        performTranslation(state, { forceText: state.lastTranslatedText, preserveTempDict: true });
+    }
+}
+//2 END
+
+
