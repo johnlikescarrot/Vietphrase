@@ -262,6 +262,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           localStorage.setItem('savedInputText', textFromClipboard);
         }
 
+        // Xóa dữ liệu tạm thời cũ
+        temporaryNameDictionary.clear();
+
         // Gọi hàm dịch ngay lập tức
         performTranslation(state);
       }
