@@ -12128,9 +12128,6 @@
 七妙=Thất Diệu
 七命=Thất Mệnh
 七某=Thất mỗ
-七七=Thất Thất
-七杀=Thất Sát
-七煞=Thất Sát
 七少=thất thiếu
 七圣=Thất Thánh
 七翔=Thất Tường
@@ -90804,3 +90801,4 @@ X· 德雷克=X· Drake
 亚历克斯德尔瓦约里德隆=Alex · W · Del · Delong
 阿爾弗雷德 · 伯納德 · 諾貝爾=Alfred Bernhard Nobel
 贝拉特里克斯 · 莱斯特兰奇=Bellatrix Lestrange
+天香酒楼=Thiên Hương tửu lâu
