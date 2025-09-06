@@ -221,9 +221,20 @@ export function performTranslation(state, options = {}) {
         let textForSpan = !translationResult.found ? '' : (isVietphraseMode ? `(${translationResult.all.join('/')})` : translationResult.best);
         if (!translationResult.found) span.classList.add('untranslatable');
         if (isVietphraseMode && translationResult.found) span.classList.add('vietphrase-word');
-        if (capitalizeNextWord && /\p{L}/u.test(textForSpan)) {
-          textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
-          capitalizeNextWord = false;
+
+        // Nếu cờ viết hoa đang bật
+        if (capitalizeNextWord) {
+          const firstMeaningfulChar = line.substring(i).trim().charAt(0);
+          // Kiểm tra xem ký tự kế tiếp có phải là số không
+          if (/^\d/.test(firstMeaningfulChar)) {
+            // Nếu là số, tắt cờ viết hoa và không làm gì cả
+            capitalizeNextWord = false;
+          }
+          // Nếu không phải số VÀ từ hiện tại là chữ, thì tiến hành viết hoa
+          else if (/\p{L}/u.test(textForSpan)) {
+            textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
+            capitalizeNextWord = false; // Tắt cờ sau khi đã viết hoa
+          }
         }
         span.textContent = textForSpan;
         if (textForSpan.trim() === '') { leadingSpace = ''; }
@@ -297,9 +308,20 @@ export function performTranslation(state, options = {}) {
         }
 
         let textForSpan = nonMatchBlock;
-        if (capitalizeNextWord && /\p{L}/u.test(textForSpan)) {
-          textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
-          capitalizeNextWord = false;
+
+        // Nếu cờ viết hoa đang bật
+        if (capitalizeNextWord) {
+          const firstMeaningfulChar = line.substring(i).trim().charAt(0);
+          // Kiểm tra xem ký tự kế tiếp có phải là số không
+          if (/^\d/.test(firstMeaningfulChar)) {
+            // Nếu là số, tắt cờ viết hoa và không làm gì cả
+            capitalizeNextWord = false;
+          }
+          // Nếu không phải số VÀ từ hiện tại là chữ, thì tiến hành viết hoa
+          else if (/\p{L}/u.test(textForSpan)) {
+            textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
+            capitalizeNextWord = false; // Tắt cờ sau khi đã viết hoa
+          }
         }
         const span = document.createElement('span');
         span.className = 'word';
