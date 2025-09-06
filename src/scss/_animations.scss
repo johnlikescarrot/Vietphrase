@@ -11,17 +11,3 @@
         transform: rotate(360deg);
     }
 }
-
-@keyframes subtle-glow {
-    0% {
-        text-shadow: 0 0 5px rgba(138, 180, 248, 0.4);
-    }
-
-    50% {
-        text-shadow: 0 0 15px rgba(138, 180, 248, 0.6);
-    }
-
-    100% {
-        text-shadow: 0 0 5px rgba(138, 180, 248, 0.4);
-    }
-}

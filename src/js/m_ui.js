@@ -20,7 +20,7 @@ export function updateClock() {
   const day = String(now.getDate()).padStart(2, '0');
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
-  //  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
 
   const timezoneOffsetMinutes = now.getTimezoneOffset();
   const timezoneOffsetHours = -timezoneOffsetMinutes / 60;
@@ -28,5 +28,5 @@ export function updateClock() {
   const timezoneSign = timezoneOffsetHours >= 0 ? '+' : '';
   const timezoneString = `${timezoneSign}${String(timezoneOffsetHours).padStart(2, '0')}:${String(timezoneOffsetMinutesRemainder).padStart(2, '0')}`;
 
-  clockElement.textContent = `${year}-${month}-${day} ${hours}:${minutes}:`;
+  clockElement.textContent = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }

@@ -10,17 +10,6 @@
     transform: rotate(360deg);
   }
 }
-@keyframes subtle-glow {
-  0% {
-    text-shadow: 0 0 5px rgba(138, 180, 248, 0.4);
-  }
-  50% {
-    text-shadow: 0 0 15px rgba(138, 180, 248, 0.6);
-  }
-  100% {
-    text-shadow: 0 0 5px rgba(138, 180, 248, 0.4);
-  }
-}
 :root {
   --bg-main: #1f1f1f;
   --bg-panel: #1e1e1e;
@@ -97,7 +86,6 @@ body {
   background-color: var(--bg-main);
   padding: 4px 8px;
   border-radius: 4px;
-  animation: subtle-glow 4s ease-in-out infinite;
 }
 
 @media (max-width: 640px) {
