@@ -5,6 +5,7 @@ const punctuationMap = new Map([
   // Dấu câu cơ bản
   ['。', '.'],
   ['、', ','],
+  ['．', '.'],
   ['，', ','],
   ['：', ':'],
   ['；', ';'],
@@ -15,6 +16,7 @@ const punctuationMap = new Map([
   // Các loại ngoặc kép (dùng cho trích dẫn và tên tác phẩm)
   ['“', '“'],
   ['”', '”'],
+  ['＂', '"'],
   ['«', '«'],
   ['»', '»'],
   ['『', '『'],
