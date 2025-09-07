@@ -9197,15 +9197,12 @@
 留风=Lưu Phong
 琉球=Lưu Cầu
 琉夜=Lưu Dạ
-媹 妃=Princess
 劉斌=Lưu Bân
 劉凱=Lưu Khải
 劉烈=Lưu Liệt
 劉青=Lưu Thanh
 劉婉=Lưu Uyển
 劉洋=Lưu Dương
-柳暗=Liễu Ám
-柳博=Liễu Bác
 柳城=Liễu Thành
 柳大=Liễu Đại
 柳冬=Liễu Đông
@@ -16318,7 +16315,7 @@
 吴悦=Ngô Duyệt
 吴越=Ngô Việt
 吴云=Ngô Vân
-吴允=Ngô Duẫn
+吴允=Ngô Doãn
 吴泽=Ngô Trạch
 吴章=Ngô Chương
 吴哲=Ngô Triết
@@ -20635,14 +20632,14 @@
 雲達=Werder
 雲加=Wenger
 筠怡=Quân di
-允弼=Duẫn Bật
+允弼=Doãn Bật
 允初=Doãn Sơ
-允儿=Duẫn nhi
-允风=Duẫn Phong
+允儿=Doãn Nhi
+允风=Doãn Phong
 陨日=Vẫn Nhật
 殒昊=Vẫn Hạo
 运财=Vận Tài
-韵儿=Vận nhi
+韵儿=Vận Nhi
 韵琴=Vận Cầm
 韵如=Vận Như
 韵婷=Vận Đình
@@ -21134,7 +21131,7 @@
 赵志=Triệu Chí
 赵卓=Triệu Trác
 赵醉=Triệu Túy
-照儿=Chiếu nhi
+照儿=Chiếu Nhi
 趙琳=Triệu Lâm
 趙氏=Triệu thị
 折家=Chiết gia
@@ -21227,7 +21224,7 @@
 峥天=Tranh Thiên
 峥云=Tranh Vân
 峥战=Tranh Chiến
-铮儿=Tranh nhi
+铮儿=Tranh Nhi
 铮平=Tranh Bình
 筝筝=Tranh Tranh
 正辰=Chính Thần
@@ -21627,7 +21624,7 @@
 猪儿=Trư Nhi
 猪蛇=Trư Xà
 猪湾=vịnh Con Lợn
-蛛儿=Chu nhi
+蛛儿=Chu Nhi
 竹尘=Trúc Trần
 竹风=Trúc Phong
 竹峰=Trúc Phong
@@ -21734,12 +21731,11 @@
 梓林=Tử Lâm
 梓青=Tử Thanh
 梓严=Tử Nghiêm
-紫 金=Tử Kim
 紫钗=Tử Sai
 紫尘=Tử Trần
 紫川=Tử Xuyên
 紫刀=Tử Đao
-紫儿=Tử nhi
+紫儿=Tử Nhi
 紫风=Tử Phong
 紫枫=Tử Phong
 紫府=Tử Phủ
@@ -26999,7 +26995,7 @@
 程元玉=Trình Nguyên Ngọc
 程云鹤=Trình Vân Hạc
 程云鹏=Trình Vân Bằng
-程允安=Trình Duẫn An
+程允安=Trình Doãn An
 程载哀=Trình Tái Ai
 程兆琦=Trình Triệu Kỳ
 程志刚=Trình Chí Cương
@@ -28816,7 +28812,7 @@
 东方博=Đông Phương Bác
 东方聪=Đông Phương Thông
 东方弟=Đông Phương đệ
-东方儿=Đông Phương nhi
+东方儿=Đông Phương Nhi
 东方芙=Đông Phương Phù
 东方府=Đông Phương phủ
 东方哥=Đông Phương ca
@@ -31264,7 +31260,7 @@
 干大哥=Kiền đại ca
 干大侠=Kiền đại hiệp
 干大俠=Kiền đại hiệp
-干哥儿=Kiền nhi
+干哥儿=Kiền Nhi
 干光豪=Can Quang Hào
 干戚斧=Kiền Thích Phủ
 干沙路=Gonzalo
@@ -34048,7 +34044,7 @@
 胡赫尔=Huchel
 胡淮安=Hồ Hoài An
 胡槐河=Hồ Hòe Hà
-胡惠儿=Hồ Huệ nhi
+胡惠儿=Hồ Huệ Nhi
 胡家辉=Hồ Gia Huy
 胡将军=Hồ tướng quân
 胡军主=Hồ quân chủ
@@ -40331,7 +40327,7 @@
 李云渲=Lí Vân Tuyển
 李云宗=Lý Vân Tông
 李芸芸=Lý Vân Vân
-李允明=Lý Duẫn Minh
+李允明=Lý Doãn Minh
 李赞成=Lý Tán Thành
 李泽秀=Lý Trạch Tú
 李泽雨=Lý Trạch Vũ
@@ -43224,7 +43220,7 @@
 吕咏仪=Lữ Vịnh Nghi
 吕幼文=Lữ Ấu Văn
 吕云杰=Lữ Vân Kiệt
-吕允究=Lữ Duẫn Cứu
+吕允究=Lữ Doãn Cứu
 吕正天=Lữ Chính Thiên
 呂建剛=Lữ Kiến Cương
 呂善婭=Lữ Thiện Á
@@ -53184,7 +53180,7 @@
 唐云龙=Đường Vân Long
 唐云远=Đường Vân Viễn
 唐云长=Đường Vân Trường
-唐允风=Đường Duẫn Phong
+唐允风=Đường Doãn Phong
 唐哲轩=Đường Triết Hiên
 唐珍珠=Đường Trân Châu
 唐震天=Đường Chấn Thiên
@@ -57843,7 +57839,7 @@
 小小重=Tiểu Tiểu Trọng
 小小猪=Tiểu Tiểu Trư
 小谢毅=tiểu Tạ Nghị
-小暄儿=tiểu Huyên nhi
+小暄儿=tiểu Huyên Nhi
 小雪乃=Yukino-chan
 小雪月=Tiểu Tuyết Nguyệt
 小亚龙=Tiểu Á Long
@@ -59540,7 +59536,7 @@
 娅茜兰=Jacilane
 娅心塔=Jacinta
 烟翠谷=Yên Thúy cốc
-烟花儿=Yên Hoa nhi
+烟花儿=Yên Hoa Nhi
 烟流派=Yên Lưu Phái
 烟流系=Yên Lưu Hệ
 烟柳阁=Yên Liễu Các
@@ -60970,7 +60966,7 @@
 易大侠=Dịch đại hiệp
 易大俠=Dịch đại hiệp
 易东来=Dịch Đông Lai
-易哥儿=Dịch nhi
+易哥儿=Dịch Nhi
 易公子=Dịch công tử
 易姑娘=Dịch cô nương
 易海兰=Dịch Hải Lan
@@ -63342,7 +63338,7 @@
 张云舟=Trương Vân Châu
 张云自=Trương Vân Tự
 张在晨=Trương Tại Thần
-张在允=Trương Tại Duẫn
+张在允=Trương Tại Doãn
 张泽龙=Trương trạch long
 张泽全=Trương Trạch Toàn
 张泽瑞=Trương Trạch Thụy
@@ -63866,7 +63862,7 @@
 赵云飞=Triệu Vân Phi
 赵云兴=Triệu Vân Hưng
 赵云轩=Triệu Vân Hiên
-赵允弼=Triệu Duẫn Bật
+赵允弼=Triệu Doãn Bật
 赵泽生=Triệu Trạch Sinh
 赵詹士=Triệu Chiêm Sĩ
 赵展阳=Triệu Triển Dương
@@ -90801,3 +90797,4 @@ X· 德雷克=X· Drake
 阿爾弗雷德 · 伯納德 · 諾貝爾=Alfred Bernhard Nobel
 贝拉特里克斯 · 莱斯特兰奇=Bellatrix Lestrange
 天香酒楼=Thiên Hương tửu lâu
+炸天帮=Tạc Thiên Bang

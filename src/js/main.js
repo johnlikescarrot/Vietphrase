@@ -279,6 +279,61 @@ document.addEventListener('DOMContentLoaded', async () => {
     DOMElements.inputText.value = '';
   });
 
+  // Xử lý nút "Nhập và Dịch"
+  DOMElements.importAndTranslateBtn.addEventListener('click', () => {
+    // Kích hoạt trình chọn tệp ẩn
+    DOMElements.textFileImporter.click();
+  });
+
+  // Xử lý khi người dùng đã chọn xong tệp
+  DOMElements.textFileImporter.addEventListener('change', async (e) => {
+    const files = e.target.files;
+
+    // Nếu không có tệp nào được chọn thì không làm gì cả
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    // Kiểm tra xem đã có từ điển hay chưa
+    if (!state.dictionaries || state.dictionaries.size === 0) {
+      customAlert('Vui lòng tải Từ Điển trước khi nhập tệp và dịch.');
+      return;
+    }
+
+    try {
+      // Tạo một mảng các "lời hứa" để đọc từng tệp.
+      // Điều này đảm bảo chúng ta đọc tất cả các tệp một cách bất đồng bộ nhưng vẫn giữ đúng thứ tự.
+      const readPromises = Array.from(files).map(file => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => resolve(event.target.result);
+          reader.onerror = (error) => reject(error);
+          reader.readAsText(file, 'UTF-8');
+        });
+      });
+
+      // Chờ cho tất cả các tệp được đọc xong
+      const fileContents = await Promise.all(readPromises);
+
+      // Gộp nội dung của tất cả các tệp, mỗi tệp cách nhau bằng một dòng trống
+      const combinedText = fileContents.join('\n\n');
+
+      // Đưa nội dung đã gộp vào ô văn bản
+      DOMElements.inputText.value = combinedText;
+
+      // Tự động thực hiện dịch
+      temporaryNameDictionary.clear();
+      performTranslation(state);
+
+    } catch (error) {
+      console.error('Lỗi khi đọc tệp:', error);
+      customAlert('Đã xảy ra lỗi trong quá trình đọc tệp. Vui lòng thử lại.');
+    } finally {
+      // Reset trình chọn tệp để người dùng có thể chọn lại cùng một tệp nếu muốn
+      e.target.value = null;
+    }
+  });
+
   DOMElements.copyBtn.addEventListener('click', async () => {
     const outputPanel = DOMElements.outputPanel;
     if (outputPanel.textContent.trim().length === 0 || outputPanel.textContent.trim() === 'Kết quả sẽ hiện ở đây...') {

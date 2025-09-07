@@ -107,6 +107,7 @@
         <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
           <div class="flex items-center gap-4">
             <button id="translate-btn" class="btn">Dịch</button>
+            <button id="import-and-translate-btn" class="btn">Nhập</button>
             <button id="clear-btn" class="btn btn-secondary">Xóa</button>
           </div>
           <div class="flex items-center space-x-6">
@@ -547,6 +548,7 @@
     class="hidden border border-border-color rounded-md shadow-lg max-h-80 overflow-y-auto">
   </div>
 
+  <input type="file" id="text-file-importer" multiple class="hidden" accept=".txt">
   <input type="file" id="file-importer" multiple class="hidden" accept=".txt">
   <input type="file" id="single-file-importer" class="hidden" accept=".txt">
   <script type="module" src="src/js/main.js"></script>

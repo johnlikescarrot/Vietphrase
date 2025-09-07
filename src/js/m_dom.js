@@ -8,6 +8,8 @@ const DOMElements = {
   fileImporter: document.getElementById('file-importer'),
   inputText: document.getElementById('input-text'),
   translateBtn: document.getElementById('translate-btn'),
+  importAndTranslateBtn: document.getElementById('import-and-translate-btn'),
+  textFileImporter: document.getElementById('text-file-importer'),
   clearBtn: document.getElementById('clear-btn'),
   copyBtn: document.getElementById('copy-btn'),
   exportBtn: document.getElementById('export-btn'),
