@@ -3114,7 +3114,7 @@
 法伊=Fey
 法語=Pháp ngữ
 番僧=Phiên Tăng
-凡儿=Phàm nhi
+凡儿=Phàm Nhi
 凡盟=Phàm Minh
 凡特=Fant
 樊稠=Phàn Trù
@@ -3240,7 +3240,7 @@
 方证=Phương Chứng
 方钟=Phương Chung
 芳蝶=Phương Điệp
-芳儿=Phương nhi
+芳儿=Phương Nhi
 芳芳=Phương Phương
 芳兰=Phương Lan
 芳丽=Phương Lệ
@@ -3667,7 +3667,7 @@
 扶宁=Phù Ninh
 扶仙=Phù Tiên
 扶折=Phù Chiết
-芙儿=Phù nhi
+芙儿=Phù Nhi
 芙丽=Phù Lệ
 芙妹=Phù muội
 芙蕊=Phù Nhị
@@ -4393,7 +4393,7 @@
 海登=Haydn
 海缔=Hải Đế
 海蒂=Heidy
-海儿=Hải nhi
+海儿=Hải Nhi
 海菲=Hải Phỉ
 海丰=Hải Phong
 海峰=Hải Phong
@@ -4705,7 +4705,7 @@
 昊天=Hạo Thiên
 昊虚=Hạo Hư
 浩成=Hạo Thành
-浩儿=Hạo nhi
+浩儿=Hạo Nhi
 浩方=Hạo Phương
 浩风=Hạo Phong
 浩哥=Hạo ca
@@ -4770,7 +4770,7 @@
 河伯=Hà Bá/thần sông
 河甸=Hà Điện
 河东=Hà Đông
-河儿=Hà nhi
+河儿=Hà Nhi
 河南=Hà Nam
 河塘=Hà Đường
 河西=Hà Tây
@@ -4835,7 +4835,7 @@
 赫图=Hách Đồ
 赫辛=Hörsing
 鹤痴=Hạc Si
-鹤儿=Hạc nhi
+鹤儿=Hạc Nhi
 鹤岗=Hạc Cương
 鹤年=Hạc Niên
 鹤神=Hạc Thần
@@ -4973,7 +4973,7 @@
 红雉=Hồng Trĩ
 宏保=Hoành Bảo
 宏彬=Hồng Bân
-宏儿=Hoành nhi
+宏儿=Hoành Nhi
 宏光=Hồng Quang
 宏嘉=Hồng gia
 宏明=Hoành Minh
@@ -5530,7 +5530,7 @@
 灰鹰=Đại Bàng Xám
 灰营=Hôi Doanh
 灰仔=Hôi Tử
-晖儿=Huy nhi
+晖儿=Huy Nhi
 珲春=Hồn Xuân
 辉岗=Huy Cương
 辉夜=Kaguya
@@ -5550,7 +5550,7 @@
 会稽=Hội Kê
 彗如=Tuệ Như
 秽多=Eta
-惠儿=Huệ nhi
+惠儿=Huệ Nhi
 惠风=Huệ Phong
 惠枫=Huệ Phong
 惠剛=Huệ Cương
@@ -6003,7 +6003,7 @@
 榎本=Enomoto
 嫁珂=Giá Kha
 尖沙=Tiêm Sa
-坚儿=Kiên nhi
+坚儿=Kiên Nhi
 坚尼=Kennedy
 监利=Giám Lợi
 简爱=Jane Eyre
@@ -6251,7 +6251,7 @@
 蒋执=Tương Chấp
 蒋忠=Tưởng Trung
 蒋舟=Tưởng Chu
-绛儿=Giáng nhi
+绛儿=Giáng Nhi
 绛云=Giáng Vân
 交州=Giao Châu
 姣珂=Giảo Kha
@@ -6347,7 +6347,7 @@
 桀狼=Kiệt Lang
 桀派=Zepar
 桀纣=Kiệt Trụ
-婕儿=Tiệp nhi
+婕儿=Tiệp Nhi
 婕妤=Tiệp dư
 捷克=Tiệp Khắc/Czech
 捷林=Lincoln
@@ -6358,7 +6358,7 @@
 傑森=Jason
 傑斯=Geese
 傑特=Jett
-睫儿=Tiệp nhi
+睫儿=Tiệp Nhi
 截教=Tiệt giáo
 碣石=Jieshi
 竭山=Kiệt Sơn
@@ -6530,7 +6530,7 @@
 泾渭=Kinh Vị
 经贸=Kinh Mậu
 经轩=Kinh Hiên
-荆儿=Kinh nhi
+荆儿=Kinh Nhi
 荆福=Kinh Phúc
 荆国=Kinh quốc
 荆柯=Kinh Kha
@@ -6595,7 +6595,7 @@
 净悟=Tịnh Ngộ
 净洗=Tịnh Tẩy
 净玄=Tịnh Huyền
-婧儿=Tịnh nhi
+婧儿=Tịnh Nhi
 婧姬=Tịnh Cơ
 婧瑶=Tịnh Dao
 竟陵=Cánh Lăng
@@ -6704,7 +6704,7 @@
 桔梗=Kikyou
 桔琳=Juline
 菊川=Kikugawa
-菊儿=Cúc nhi
+菊儿=Cúc Nhi
 菊凤=Cúc Phượng
 菊剑=Cúc Kiếm
 菊香=Cúc Hương
@@ -6732,7 +6732,7 @@
 钜鹿=Cự Lộc
 俱兰=Câu Lan
 剧花=Kịch Hoa
-娟儿=Quyên nhi
+娟儿=Quyên Nhi
 娟姐=Quyên tỷ
 娟容=Quyên Dung
 娟子=Quyên Tử
@@ -6751,7 +6751,7 @@
 君宝=Quân Bảo
 君豹=Quân Báo
 君伯=Quân bá
-君儿=Quân nhi
+君儿=Quân Nhi
 君凡=Quân Phàm
 君府=Quân phủ
 君集=Quân Tập
@@ -6786,7 +6786,7 @@
 俊爷=Tuấn gia
 郡王=quận vương
 骏道=Tuấn Đạo
-骏儿=Tuấn nhi
+骏儿=Tuấn Nhi
 喀法=Kaffa
 喀利=Khách Lợi
 喀隆=Karon
@@ -6973,7 +6973,7 @@
 康朝=Khang Triêu
 康德=Kant/Conde
 康蒂=Candy
-康儿=Khang nhi
+康儿=Khang Nhi
 康甘=Comgan
 康格=Comgan
 康辉=Khang Huy
@@ -7111,7 +7111,7 @@
 克兹=Cluse
 刻皇=Khắc Hoàng
 客村=Kecun
-恪儿=Khác nhi
+恪儿=Khác Nhi
 肯达=Katan
 肯德=Khẳng Đức
 肯迪=Kendi
@@ -7427,7 +7427,7 @@
 兰迪=Randy
 兰顿=Langton
 兰多=Lan Đa
-兰儿=Lan nhi
+兰儿=Lan Nhi
 兰芳=Lan Phương
 兰妃=Lan Phi
 兰风=Lan Phong
@@ -7494,7 +7494,7 @@
 蓝帝=Lam Đế
 蓝洞=Lam Động
 蓝盾=Lam Thuẫn
-蓝儿=Lam nhi
+蓝儿=Lam Nhi
 蓝菲=Lam Phỉ
 蓝风=Lam Phong
 蓝枫=Lam Phong
@@ -7661,7 +7661,7 @@
 嫪毐=Lao Ái
 肋丛=BOSS
 乐常=Nhạc Thường
-乐儿=Nhạc nhi
+乐儿=Nhạc Nhi
 乐凡=Nhạc Phàm
 乐湖=Nhạc Hồ
 乐进=Nhạc Tiến
@@ -7720,7 +7720,7 @@
 雷冬=Lôi Đông
 雷顿=Raton
 雷恩=Ryan
-雷儿=Lôi nhi
+雷儿=Lôi Nhi
 雷尔=Lech
 雷罚=Lôi phạt
 雷枫=Lôi Phong
@@ -7898,7 +7898,7 @@
 冷羽=Lãnh Vũ
 冷岄=Lãnh Sơn
 冷云=Lãnh Vân
-离儿=Ly nhi
+离儿=Ly Nhi
 离歌=Ly Ca
 离昊=Ly Hạo
 离决=Ly Quyết
@@ -7912,9 +7912,9 @@
 梨月=Lê Nguyệt
 犁天=Lê Thiên
 鹂鹂=Ly Ly
-漓儿=Li nhi
+漓儿=Li Nhi
 漓江=Ly Giang
-璃儿=Ly nhi
+璃儿=Ly Nhi
 黎布=Lê Bố
 黎朝=Lê triều
 黎辰=Lê Thần
@@ -8326,7 +8326,7 @@
 丽察=Riţa
 丽达=Lida
 丽蝶=Lệ Điệp
-丽儿=Lệ nhi
+丽儿=Lệ Nhi
 丽菲=Lệ Phỉ
 丽芬=Lệ Phân
 丽芙=Liv
@@ -8413,12 +8413,12 @@
 连锋=Liên Phong
 连刃=Liên Nhận
 连业=Liên Nghiệp
-怜儿=Liên nhi
+怜儿=Liên Nhi
 怜花=Lân Hoa
 怜卿=Liên Khanh
 怜星=Liên Tinh
 怜月=Liên Nguyệt
-莲儿=Liên nhi/Liên Nhi
+莲儿=Liên Nhi
 莲妃=Liên phi
 莲根=ngó sen
 莲卡=Lienka
@@ -8756,7 +8756,7 @@
 琳达=Lynda
 琳達=Linda
 琳德=Linde
-琳儿=Lâm nhi
+琳儿=Lâm Nhi
 琳菲=Lâm Phỉ
 琳晶=Lâm Tinh
 琳丽=Lâm Lệ
@@ -8777,7 +8777,7 @@
 鳞马=Lân Mã
 麟宝=Lân Bảo
 麟弟=Lân đệ
-麟儿=Lân nhi
+麟儿=Lân Nhi
 麟皇=Lân Hoàng
 麟家=Lân gia
 麟山=Lân Sơn
@@ -8857,7 +8857,7 @@
 灵株=Linh Chu
 灵珠=linh châu
 苓儿=Linh Nhi
-玲儿=Linh nhi
+玲儿=Linh Nhi
 玲玲=Linh Linh
 玲梦=Linh Mộng
 玲星=Linh Tinh
@@ -8977,7 +8977,7 @@
 绫音=Lăng Âm
 翎泉=Linh Tuyền
 翎炎=Linh Viêm
-菱儿=Lăng nhi
+菱儿=Lăng Nhi
 菱绅=Lăng Thân
 鈴木=Suzuki
 零陵=Linh Lăng
@@ -9326,7 +9326,7 @@
 龙丹=Long Đan
 龙帝=Long Đế
 龙定=Long Định
-龙儿=Long nhi
+龙儿=Long Nhi
 龙凡=Long Phàm
 龙方=Long Phương
 龙风=Long Phong
@@ -9731,7 +9731,7 @@
 绿笛=Lục Địch
 绿蛾=Lục Nga
 绿萼=Lục Ngạc
-绿儿=Lục nhi/Lục Nhi
+绿儿=Lục Nhi
 绿鸽=Green Pigeon
 绿海=Lục Hải
 绿荷=Lục Hà
@@ -9754,7 +9754,7 @@
 栾山=Loan sơn
 栾氏=Loan thị
 栾武=Loan Vũ
-鸾儿=Loan nhi
+鸾儿=Loan Nhi
 鸾凤=Loan Phượng
 鸾鸟=Loan Điểu
 乱古=Loạn Cổ
@@ -10364,7 +10364,7 @@
 梅茨=Metz
 梅达=Meda
 梅迪=Mehdi
-梅儿=Mai nhi
+梅儿=Mai Nhi
 梅尔=Meire
 梅爾=Mel
 梅菲=Murphy
@@ -10448,7 +10448,7 @@
 美洲=Châu Mỹ
 美綴=Mitsuzuri
 镁国=Mĩ quốc
-媚儿=Mị nhi
+媚儿=Mị Nhi
 媚骨=mị cốt
 媚娟=Mị Quyên
 媚莲=Mị Liên
@@ -10564,7 +10564,7 @@
 梦慈=Montse
 梦蒂=Monty
 梦蝶=Mộng Điệp
-梦儿=Mộng nhi
+梦儿=Mộng Nhi
 梦姑=Mộng Cô
 梦洁=Mộng Khiết
 梦兰=Mộng Lan
@@ -10752,7 +10752,7 @@
 闵柔=Mẫn Nhu
 泯山=Mẫn Sơn
 闽剧=Mân kịch
-敏儿=Mẫn nhi
+敏儿=Mẫn Nhi
 敏华=Mẫn Hoa
 敏蕙=Mẫn Huệ
 敏佳=Mẫn Giai
@@ -10799,7 +10799,7 @@
 明仔=Minh tử
 明宗=Minh tông
 明尊=Minh Tôn
-鸣儿=Minh nhi
+鸣儿=Minh Nhi
 鸣风=Minh Phong
 鸣辉=Minh Huy
 鸣雷=Minh Lôi
@@ -10850,9 +10850,8 @@
 冥域=Minh vực
 冥月=Minh Nguyệt
 冥主=Minh Chủ
-铭儿=Minh nhi
+铭儿=Minh Nhi
 铭纹=Minh Văn
-溟 涬=minh
 溟荒=Minh Hoang
 溟皇=Minh Hoàng
 螟母=Minh Mẫu
@@ -11077,7 +11076,7 @@
 墨承=Mặc Thừa
 墨城=Mặc Thành
 墨大=Mặc đại
-墨儿=Mặc nhi
+墨儿=Mặc Nhi
 墨菲=Murphy
 墨风=Mặc Phong
 墨哥=Mặc ca
@@ -11431,7 +11430,7 @@
 南郑=Nam Trịnh
 南州=Nam Châu
 南洲=Nam Châu
-楠儿=Nam nhi
+楠儿=Nam Nhi
 楠楠=Nam Nam
 楠希=Nancy
 楠雅=Nam Nhã
@@ -11591,7 +11590,7 @@
 宁城=Ninh Thành
 宁次=Neji
 宁蝶=Trữ Điệp
-宁儿=Ninh nhi
+宁儿=Ninh Nhi
 宁港=Ninh cảng
 宁海=Ninh Hải
 宁浩=Ninh Hạo
@@ -11634,7 +11633,7 @@
 柠儿=Nịnh Nhi
 寧萱=Ninh Huyên
 凝丹=Ngưng Đan
-凝儿=Ngưng nhi
+凝儿=Ngưng Nhi
 凝芳=Ngưng Phương
 凝罡=Ngưng Cương
 凝魂=Ngưng Hồn
@@ -11858,7 +11857,7 @@
 盘仙=Bàn Tiên
 磐门=Bàn Môn
 蟠龙=Bàn Long
-畔儿=Bạn nhi
+畔儿=Bạn Nhi
 庞斑=Bàng Ban
 庞贝=Pompeii
 庞博=Bàng Bác
@@ -12020,13 +12019,13 @@
 飘血=Phiêu Huyết
 飘云=Phiêu Vân
 嘌呤=piurin
-颦儿=Tần nhi
+颦儿=Tần Nhi
 品客=Pringles
 品圣=Phẩm Thánh
-娉儿=Phinh nhi
+娉儿=Phinh Nhi
 平德=Pünder
 平度=Bình Độ
-平儿=Bình nhi
+平儿=Bình Nhi
 平哥=Bình ca
 平海=Bình Hải
 平克=Pinky
@@ -12039,9 +12038,9 @@
 评弹=Bình đàn
 评剧=Bình kịch
 评书=Bình thư
-苹儿=Bình nhi
+苹儿=Bình Nhi
 瓶灵=Bình Linh
-萍儿=Bình nhi
+萍儿=Bình Nhi
 萍妹=Bình muội
 萍西=Pinxi
 泊蓝=Bạc Lam
@@ -12239,7 +12238,7 @@
 歧牛=Kỳ Ngưu
 歧血=Kỳ Huyết
 祈岩=Kỳ Nham
-俟儿=Sĩ nhi
+俟儿=Sĩ Nhi
 俟兄=Sĩ huynh
 淇水=Kỳ Thủy
 骐骥=Kỳ Ký
@@ -12251,7 +12250,7 @@
 琪都=Kỳ Đô
 琪琪=Kỳ Kỳ
 旗山=Kỳ Sơn
-齊兒=Tề nhi
+齊兒=Tề Nhi
 蕲春=Kỳ Xuân
 蕲灵=Kỳ Linh
 麒麟=Kỳ Lân
@@ -12368,7 +12367,7 @@
 茜茜=Thiến Thiến
 茜雅=Thiến Nhã
 茜娅=Thiến Á
-倩儿=Thiến nhi/Thiến Nhi
+倩儿=Thiến Nhi
 倩怙=Thiến Di
 倩辉=Thiến Huy
 倩妹=Thiến muội
@@ -12427,7 +12426,7 @@
 乔榛=Kiều Trăn
 乔志=Georges
 乔治=George
-桥儿=Kiều nhi
+桥儿=Kiều Nhi
 桥哥=Kiều ca
 桥景=Kiều Cảnh
 桥蕤=Kiều Nhụy
@@ -12641,9 +12640,8 @@
 秦族=Tần tộc
 秦祖=Tần Tổ
 秦佐=Tần Tá
-琴吹 䌷=Kotobuki Tsumugi
 琴帝=Cầm Đế
-琴儿=Cầm nhi
+琴儿=Cầm Nhi
 琴姬=Cầm Cơ
 琴剑=Cầm Kiếm
 琴绝=Cầm Tuyệt
@@ -12661,8 +12659,8 @@
 琴伊=Cầm Y
 禽王=Cầm Vương
 禽族=Cầm tộc
-吣儿=Tẩm nhi
-沁儿=Thấm nhi
+吣儿=Tẩm Nhi
+沁儿=Thấm Nhi
 沁雪=Thấm Tuyết
 青安=Thanh An
 青城=Thanh Thành
@@ -12673,7 +12671,7 @@
 青岛=Thanh Đảo
 青电=Thanh Điện
 青萼=Thanh Ngạc
-青儿=Thanh nhi
+青儿=Thanh Nhi
 青凡=Thanh Phàm
 青梵=Thanh Phạm
 青风=Thanh Phong
@@ -12762,7 +12760,7 @@
 清兵=Thanh binh
 清昶=Thanh Sưởng
 清初=Thanh sơ
-清儿=Thanh nhi
+清儿=Thanh Nhi
 清凡=Thanh Phàm
 清風=Thanh Phong
 清寒=Thanh Hàn
@@ -13047,7 +13045,7 @@
 容薇=Dung Vi
 容熙=Dung Hi
 容雪=Dung Tuyết
-蓉儿=Dung nhi
+蓉儿=Dung Nhi
 蓉妹=Dung muội
 蓉娘=Dung nương
 蓉蓉=Dung Dung
@@ -13056,18 +13054,17 @@
 融洛=Dung Lạc
 融焰=Dung Diễm
 融越=Dung Việt
-柔儿=Nhu nhi
+柔儿=Nhu Nhi
 柔佳=Nhu Giai
 柔嘉=Nhu Gia
 柔妹=Nhu muội
 柔然=Nhu Nhiên
 柔水=Nhu Thủy
 柔依=Nhu Y
-媃 儿=Nữu Nhi
 如馨=Như Hinh
 如颜=Như Nhan
 如雲=Như Vân
-茹儿=Như nhi
+茹儿=Như Nhi
 茹晖=Như Huy
 茹婕=Như Tiệp
 茹捷=Như Tiệp
@@ -13093,7 +13090,7 @@
 阮依=Nguyễn Y
 阮攸=Nguyễn Du
 阮尊=Nguyễn Tôn
-蕊儿=Nhụy nhi
+蕊儿=Nhụy Nhi
 蕊蕊=Nhị Nhị
 芮冰=Nhuế Băng
 芮国=Nhuế quốc
@@ -13198,8 +13195,7 @@
 撒摩=Tát Ma
 撒耶=Saye
 灑史=Sái Sử
-卅儿=Tạp nhi
-萨 德=Tát Đức
+卅儿=Tạp Nhi
 萨宾=Sabine
 萨达=Tát Đạt
 萨德=Sade
@@ -13496,7 +13492,7 @@
 姗迪=San Địch/Sandy
 珊迪=San Địch
 珊都=San Đô
-珊儿=San nhi
+珊儿=San Nhi
 珊嘉=San Gia
 珊娜=Sana
 珊妮=Sunny
@@ -13548,7 +13544,7 @@
 尚荣=Thượng Vinh
 尚圣=Thượng Thánh
 尚芸=Thượng Vân
-裳儿=Thường nhi
+裳儿=Thường Nhi
 烧当=Thiêu Đương
 稍芬=Sảo Phân
 韶寒=Thiều Hàn
@@ -13764,9 +13760,8 @@
 审配=Thẩm Phối
 慎羽=Thận Vũ
 蜃兽=Thận Thú
-生 sǐ 境=Sinh Tử Cảnh
 声涛=Thanh Đào
-笙儿=Sanh nhi
+笙儿=Sanh Nhi
 笙寒=Sanh Hàn
 笙盈=Sanh Doanh
 省陵=Tỉnh Lăng
@@ -13828,7 +13823,7 @@
 圣族=Thánh tộc
 圣尊=Thánh Tôn
 胜安=Thắng An
-胜儿=Thắng nhi
+胜儿=Thắng Nhi
 胜佛=Thắng Phật
 胜光=Thắng Quang
 胜鑫=Thắng Hâm
@@ -13860,7 +13855,7 @@
 失伯=Thất bá
 师晗=Sư Hàm
 师良=Sư Lương
-诗儿=Thi nhi
+诗儿=Thi Nhi
 诗涵=Thi Hàm
 诗经=Kinh Thi
 诗茗=Thi Mính
@@ -14064,7 +14059,7 @@
 淑云=Thục Vân
 淑真=Thục Chân
 淑子=Toshiko
-舒儿=Thư nhi
+舒儿=Thư Nhi
 舒凡=Thư Phàm
 舒国=Thư Quốc
 舒赫=Schuch
@@ -14113,7 +14108,7 @@
 双牙=Song Nha
 双雨=Song Vũ
 双子=Song Tử
-霜儿=Sương nhi
+霜儿=Sương Nhi
 霜骨=Sương Cốt
 霜角=Sương Giác
 霜郡=Sương Quận
@@ -14490,7 +14485,7 @@
 肃炎=Tiêu Viêm
 肃州=Túc Châu
 涑水=Thúc Thủy
-素儿=Tố nhi
+素儿=Tố Nhi
 素芳=Tố Phương
 素芬=Tố Phân
 素华=Tố Hoa
@@ -14735,7 +14730,7 @@
 泰德=Ted
 泰迪=Teddy
 泰斗=Thái Đẩu
-泰儿=Thái nhi
+泰儿=Thái Nhi
 泰尔=Tyre
 泰奋=Tần Phấn
 泰甘=Tegan
@@ -15330,7 +15325,7 @@
 亭楼=Đình Lâu
 庭杰=Đình Kiệt
 庭奇=Đình Kỳ
-婷儿=Đình nhi
+婷儿=Đình Nhi
 婷妹=Đình muội
 婷钰=Đình Ngọc
 霆锋=Đình Phong
@@ -15495,12 +15490,12 @@
 外殿=ngoại điện
 外罡=Ngoại Cương
 外盟=Ngoại Minh
-婠儿=Loan nhi
+婠儿=Loan Nhi
 婠婠=Loan Loan
 完颜=Hoàn Nhan
 宛白=Uyển Bạch
 宛城=Uyển Thành
-宛儿=Uyển nhi
+宛儿=Uyển Nhi
 宛家=Uyển Gia
 宛丘=Uyển Khâu
 宛柔=Uyển Nhu
@@ -15510,7 +15505,7 @@
 宛欣=Uyển Hân
 宛烟=Uyển Yên
 宛玉=Uyển Ngọc
-婉儿=Uyển nhi
+婉儿=Uyển Nhi
 婉芳=Uyển Phương
 婉君=Uyển Quân
 婉妹=Uyển muội
@@ -16422,7 +16417,7 @@
 武宗=Võ Tông
 武祖=Vũ Tổ
 舞绰=Tiêu Xước
-舞儿=Vũ nhi
+舞儿=Vũ Nhi
 舞厉=Vũ Lệ
 舞彤=Vũ Đồng
 舞炎=Tiêu Viêm
@@ -16646,7 +16641,7 @@
 洗心=Tẩy Tâm
 洗月=Tẩy Nguyệt
 玺雅=Tỳ Nhã
-喜儿=Hỉ nhi
+喜儿=Hỉ Nhi
 喜宁=Hỉ Ninh
 喜鹊=Hỉ Thước
 细禾=Tế Hòa
@@ -16826,7 +16821,7 @@
 香雨=Hương Vũ
 香云=Hương Vân
 香芸=Hương Vân
-湘儿=Tương nhi
+湘儿=Tương Nhi
 湘家=Tương gia
 湘江=Tương Giang
 湘兰=Tương Lan
@@ -16843,7 +16838,7 @@
 湘芸=Tương Vân
 湘竹=Tương Trúc
 襄城=Tương thành
-襄儿=Tương nhi
+襄儿=Tương Nhi
 襄荆=Tương Kinh
 襄阳=Tương Dương
 襄州=Tương Châu
@@ -16895,7 +16890,7 @@
 骁厉=Kiêu Lệ
 哮天=Hao Thiên
 宵华=Tiếu Hoa
-逍儿=Tiêu nhi
+逍儿=Tiêu Nhi
 逍龙=Tiêu Long
 逍圣=Tiêu Thánh
 萧霸=Tiêu Phách
@@ -17495,7 +17490,7 @@
 新亚=Tân Á
 新野=Tân Dã
 新州=Tân Châu
-歆儿=Hâm nhi
+歆儿=Hâm Nhi
 歆瑶=Hâm Dao
 薪火=Tân Hỏa
 馨岚=Hinh Lam
@@ -17552,7 +17547,7 @@
 兴然=Hưng Nhiên
 兴唐=Hưng Đường
 兴禹=Hưng Vũ
-杏儿=Hạnh nhi
+杏儿=Hạnh Nhi
 杏轩=Hạnh Hiên
 姓艾=họ Ngải
 姓敖=họ Ngao
@@ -17720,7 +17715,7 @@
 熊伯=Hùng bá
 熊城=Hùng Thành
 熊弟=Hùng đệ
-熊儿=Hùng nhi
+熊儿=Hùng Nhi
 熊飞=Hùng Phi
 熊峰=Hùng Phong
 熊府=Hùng phủ
@@ -17990,7 +17985,7 @@
 旭州=Húc Châu
 叙朗=Suran
 蓄元=Súc Nguyên
-轩儿=Hiên nhi
+轩儿=Hiên Nhi
 轩风=Hiên Phong
 轩广=Hiên Nghiễm
 轩皓=Hiên Hạo
@@ -18016,9 +18011,8 @@
 萱妃=Huyên phi
 萱舞=Huyên Vũ
 萱萱=Huyên Huyên
-暄儿=Huyên nhi
+暄儿=Huyên Nhi
 暄暄=Huyên Huyên
-譞 少=Huyên thiếu gia
 玄帮=Huyền bang
 玄彬=Huyền Bân
 玄兵=Huyền Binh
@@ -18336,7 +18330,7 @@
 雅迪=Nhã Địch
 雅蝶=Nhã Điệp
 雅恩=Jan/Yann
-雅儿=Nhã nhi
+雅儿=Nhã Nhi
 雅爾=Jarre
 雅飞=Nhã Phi
 雅妃=Nhã Phi
@@ -18487,7 +18481,7 @@
 嫣月=Yên Nguyệt
 延安=Duyên An
 延东=Duyên Đông
-延儿=Diên nhi
+延儿=Diên Nhi
 延风=Duyên Phong
 延郎=Duyên Lang
 延朗=Duyên Lãng
@@ -18614,7 +18608,7 @@
 蜒儿=Diên Nhi
 颜尘=Nhan Trần
 颜迪=Nhan Địch
-颜儿=Nhan nhi
+颜儿=Nhan Nhi
 颜菲=Nhan Phỉ
 颜丰=Nhan Phong
 颜黑=Nhan Hắc
@@ -18640,7 +18634,7 @@
 魇龙=Yểm Long
 魇烛=Yểm Chúc
 彦伯=Ngạn Bá
-彦儿=Ngạn nhi
+彦儿=Ngạn Nhi
 彦哥=Ngạn ca
 彦基=Ngạn Cơ
 彦琳=Ngạn Lâm
@@ -18678,7 +18672,7 @@
 燕春=Yến Xuân
 燕翠=Yến Thúy
 燕大=Yến Đại
-燕儿=Yến nhi
+燕儿=Yến Nhi
 燕飞=Yên Phi
 燕非=Yến Phi
 燕风=Yến Phong
@@ -19020,7 +19014,7 @@
 遥迦=Dao Già
 瑤池=Dao Trì
 瑶池=Dao Trì
-瑶儿=Dao nhi
+瑶儿=Dao Nhi
 瑶妃=Dao phi
 瑶光=Dao Quang
 瑶姬=Dao Cơ
@@ -19233,7 +19227,7 @@
 夜阐=Dạ Lan
 夜辰=Dạ Thần
 夜刺=Dạ Thứ
-夜儿=Dạ nhi
+夜儿=Dạ Nhi
 夜枫=Dạ Phong
 夜歌=Dạ Ca
 夜航=Dạ Hàng
@@ -19399,7 +19393,7 @@
 宜伦=Nghi Luân
 宜山=Nghi Sơn
 宜芝=Nghi Chi
-怡儿=Di nhi
+怡儿=Di Nhi
 怡琳=Di Lâm
 怡楠=Di Nam
 怡宁=Di Ninh
@@ -19436,7 +19430,7 @@
 易尘=Dịch Trần
 易辰=Dịch Thần
 易鼎=Dịch Đỉnh
-易儿=Dịch nhi
+易儿=Dịch Nhi
 易风=Dịch Phong
 易峰=Dịch Phong
 易锋=Dịch Phong
@@ -19533,7 +19527,7 @@
 阴种=Âm chủng
 阴珠=Âm Châu
 阴族=Âm Tộc
-茵儿=Nhân nhi
+茵儿=Nhân Nhi
 茵雪=Nhuệ Tuyết
 音圭=Âm Khuê
 殷辰=Ân Thần
@@ -19649,7 +19643,7 @@
 英尺=thước Anh
 英东=Anh Đông
 英度=Ấn Độ
-英儿=Anh nhi
+英儿=Anh Nhi
 英法=Anh Pháp
 英妃=Anh Phi
 英公=Anh Công
@@ -19671,7 +19665,7 @@
 英语=Anh ngữ
 英語=Anh ngữ
 英宗=Anh Tông
-莺儿=Oanh nhi
+莺儿=Oanh Nhi
 莺莺=Oanh Oanh
 婴丹=Anh Đan
 婴火=Anh hỏa
@@ -19692,9 +19686,9 @@
 鹰翔=Ưng Tường
 鹰宗=Ưng Tông
 迎姐=Nghênh tỷ
-盈儿=Doanh nhi
+盈儿=Doanh Nhi
 盈菲=Doanh Phỉ
-莹儿=Oánh nhi
+莹儿=Oánh Nhi
 莹妹=Oánh muội
 萦萝=Oanh La
 滢妍=Oánh Nghiên
@@ -19921,7 +19915,7 @@
 愉雯=Du Văn
 愚风=Ngu Phong
 榆林=Du Lâm
-瑜儿=Du nhi
+瑜儿=Du Nhi
 瑜蓝=Du Lam
 虞帆=Ngu Phàm
 虞芳=Ngu Phương
@@ -19942,7 +19936,7 @@
 宇晨=Võ Thần
 宇程=Vũ Trình
 宇纯=Vũ Thuần
-宇儿=Vũ nhi
+宇儿=Vũ Nhi
 宇凡=Vũ Phàm
 宇哥=Vũ ca
 宇某=Vũ mỗ
@@ -20067,7 +20061,7 @@
 玉帝=Ngọc Đế
 玉蝶=Ngọc Điệp
 玉鼎=Ngọc đỉnh
-玉儿=Ngọc nhi
+玉儿=Ngọc Nhi
 玉芳=Ngọc Phương
 玉芬=Ngọc Phân
 玉凤=Ngọc Phượng
@@ -20174,11 +20168,10 @@
 狱祖=Ngục Tổ
 浴京=Lạc Kinh
 浴枭=Dục Kiêu
-钰儿=Ngọc nhi
+钰儿=Ngọc Nhi
 钰慧=Ngọc Tuệ
 钰卿=Ngọc Khanh
 钰莹=Ngọc Oánh
-域场 =Vực Tràng
 喻晨=Dụ Thần
 御昌=Ngự Xương
 御斗=Ngự Đấu
@@ -20389,8 +20382,8 @@
 月池=Nguyệt Trì
 月岛=Nguyệt Đảo
 月娥=Nguyệt Nga
-月儿=Nguyệt nhi
-月兒=Nguyệt nhi
+月儿=Nguyệt Nhi
+月兒=Nguyệt Nhi
 月公=Nguyệt Công
 月宫=Nguyệt cung
 月勾=Nguyệt Câu
@@ -20485,7 +20478,7 @@
 岳羽=Nhạc Vũ
 岳雨=Nhạc Vũ
 岳芸=Nhạc Vân
-玥儿=Nguyệt nhi
+玥儿=Nguyệt Nhi
 悦儿=Duyệt Nhi
 悦来=Duyệt Lai
 悦糖=Duyệt Đường
@@ -20517,7 +20510,7 @@
 云丹=Vân Đan
 云雕=Vân Điêu
 云督=Vân Đốc
-云儿=Vân nhi
+云儿=Vân Nhi
 云帆=Vân Phàm
 云妃=Vân phi
 云菲=Vân Phỉ
@@ -20619,7 +20612,7 @@
 云宗=Vân Tông
 匀薪=Quân Hinh
 匀馨=Quân Hinh
-芸儿=Vân nhi
+芸儿=Vân Nhi
 芸莉=Vân Lỵ
 芸妹=Vân muội
 芸娘=Vân Nương
