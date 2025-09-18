@@ -26060,7 +26060,7 @@
 苍龙谷=Thương Long Cốc
 苍龙会=Thương Long hội
 苍龙诀=Thương Long Quyết
-苍龙山=núi Thương Long
+苍龙山=Thương Long Sơn
 苍茫诀=Thương Mang Quyết
 苍茫宗=Thương Mang Tông
 苍莽山=Thương Mãng sơn
