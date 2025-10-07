@@ -30064,7 +30064,7 @@
 飞龙子=Phi Long Tử
 飞瀑峰=Phi Bộc Phong
 飞升阁=Phi Thăng Các
-飞升境=Phi Thăng Cảnh
+飞升境=Phi Thăng cảnh
 飞升期=Phi Thăng kỳ
 飞石城=Phi Thạch Thành
 飞天峰=Phi Thiên Phong
@@ -32224,9 +32224,9 @@
 归天舒=Quy Thiên Thư
 归辛树=Quy Tân Thụ
 归行负=Quy Hành Phụ
-归一境=Quy Nhất Cảnh
+归一境=Quy Nhất cảnh
 归一言=quy Nhất Ngôn
-归一宗=Quy Nhất tông
+归一宗=Quy Nhất Tông
 归有财=Quy Hữu Tài
 归有田=Quy Hữu Điền
 归元丹=Quy Nguyên Đan
