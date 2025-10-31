@@ -15950,7 +15950,7 @@
 连刃=Liên Nhận
 连业=Liên Nghiệp
 怜儿=Liên Nhi
-怜花=Lân Hoa
+怜花=Liên Hoa
 怜卿=Liên Khanh
 怜星=Liên Tinh
 怜月=Liên Nguyệt
@@ -19882,7 +19882,6 @@
 三寿=Tam Thọ
 三眼=tam nhãn
 三焰=Tam Diễm
-三域=Tam vực
 三奘=Tam Trang
 三珠=Tam Châu
 叁通=Tam Thông
@@ -65579,7 +65578,7 @@
 至道境=đến Đạo Cảnh
 至高神=Chí Cao Thần
 至金丹=đến Kim Đan
-至强者=Chí cường giả
+至强者=chí cường giả
 至清丹=Chí Thanh Đan
 至上殿=Chí Thượng Điện
 至天门=Chí Thiên Môn
@@ -70189,7 +70188,6 @@ X· 德雷克=X· Drake
 丹宗里面=Đan Tông trong
 单卡拉比=Decarabia
 单留绿玉=Đan Lưu Lục Ngọc
-胆大包天=gan to bằng trời
 旦雅夫人=Đán Nhã phu nhân
 啖魂圣宫=Đạm Hồn Thánh Cung
 弹指神功=Đạn Chỉ Thần Công
