@@ -474,5 +474,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateFontSize();
 
   updateClock();
-  setInterval(updateClock, 60000);
+  setInterval(updateClock, 30000);
 });
