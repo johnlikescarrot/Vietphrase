@@ -20173,7 +20173,7 @@
 神照=Thần Chiếu
 神阵=thần trận
 神州=Thần Châu
-神舟=Thần Châu
+神舟=Thần Chu
 神洲=Thần Châu
 神宗=Thần Tông
 神族=Thần tộc
@@ -70703,7 +70703,7 @@ X· 德雷克=X· Drake
 东南明堂=Đông Nam Minh Đường
 东尼大木=Tony Ooki
 东宁山脉=Đông Ninh sơn mạch
-东山再起=Đông Sơn tái khởi
+东山再起=đông sơn tái khởi
 东商卫城=Đông Thương Vệ Thành
 东胜神州=Đông Thắng Thần Châu
 东胜神洲=Đông Thắng Thần Châu
