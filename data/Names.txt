@@ -38503,8 +38503,6 @@
 巨人族=Cự Nhân tộc
 巨刃星=Cự Nhận tinh
 巨山兽=Cự Sơn Thú
-巨无霸=Cự Vô Phách
-巨蜥蜴=Thằn lằn khổng lồ
 巨蟹宫=Cự Giải cung
 巨蟹王=Cự Giải Vương
 巨岩国=Cự Nham quốc
