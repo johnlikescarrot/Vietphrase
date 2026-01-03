@@ -34831,14 +34831,14 @@
 火碎刀=Hỏa Toái Đao
 火纹雕=Hỏa Văn Điêu
 火玟瑰=Hỏa Mân Côi
-火乌国=Hỏa Ô quốc
+火乌国=Hỏa Ô Quốc
 火无极=Hỏa Vô Cực
 火仙子=Hỏa Tiên Tử
 火邪宗=Hỏa Tà Tông
 火行师=Hỏa Hành Sư
 火须兽=Hỏa Tu Thú
 火须子=Hỏa Tu Tử
-火宣门=Hỏa Tuyên môn
+火宣门=Hỏa Tuyên Môn
 火璇旗=Hỏa Tuyền Kỳ
 火牙狼=Hỏa Nha Lang
 火炎豹=Hỏa Viêm Báo
@@ -34849,8 +34849,8 @@
 火焰领=Hỏa Diễm Lĩnh
 火焰猫=Kaenbyou
 火焰鸟=Hỏa Diễm Điểu
-火焰山=Hỏa Diệm sơn
-火焰石=Hỏa Diễm thạch
+火焰山=Hỏa Diệm Sơn
+火焰石=Hỏa Diễm Thạch
 火焰术=Hỏa Diễm thuật
 火焰珠=Hỏa Diễm Châu
 火焰族=Hỏa Diễm Tộc
