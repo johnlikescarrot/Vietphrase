@@ -1,0 +1,18 @@
+name: Send Feedback to Jules
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  send-feedback:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Send Feedback
+        uses: BeksOmega/jules-comms@v1.0.0
+        with:
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
+          feedback_users: "gemini-code-assist[bot],coderabbitai[bot],bito-code-review[bot],qodo-code-review[bot]"
