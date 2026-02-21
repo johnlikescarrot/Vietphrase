@@ -522,8 +522,10 @@ export function initializeModal(state) {
       container.style.left = `${inputRect.left}px`;
 
       container.classList.remove('hidden');
+      currentHighlightedIndex = -1;
     } else {
       container.classList.add('hidden');
+      currentHighlightedIndex = -1;
     }
   });
 
@@ -687,6 +689,7 @@ export function initializeModal(state) {
 
     if (isOptionsVisible) {
       const options = container.querySelectorAll('.vietphrase-option');
+      if (options.length === 0) return;
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         currentHighlightedIndex = (currentHighlightedIndex + 1) % options.length;

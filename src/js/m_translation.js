@@ -234,6 +234,7 @@ export function performTranslation(state, options = {}) {
           }
         }
         span.textContent = textForSpan;
+        let leadingSpace = ' ';
         if (textForSpan.trim() === '') { leadingSpace = ''; }
         const trimmedText = textForSpan.trim();
         if (/[.!?]$/.test(trimmedText)) {
@@ -243,8 +244,6 @@ export function performTranslation(state, options = {}) {
         if (UNAMBIGUOUS_OPENING.has(originalWord)) {
           capitalizeNextWord = true;
         }
-
-        let leadingSpace = ' ';
         const firstChar = originalWord.charAt(0);
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
           const isDouble = firstChar === '"';
@@ -377,8 +376,8 @@ export function performTranslation(state, options = {}) {
     finalHtml = finalHtml.replace(spanRegex, () => {
       let translation = data.translation;
       if (translation) {
-        // Viết hoa chữ cái đầu của mỗi từ trong tên (vì đây là từ điển Name)
-        translation = translation.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        // Viết hoa chữ cái đầu và viết thường các chữ còn lại của mỗi từ trong tên
+        translation = translation.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
       }
       return `<span class="word from-name-dict" data-original="${data.original}">${translation}</span>`;
     });
