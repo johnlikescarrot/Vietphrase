@@ -665,6 +665,46 @@ export function initializeModal(state) {
     e.stopPropagation(); // Ngăn nó tự đóng khi bấm vào chính nó
   });
 
+  // Phím tắt bàn phím
+  document.addEventListener('keydown', (e) => {
+    const container = DOMElements.vietphraseOptionsContainer;
+    const isOptionsVisible = !container.classList.contains('hidden');
+
+    if (e.key === 'Escape') {
+      if (isOptionsVisible) {
+        container.classList.add('hidden');
+        currentHighlightedIndex = -1;
+      } else {
+        if (isPanelVisible) {
+          hideQuickEditPanel();
+        }
+        if (DOMElements.editModal.style.display === 'flex') {
+          closeOldModal();
+        }
+      }
+      return;
+    }
+
+    if (isOptionsVisible) {
+      const options = container.querySelectorAll('.vietphrase-option');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        currentHighlightedIndex = (currentHighlightedIndex + 1) % options.length;
+        highlightOption(container, currentHighlightedIndex);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        currentHighlightedIndex = (Math.max(currentHighlightedIndex, 0) - 1 + options.length) % options.length;
+        highlightOption(container, currentHighlightedIndex);
+      } else if (e.key === 'Enter') {
+        if (currentHighlightedIndex >= 0) {
+          e.preventDefault();
+          selectHighlightedOption(container, currentHighlightedIndex);
+          currentHighlightedIndex = -1;
+        }
+      }
+    }
+  });
+
 }
 
 function showVpOptionsForQuickEdit(anchorElement, text, state) {
@@ -834,42 +874,3 @@ function updateOldModalFields(text, state) {
   return bestMeaning; // Trả về nghĩa gợi ý tốt nhất
 
 }
-// Phím tắt bàn phím
-document.addEventListener('keydown', (e) => {
-  const container = DOMElements.vietphraseOptionsContainer;
-  const isOptionsVisible = !container.classList.contains('hidden');
-
-  if (e.key === 'Escape') {
-    if (isOptionsVisible) {
-      container.classList.add('hidden');
-      currentHighlightedIndex = -1;
-    } else {
-      if (isPanelVisible) {
-        hideQuickEditPanel();
-      }
-      if (DOMElements.editModal.style.display === 'flex') {
-        closeOldModal();
-      }
-    }
-    return;
-  }
-
-  if (isOptionsVisible) {
-    const options = container.querySelectorAll('.vietphrase-option');
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      currentHighlightedIndex = (currentHighlightedIndex + 1) % options.length;
-      highlightOption(container, currentHighlightedIndex);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      currentHighlightedIndex = (currentHighlightedIndex - 1 + options.length) % options.length;
-      highlightOption(container, currentHighlightedIndex);
-    } else if (e.key === 'Enter') {
-      if (currentHighlightedIndex >= 0) {
-        e.preventDefault();
-        selectHighlightedOption(container, currentHighlightedIndex);
-        currentHighlightedIndex = -1;
-      }
-    }
-  }
-});

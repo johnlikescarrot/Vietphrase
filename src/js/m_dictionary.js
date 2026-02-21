@@ -64,15 +64,7 @@ const REQUIRED_FILES = [
 const DB_NAME = 'VietphraseDB';
 const STORE_NAME = 'dictionaryStore';
 
-function serializeDictionaries(dictionaries) {
-  return Array.from(dictionaries, ([name, data]) => [
-    name,
-    {
-      priority: data.priority,
-      dict: Array.from(data.dict)
-    }
-  ]);
-}
+
 
 function openDB() {
   return new Promise((resolve, reject) => {

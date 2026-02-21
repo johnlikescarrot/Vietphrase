@@ -167,10 +167,7 @@ export function performTranslation(state, options = {}) {
         const span = document.createElement('span');
         span.className = 'word';
         span.dataset.original = placeholder;
-        if (capitalizeNextWord) {
-          span.dataset.capitalize = 'true';
-          capitalizeNextWord = false;
-        }
+        capitalizeNextWord = false;
         span.textContent = placeholder;
         lineHtml += leadingSpace + span.outerHTML;
         i += placeholder.length;
@@ -375,9 +372,9 @@ export function performTranslation(state, options = {}) {
     const escapedPlaceholder = escapeRegExp(placeholder);
     // Sử dụng biểu thức chính quy để tìm và thay thế TẤT CẢ các span chứa placeholder này,
     // bất kể các thuộc tính khác (như data-capitalize).
-    const spanRegex = new RegExp(`(<span[^>]+data-original="${escapedPlaceholder}"[^>]*>)${escapedPlaceholder}(</span>)`, 'g');
+    const spanRegex = new RegExp(`<span[^>]+data-original="${escapedPlaceholder}"[^>]*>${escapedPlaceholder}</span>`, 'g');
 
-    finalHtml = finalHtml.replace(spanRegex, (match, openingTag) => {
+    finalHtml = finalHtml.replace(spanRegex, () => {
       let translation = data.translation;
       if (translation) {
         // Viết hoa chữ cái đầu của mỗi từ trong tên (vì đây là từ điển Name)
