@@ -208,7 +208,8 @@ input[type="color"] {
         border-bottom: none; // Loại bỏ đường kẻ ở tùy chọn cuối cùng
     }
 
-    &:hover {
+    &:hover,
+    &.highlighted {
         background-color: var(--accent-color);
         color: var(--bg-main);
     }

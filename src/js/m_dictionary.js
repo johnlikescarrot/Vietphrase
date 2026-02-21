@@ -65,14 +65,13 @@ const DB_NAME = 'VietphraseDB';
 const STORE_NAME = 'dictionaryStore';
 
 function serializeDictionaries(dictionaries) {
-  const serializable = [];
-  for (const [name, data] of dictionaries.entries()) {
-    serializable.push([name, {
+  return Array.from(dictionaries, ([name, data]) => [
+    name,
+    {
       priority: data.priority,
-      dict: Array.from(data.dict.entries())
-    }]);
-  }
-  return serializable;
+      dict: Array.from(data.dict)
+    }
+  ]);
 }
 
 function openDB() {

@@ -58,6 +58,8 @@ let isPanelVisible = false;
 let isPanelLocked = localStorage.getItem('isPanelLocked') === 'true';
 let isEditModalLocked = localStorage.getItem('isEditModalLocked') === 'true';
 
+let currentHighlightedIndex = -1;
+
 function applyCase(caseType) {
   const input = DOMElements.customMeaningInput;
   let text = input.value;
@@ -110,6 +112,25 @@ function groupSimilarMeanings(meanings, state) {
     }
   });
   return vpParts.join(' ');
+}
+
+function highlightOption(container, index) {
+  const options = container.querySelectorAll('.vietphrase-option');
+  options.forEach((opt, i) => {
+    if (i === index) {
+      opt.classList.add('highlighted');
+      opt.scrollIntoView({ block: 'nearest' });
+    } else {
+      opt.classList.remove('highlighted');
+    }
+  });
+}
+
+function selectHighlightedOption(container, index) {
+  const options = container.querySelectorAll('.vietphrase-option');
+  if (options[index]) {
+    options[index].click();
+  }
 }
 
 function closeOldModal() {
@@ -672,6 +693,7 @@ function showVpOptionsForQuickEdit(anchorElement, text, state) {
 
   const combinedMeanings = Array.from(uniqueMeanings);
   optionsContainer.innerHTML = '';
+  currentHighlightedIndex = -1;
 
   // 2. Tạo các tùy chọn mới
   if (combinedMeanings.length > 0) {
@@ -779,6 +801,7 @@ function updateOldModalFields(text, state) {
 
   const combinedMeanings = Array.from(uniqueMeanings);
   optionsContainer.innerHTML = '';
+  currentHighlightedIndex = -1;
   let bestMeaning = ''; // Biến để lưu nghĩa tốt nhất
 
   if (combinedMeanings.length > 0) {
@@ -809,4 +832,44 @@ function updateOldModalFields(text, state) {
   DOMElements.editModalDeleteBtn.disabled = !nameDictionary.has(text);
 
   return bestMeaning; // Trả về nghĩa gợi ý tốt nhất
+
 }
+// Phím tắt bàn phím
+document.addEventListener('keydown', (e) => {
+  const container = DOMElements.vietphraseOptionsContainer;
+  const isOptionsVisible = !container.classList.contains('hidden');
+
+  if (e.key === 'Escape') {
+    if (isOptionsVisible) {
+      container.classList.add('hidden');
+      currentHighlightedIndex = -1;
+    } else {
+      if (isPanelVisible) {
+        hideQuickEditPanel();
+      }
+      if (DOMElements.editModal.style.display === 'flex') {
+        closeOldModal();
+      }
+    }
+    return;
+  }
+
+  if (isOptionsVisible) {
+    const options = container.querySelectorAll('.vietphrase-option');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      currentHighlightedIndex = (currentHighlightedIndex + 1) % options.length;
+      highlightOption(container, currentHighlightedIndex);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      currentHighlightedIndex = (currentHighlightedIndex - 1 + options.length) % options.length;
+      highlightOption(container, currentHighlightedIndex);
+    } else if (e.key === 'Enter') {
+      if (currentHighlightedIndex >= 0) {
+        e.preventDefault();
+        selectHighlightedOption(container, currentHighlightedIndex);
+        currentHighlightedIndex = -1;
+      }
+    }
+  }
+});

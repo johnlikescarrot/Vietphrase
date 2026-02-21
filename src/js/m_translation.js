@@ -152,7 +152,7 @@ export function performTranslation(state, options = {}) {
     if (line.trim() === '') return null;
     let isInsideDoubleQuote = false;
     let isInsideSingleQuote = false;
-    let capitalizeNextWord = false; // DÙNG CSS trong thẻ p text-transform: capitalize;
+    let capitalizeNextWord = true;
     let lineHtml = '';
     let lastChar = '';
     let i = 0;
@@ -372,11 +372,16 @@ export function performTranslation(state, options = {}) {
   // LỚP 3: THAY THẾ PLACEHOLDER VÀ VIẾT HOA ĐẦU DÒNG
   let finalHtml = translatedLineHtmls.join('');
   for (const [placeholder, data] of placeholders.entries()) {
-    const spanRegex = new RegExp(`(<span class="word" data-original="${escapeRegExp(placeholder)}"[^>]*>)${escapeRegExp(placeholder)}(</span>)`, 'g');
+    const escapedPlaceholder = escapeRegExp(placeholder);
+    // Sử dụng biểu thức chính quy để tìm và thay thế TẤT CẢ các span chứa placeholder này,
+    // bất kể các thuộc tính khác (như data-capitalize).
+    const spanRegex = new RegExp(`(<span[^>]+data-original="${escapedPlaceholder}"[^>]*>)${escapedPlaceholder}(</span>)`, 'g');
+
     finalHtml = finalHtml.replace(spanRegex, (match, openingTag) => {
       let translation = data.translation;
-      if (openingTag.includes('data-capitalize="true"')) {
-        if (translation) translation = translation.charAt(0).toUpperCase() + translation.slice(1);
+      if (translation) {
+        // Viết hoa chữ cái đầu của mỗi từ trong tên (vì đây là từ điển Name)
+        translation = translation.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
       }
       return `<span class="word from-name-dict" data-original="${data.original}">${translation}</span>`;
     });
