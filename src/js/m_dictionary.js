@@ -77,15 +77,23 @@ function serializeDictionaries(dictionaries) {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME);
-    request.onerror = () => reject("Lỗi khi mở IndexedDB.");
-    request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+    try {
+      if (!window.indexedDB) {
+        reject('Trình duyệt không hỗ trợ IndexedDB.');
+        return;
       }
-    };
+      const request = indexedDB.open(DB_NAME);
+      request.onerror = () => reject('Lỗi khi mở IndexedDB. Có thể do chế độ ẩn danh.');
+      request.onsuccess = () => resolve(request.result);
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+      };
+    } catch (e) {
+      reject('Lỗi hệ thống khi mở IndexedDB: ' + e.message);
+    }
   });
 }
 

@@ -148,7 +148,7 @@ function showQuickEditPanel(selection, state) {
   const rect = range.getBoundingClientRect();
 
   panel.style.visibility = 'hidden';
-  panel.classList.remove('hidden');
+  panel.classList.remove('hidden'); setTimeout(() => { panel.classList.add('show'); }, 10);
 
   const panelWidth = panel.offsetWidth;
   const panelHeight = panel.offsetHeight;
@@ -286,7 +286,7 @@ function openOldModal(state) {
   const text = selectionState.originalText;
   populateOldModal(text, state);
   hideQuickEditPanel();
-  DOMElements.editModal.style.display = 'flex';
+  DOMElements.editModal.style.display = 'flex'; setTimeout(() => { const mc = DOMElements.editModal.querySelector('.modal-content'); if(mc) mc.classList.add('show'); }, 10);
 }
 
 function expandOldModalSelection(direction, state) {
@@ -304,6 +304,20 @@ function expandOldModalSelection(direction, state) {
 }
 
 export function initializeModal(state) {
+
+  // Keyboard Shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'Enter') {
+      e.preventDefault();
+      if (!DOMElements.translateBtn.disabled) DOMElements.translateBtn.click();
+    }
+    if (e.key === 'Escape') {
+      // Close only if not locked or if we want to force close
+      closeOldModal();
+      hideQuickEditPanel();
+    }
+  });
+
 
   let isDoubleClick = false;
   // === DOUBLE CLICK ===

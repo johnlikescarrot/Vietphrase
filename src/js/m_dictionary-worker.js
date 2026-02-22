@@ -42,10 +42,13 @@ const STORE_NAME = 'dictionaryStore';
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME);
-    request.onerror = () => reject("Lỗi khi mở IndexedDB từ Worker.");
-    request.onsuccess = () => resolve(request.result);
-    // Worker không thể tạo CSDL, nó chỉ có thể sử dụng CSDL đã được luồng chính tạo
+    try {
+      const request = indexedDB.open(DB_NAME);
+      request.onerror = () => reject('Lỗi khi mở IndexedDB từ Worker. Có thể do chế độ ẩn danh.');
+      request.onsuccess = () => resolve(request.result);
+    } catch (e) {
+      reject('Lỗi hệ thống khi mở IndexedDB: ' + e.message);
+    }
   });
 }
 
@@ -105,7 +108,7 @@ self.onmessage = async function (e) {
 
       let contentToParse = item.content;
       // Nếu file này nằm trong danh sách cần chuẩn hóa, hãy xử lý nó
-      if (dictionariesToStandardize.has(dictionaryId)) {
+      if (dictionariesToStandardize.has(dictionaryId) && /[。、．，：；？！～“”（）‘《》『』「」【】]/.test(contentToParse)) {
         contentToParse = contentToParse
           .split(/\r?\n/)
           .map(standardizeDictionaryLine)

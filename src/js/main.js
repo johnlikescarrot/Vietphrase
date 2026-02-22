@@ -269,9 +269,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         performTranslation(state);
       }
     } catch (err) {
-      // Thông báo lỗi nếu không thể truy cập clipboard
       console.error('Lỗi khi dán từ clipboard:', err);
-      customAlert('Không thể dán văn bản. Vui lòng kiểm tra quyền truy cập clipboard của trình duyệt.');
+      if (err.name === 'NotAllowedError') {
+        customAlert('Bạn đã từ chối quyền truy cập clipboard. Vui lòng cấp quyền để sử dụng tính năng này.');
+      } else {
+        customAlert('Không thể dán văn bản. Vui lòng kiểm tra quyền truy cập clipboard của trình duyệt.');
+      }
     }
   });
 

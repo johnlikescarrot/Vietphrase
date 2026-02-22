@@ -65,6 +65,17 @@ class Trie {
 }
 
 import DOMElements from './m_dom.js';
+
+function debounce(func, delay) {
+  let timeoutId;
+  return function (...args) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
+}
+
 import { customConfirm } from './m_dialog.js';
 import { performTranslation } from './m_translation.js';
 import { standardizeDictionaryLine } from './m_preprocessor.js';
@@ -148,7 +159,7 @@ export function initializeNameList(state) {
     nameDictionary = parseDictionary(standardizedText);
 
     saveNameDictionaryToStorage();
-    rebuildMasterData(state);
+    debouncedRebuildMasterData(state);
 
     const originalText = DOMElements.nameListSaveBtn.textContent;
     DOMElements.nameListSaveBtn.textContent = 'Đã lưu!';
@@ -167,7 +178,7 @@ export function initializeNameList(state) {
       nameDictionary.clear();
       saveNameDictionaryToStorage();
       renderNameList();
-      rebuildMasterData(state);
+      debouncedRebuildMasterData(state);
       // Dịch lại toàn bộ văn bản sau khi xóa
       performTranslation(state, { forceText: state.lastTranslatedText });
     }
@@ -239,13 +250,15 @@ function loadNameDictionaryFromStorage() {
   if (stored) nameDictionary = new Map(JSON.parse(stored));
 }
 
+export const debouncedRebuildMasterData = debounce(rebuildMasterData, 100);
+
 export function rebuildMasterData(state) {
   if (!state || !state.dictionaries) {
     console.warn("rebuildMasterData được gọi nhưng từ điển chưa sẵn sàng.");
     return;
   }
 
-  console.time('TrieBuiding'); // Bắt đầu đếm thời gian xây dựng Trie
+  console.time('rebuildMasterData'); // Bắt đầu đếm thời gian xây dựng Trie
 
   // 1. Xây dựng lại masterKeySet như cũ để các chức năng khác không bị ảnh hưởng
   state.masterKeySet = new Set([...nameDictionary.keys()]);
@@ -284,7 +297,7 @@ export function rebuildMasterData(state) {
   });
 
   state.dictionaryTrie = dictionaryTrie; // Lưu Trie vào state
-  console.timeEnd('TrieBuiding'); // Kết thúc đếm thời gian
+  console.timeEnd('rebuildMasterData'); // Kết thúc đếm thời gian
 }
 
 // Hàm tối ưu chỉ để xóa một từ khỏi Trie và Set mà không cần rebuild toàn bộ
