@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let singleImportType = null;
 
   initializeSettings();
+  initializeSearch();
   initializeNameList(state);
   initializeModal(state);
 
