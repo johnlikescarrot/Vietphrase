@@ -314,9 +314,7 @@ function closeOldModal() {
     DOMElements.editModal.style.display = 'none';
     DOMElements.vietphraseOptionsContainer.classList.add('hidden');
 
-    // Logic from closeOldModal in earlier turn - preserve lock state sync if needed
-    // but bot said: "Previous revisions reset the lock state on close; now the lock persists... correct."
-    // We will keep persistence.
+    // Lock state intentionally persists across modal close/open cycles
   }, 200);
 }
 

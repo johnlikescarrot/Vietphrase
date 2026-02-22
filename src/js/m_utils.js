@@ -20,7 +20,7 @@ const animationTimeouts = new WeakMap();
 export function showModalWithAnimation(element) {
   if (!element) return;
 
-  // Clear any pending hide animation
+  // Clear any pending animation (show or hide)
   if (animationTimeouts.has(element)) {
     clearTimeout(animationTimeouts.get(element));
     animationTimeouts.delete(element);
@@ -28,14 +28,17 @@ export function showModalWithAnimation(element) {
 
   element.classList.remove('hidden');
   // Trigger reflow/delay to ensure transition plays
-  setTimeout(() => {
+  const timeoutId = setTimeout(() => {
     const content = element.classList.contains('modal-content') ? element : element.querySelector('.modal-content');
     if (content) {
       content.classList.add('show');
     } else {
       element.classList.add('show');
     }
+    animationTimeouts.delete(element);
   }, 10);
+
+  animationTimeouts.set(element, timeoutId);
 }
 
 /**
@@ -43,6 +46,12 @@ export function showModalWithAnimation(element) {
  */
 export function hideModalWithAnimation(element, onComplete = null) {
   if (!element) return;
+
+  // Clear any pending show animation
+  if (animationTimeouts.has(element)) {
+    clearTimeout(animationTimeouts.get(element));
+    animationTimeouts.delete(element);
+  }
 
   const content = element.classList.contains('modal-content') ? element : element.querySelector('.modal-content');
   if (content) {
