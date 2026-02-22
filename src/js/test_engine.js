@@ -38,14 +38,15 @@ export function runTests(state) {
     performTranslation(state);
     const result = DOMElements.outputPanel.textContent.trim();
 
-    if (result.includes(tc.expected)) {
+    // Using strict equality to catch regressions
+    if (result === tc.expected) {
       console.log(`✅ PASS: ${tc.name}`);
       passed++;
     } else {
       console.error(`❌ FAIL: ${tc.name}`);
       console.error(`   Input: ${tc.input}`);
-      console.error(`   Expected: ${tc.expected}`);
-      console.error(`   Got: ${result}`);
+      console.error(`   Expected: "${tc.expected}"`);
+      console.error(`   Got:      "${result}"`);
     }
   });
 

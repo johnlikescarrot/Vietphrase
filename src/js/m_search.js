@@ -16,12 +16,15 @@ export function initializeSearch() {
   DOMElements.searchInput.addEventListener('input', handleSearch);
 
   // Also clear search when translating new text
-  DOMElements.translateBtn.addEventListener('click', () => {
-    DOMElements.searchInput.value = '';
-  });
+  if (DOMElements.translateBtn) {
+    DOMElements.translateBtn.addEventListener('click', () => {
+      DOMElements.searchInput.value = '';
+    });
+  }
 }
 
 function clearHighlights() {
+  if (!DOMElements.outputPanel) return;
   const highlights = DOMElements.outputPanel.querySelectorAll('.search-highlight');
   highlights.forEach(span => {
     const textNode = document.createTextNode(span.textContent);
@@ -31,11 +34,11 @@ function clearHighlights() {
 }
 
 function highlightText(container, query) {
+  if (!container) return;
   const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
   const nodes = [];
   let node;
   while ((node = walker.nextNode())) {
-    // Avoid processing already highlighted nodes if any (though clearHighlights should have handled it)
     if (node.parentNode && node.parentNode.classList.contains('search-highlight')) continue;
     nodes.push(node);
   }
@@ -50,10 +53,8 @@ function highlightText(container, query) {
       let lastIndex = 0;
 
       while (index !== -1) {
-        // Add preceding text
         fragment.appendChild(document.createTextNode(text.substring(lastIndex, index)));
 
-        // Add highlighted span
         const span = document.createElement('span');
         span.className = 'search-highlight';
         span.textContent = text.substring(index, index + query.length);
@@ -63,7 +64,6 @@ function highlightText(container, query) {
         index = lowerText.indexOf(query, lastIndex);
       }
 
-      // Add remaining text
       fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
 
       if (textNode.parentNode) {

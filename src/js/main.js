@@ -7,6 +7,7 @@ import { performTranslation } from './m_translation.js';
 import { updateClock } from './m_ui.js';
 import { initializeSettings } from './m_settings.js';
 import { showModalWithAnimation, hideModalWithAnimation } from './m_utils.js';
+import { initializeSearch } from './m_search.js';
 
 function appendLog(message, type) {
   const li = document.createElement('li');

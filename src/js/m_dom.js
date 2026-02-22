@@ -29,6 +29,7 @@ const DOMElements = {
   increaseFontBtn: document.getElementById('increase-font-btn'),
   decreaseFontBtn: document.getElementById('decrease-font-btn'),
   fontSizeLabel: document.getElementById('font-size-label'),
+  searchInput: document.getElementById('search-input'),
 
   editModal: document.getElementById('edit-modal'),
   closeEditModalBtn: document.getElementById('close-edit-modal-btn'),
