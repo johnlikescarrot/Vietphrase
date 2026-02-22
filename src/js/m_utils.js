@@ -80,7 +80,7 @@ export function setLoading(element, isLoading) {
     element.style.pointerEvents = 'none';
   } else {
     element.classList.remove('is-loading');
-    element.style.opacity = '1';
-    element.style.pointerEvents = 'auto';
+    element.style.opacity = '';
+    element.style.pointerEvents = '';
   }
 }

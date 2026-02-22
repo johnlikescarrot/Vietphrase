@@ -4,7 +4,7 @@ import { Trie } from './m_nameList.js';
 /**
  * Logic Verification Suite for Vietphrase ZXC Engine
  */
-export function runTests(state) {
+export function runTests() {
   console.log('%c --- Bắt đầu kiểm tra Engine --- ', 'background: #222; color: #bada55; font-size: 1.2em;');
 
   const results = {

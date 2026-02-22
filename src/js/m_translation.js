@@ -51,7 +51,7 @@ export function synthesizeCompoundTranslation(text, state) {
   if (translationCache.has(text)) {
     return translationCache.get(text);
   }
-  const segments = segmentText(text, state.masterKeySet);
+  const segments = segmentText(text, state.dictionaryTrie, state.masterKeySet);
   if (segments.length <= 1) return [];
   // Giới hạn PHÂN ĐOẠN
   if (segments.length > 7) return [`${segments.join(' ')} - Quá dài để gợi ý`];
@@ -85,6 +85,7 @@ export function performTranslation(state, options = {}) {
 
   if (!state || !state.dictionaries || !state.dictionaryTrie) {
     DOMElements.outputPanel.textContent = 'Lỗi: Từ điển chưa được tải hoặc xử lý.';
+    setLoading(DOMElements.outputPanel, false);
     return;
   }
 
@@ -92,6 +93,7 @@ export function performTranslation(state, options = {}) {
   const standardizedText = standardizeText(textToTranslate);
   if (!standardizedText.trim()) {
     DOMElements.outputPanel.textContent = 'Kết quả sẽ hiện ở đây...';
+    setLoading(DOMElements.outputPanel, false);
     return;
   }
   if (!options.forceText) {
@@ -141,9 +143,13 @@ export function performTranslation(state, options = {}) {
   const ALL_PUNCTUATION = new Set([...UNAMBIGUOUS_OPENING, ...UNAMBIGUOUS_CLOSING, ...AMBIGUOUS_QUOTES]);
   const lines = processedText.split("\n");
   const fragment = document.createDocumentFragment();
+  const tempTrie = new Trie();
+  if (temporaryNameDictionary.size > 0) {
+    temporaryNameDictionary.forEach((v, k) => tempTrie.insert(k, { translation: v, type: "temp" }));
+  }
 
   lines.forEach(line => {
-    if (line.trim() === "") return;
+    if (line.trim() === "") { fragment.appendChild(document.createElement("p")); return; }
     const p = document.createElement("p");
     let isInsideDoubleQuote = false;
     let isInsideSingleQuote = false;
@@ -161,13 +167,7 @@ export function performTranslation(state, options = {}) {
         originalWord = placeholderMatch[0];
       } else {
         let bestMatch = null;
-        if (temporaryNameDictionary.size > 0) {
-          let longestKey = "";
-          for (const [key] of temporaryNameDictionary.entries()) {
-            if (line.startsWith(key, i) && key.length > longestKey.length) longestKey = key;
-          }
-          if (longestKey) bestMatch = { key: longestKey, value: { translation: temporaryNameDictionary.get(longestKey), type: "temp" } };
-        }
+        bestMatch = tempTrie.findLongestMatch(line, i);
 
         if (!bestMatch) {
           bestMatch = state.dictionaryTrie.findLongestMatch(line, i);
@@ -193,11 +193,7 @@ export function performTranslation(state, options = {}) {
             while (nonMatchEnd < line.length) {
               if (line.substring(nonMatchEnd).match(/^%%NAME_\d+%%/)) break;
               let isKnownAhead = false;
-              if (temporaryNameDictionary.size > 0) {
-                for (const key of temporaryNameDictionary.keys()) {
-                  if (line.startsWith(key, nonMatchEnd)) { isKnownAhead = true; break; }
-                }
-              }
+              if (tempTrie.findLongestMatch(line, nonMatchEnd)) isKnownAhead = true;
               if (!isKnownAhead && state.dictionaryTrie.findLongestMatch(line, nonMatchEnd)) isKnownAhead = true;
               if (isKnownAhead || (nonMatchEnd < line.length && ALL_PUNCTUATION.has(line[nonMatchEnd]))) break;
               nonMatchEnd++;
@@ -254,7 +250,11 @@ export function performTranslation(state, options = {}) {
         if (originalWord.length === 1) {
           if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) capitalizeNextWord = true;
         }
-        if (!((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote))) leadingSpace = "";
+        if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
+          if (UNAMBIGUOUS_OPENING.has(lastChar)) leadingSpace = "";
+        } else {
+          leadingSpace = "";
+        }
         if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
         if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
       } else {
