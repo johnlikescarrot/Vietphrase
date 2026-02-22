@@ -174,7 +174,8 @@
     }
 }
 .modal-content.show,
-#quick-edit-panel.show {
+#quick-edit-panel.show,
+#settings-panel.show {
     opacity: 1;
     transform: translateY(0);
 }

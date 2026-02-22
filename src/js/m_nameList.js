@@ -135,7 +135,7 @@ export function initializeNameList(state) {
     text.split('\n').forEach(line => {
       const parts = line.split('=');
       if (parts.length >= 2) {
-        newDict.set(parts[0].trim(), parts[1].trim());
+        newDict.set(parts[0].trim(), parts.slice(1).join("=").trim());
       }
     });
     nameDictionary = newDict;
@@ -186,7 +186,7 @@ export function initializeNameList(state) {
       text.split('\n').forEach(line => {
         const parts = line.split('=');
         if (parts.length >= 2) {
-          nameDictionary.set(parts[0].trim(), parts[1].trim());
+          nameDictionary.set(parts[0].trim(), parts.slice(1).join("=").trim());
         }
       });
       saveNameDictionaryToStorage();

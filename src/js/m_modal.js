@@ -23,7 +23,7 @@ function updateLockIcon(button, isLocked, tooltips) {
   const svgUnlocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
 
   button.innerHTML = isLocked ? svgLocked : svgUnlocked;
-  button.title = isLocked ? (tooltips.lock || "Đã khóa") : (tooltips.unlock || "Chưa khóa");
+  button.title = isLocked ? (tooltips.unlock || "Bỏ ghim bảng") : (tooltips.lock || "Ghim bảng này");
 }
 
 export function initializeModal(state) {
@@ -49,7 +49,7 @@ export function initializeModal(state) {
         selectionState.spans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
 
         const selectedNodes = [];
-        let curr = range.startContainer;
+        let curr = range.startContainer.nodeType === 3 ? range.startContainer.parentNode : range.startContainer;
         while (curr) {
           if (curr.nodeType === 1 && curr.classList.contains('word')) selectedNodes.push(curr);
           if (curr === range.endContainer || (curr.contains && curr.contains(range.endContainer))) break;
@@ -368,7 +368,7 @@ async function addPermanentName(cn, vn, state) {
   saveNameDictionaryToStorage();
   renderNameList();
   rebuildMasterData(state);
-  performTranslation(state, { forceText: state.lastTranslatedText });
+  await performTranslation(state, { forceText: state.lastTranslatedText });
 }
 
 async function deletePermanentName(cn, state) {
@@ -376,7 +376,7 @@ async function deletePermanentName(cn, state) {
   saveNameDictionaryToStorage();
   renderNameList();
   updateMasterDataForDeletion(cn, state);
-  performTranslation(state, { forceText: state.lastTranslatedText });
+  await performTranslation(state, { forceText: state.lastTranslatedText });
 }
 
 function updateTranslationInPlace(newText) {

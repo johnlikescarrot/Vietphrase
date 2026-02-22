@@ -79,16 +79,26 @@ export function initializeSettings() {
   // Mở/đóng bảng cài đặt
   settingsBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    settingsPanel.classList.toggle('hidden');
-    // Định vị lại panel gần nút settings
-    const btnRect = settingsBtn.getBoundingClientRect();
-    settingsPanel.style.top = `${btnRect.bottom + window.scrollY + 5}px`;
-    settingsPanel.style.right = `${window.innerWidth - btnRect.right - window.scrollX}px`;
+    const isHidden = settingsPanel.classList.contains('hidden');
+    if (isHidden) {
+      settingsPanel.classList.remove('hidden');
+      const btnRect = settingsBtn.getBoundingClientRect();
+      settingsPanel.style.top = `${btnRect.bottom + window.scrollY + 5}px`;
+      settingsPanel.style.right = `${window.innerWidth - btnRect.right - window.scrollX}px`;
+      setTimeout(() => settingsPanel.classList.add('show'), 10);
+    } else {
+      hideSettingsPanel();
+    }
   });
-  closeBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+  function hideSettingsPanel() {
+    settingsPanel.classList.remove('show');
+    setTimeout(() => settingsPanel.classList.add('hidden'), 200);
+  }
+
+  closeBtn.addEventListener('click', hideSettingsPanel);
   document.addEventListener('click', (e) => {
     if (!settingsPanel.classList.contains('hidden') && !settingsPanel.contains(e.target) && e.target !== settingsBtn) {
-      settingsPanel.classList.add('hidden');
+      hideSettingsPanel();
     }
   });
 
