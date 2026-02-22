@@ -1,7 +1,7 @@
 import { standardizeDictionaryLine } from './m_preprocessor.js';
 
 /**
- * Phân tích và chuẩn hóa từ điển trong một lần quét duy nhất để tiết kiệm bộ nhớ.
+ * Analyze and standardize the dictionary in a single pass to save memory.
  */
 function parseDictionaryOptimized(text, shouldStandardize, style = 'Style-Chung') {
   const dictionary = new Map();
@@ -10,7 +10,7 @@ function parseDictionaryOptimized(text, shouldStandardize, style = 'Style-Chung'
 
   while (start < text.length) {
     let line = end === -1 ? text.substring(start) : text.substring(start, end);
-    // Xử lý ký tự \r nếu có (Windows line endings)
+    // Handle \r character if present (Windows line endings)
     if (line.endsWith('\r')) line = line.slice(0, -1);
 
     const trimmedLine = line.trim();
@@ -39,7 +39,7 @@ function parseDictionaryOptimized(text, shouldStandardize, style = 'Style-Chung'
   return dictionary;
 }
 
-// --- CÁC HÀM LÀM VIỆC VỚI INDEXEDDB ---
+// --- INDEXEDDB FUNCTIONS ---
 const DB_NAME = 'VietphraseDB';
 const STORE_NAME = 'dictionaryStore';
 
@@ -75,7 +75,7 @@ async function getDataFromDB(db, id) {
   });
 }
 
-// --- BỘ NÃO CỦA WORKER ---
+// --- WORKER LOGIC ---
 self.onmessage = async function (e) {
   try {
     const { filesContent } = e.data;

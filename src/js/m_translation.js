@@ -1,3 +1,28 @@
+function applyCapitalization(text, shouldCapitalize) {
+  if (!shouldCapitalize) return { text, capitalized: false };
+  const trimmed = text.trim();
+  if (trimmed.length > 0 && !/\d/.test(trimmed.charAt(0)) && /\p{L}/u.test(trimmed)) {
+    const firstCharIdx = text.indexOf(trimmed.charAt(0));
+    return {
+      text: text.substring(0, firstCharIdx) + trimmed.charAt(0).toUpperCase() + trimmed.slice(1),
+      capitalized: true
+    };
+  }
+  return { text, capitalized: /\d/.test(trimmed.charAt(0)) };
+}
+function applyCapitalization(text, shouldCapitalize) {
+  if (!shouldCapitalize) return { text, capitalized: false };
+  const trimmed = text.trim();
+  if (trimmed.length > 0 && !/\d/.test(trimmed.charAt(0)) && /\p{L}/u.test(trimmed)) {
+    const firstCharIdx = text.indexOf(trimmed.charAt(0));
+    return {
+      text: text.substring(0, firstCharIdx) + trimmed.charAt(0).toUpperCase() + trimmed.slice(1),
+      capitalized: true
+    };
+  }
+  return { text, capitalized: /\d/.test(trimmed.charAt(0)) };
+}
+
 import DOMElements from './m_dom.js';
 import { translateWord } from './m_dictionary.js';
 import { nameDictionary, temporaryNameDictionary } from './m_nameList.js';
@@ -176,16 +201,9 @@ export function performTranslation(state, options = {}) {
         if (!translationResult.found) span.classList.add('untranslatable');
         if (isVietphraseMode && translationResult.found) span.classList.add('vietphrase-word');
 
-        // Capitalization logic
-        if (capitalizeNextWord) {
-          const firstChar = textForSpan.trim().charAt(0);
-          if (/\d/.test(firstChar)) {
-            capitalizeNextWord = false;
-          } else if (/\p{L}/u.test(textForSpan)) {
-            textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
-            capitalizeNextWord = false;
-          }
-        }
+        const capResult = applyCapitalization(textForSpan, capitalizeNextWord);
+        textForSpan = capResult.text;
+        if (capResult.capitalized || !textForSpan.trim()) capitalizeNextWord = false;
 
         if (/[.!?]$/.test(textForSpan.trim())) capitalizeNextWord = true;
         if (UNAMBIGUOUS_OPENING.has(originalWord)) capitalizeNextWord = true;
@@ -249,15 +267,9 @@ export function performTranslation(state, options = {}) {
         }
 
         let textForSpan = nonMatchBlock;
-        if (capitalizeNextWord) {
-          const firstChar = textForSpan.trim().charAt(0);
-          if (/\d/.test(firstChar)) {
-            capitalizeNextWord = false;
-          } else if (/\p{L}/u.test(textForSpan)) {
-            textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
-            capitalizeNextWord = false;
-          }
-        }
+        const capResultMatch = applyCapitalization(textForSpan, capitalizeNextWord);
+        textForSpan = capResultMatch.text;
+        if (capResultMatch.capitalized || !textForSpan.trim()) capitalizeNextWord = false;
 
         if (/[.!?]$/.test(textForSpan.trim())) capitalizeNextWord = true;
         if (UNAMBIGUOUS_OPENING.has(nonMatchBlock)) capitalizeNextWord = true;

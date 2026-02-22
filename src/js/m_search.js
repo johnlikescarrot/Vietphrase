@@ -39,7 +39,6 @@ function highlightText(container, query) {
   const nodes = [];
   let node;
   while ((node = walker.nextNode())) {
-    if (node.parentNode && node.parentNode.classList.contains('search-highlight')) continue;
     nodes.push(node);
   }
 
