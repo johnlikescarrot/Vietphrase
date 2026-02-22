@@ -3,14 +3,14 @@ import { debounce } from './m_utils.js';
 import { customConfirm, customAlert } from './m_dialog.js';
 import { performTranslation } from './m_translation.js';
 
-class TrieNode {
+export export class TrieNode {
   constructor() {
     this.children = {};
     this.value = null;
   }
 }
 
-class Trie {
+export class Trie {
   constructor() {
     this.root = new TrieNode();
   }

@@ -362,16 +362,20 @@ export function getHanViet(word, dictionaries) {
   return translatedTokens.join(' ');
 }
 
-export function segmentText(text, masterKeySet) {
-  if (!masterKeySet) return [text];
+/**
+ * Segments Chinese text into words using longest-match algorithm.
+ * Now uses Trie for O(n) performance. Falls back to masterKeySet if trie is unavailable.
+ */
+export function segmentText(text, trie, masterKeySet) {
+  if (!trie && !masterKeySet) return [text];
   const segments = [];
   let currentIndex = 0;
   const textLength = text.length;
-  const maxLen = 10;
 
   while (currentIndex < textLength) {
+    // Skip non-Chinese characters in a single block
     if (!/[\u4e00-\u9fa5]/.test(text[currentIndex])) {
-      let nonChineseBlock = '';
+      let nonChineseBlock = "";
       let i = currentIndex;
       while (i < textLength && !/[\u4e00-\u9fa5]/.test(text[i])) {
         nonChineseBlock += text[i];
@@ -383,17 +387,30 @@ export function segmentText(text, masterKeySet) {
     }
 
     let foundWord = null;
-    for (let len = Math.min(maxLen, textLength - currentIndex); len > 0; len--) {
-      const potentialWord = text.substr(currentIndex, len);
-      if (masterKeySet.has(potentialWord)) {
-        foundWord = potentialWord;
-        break;
+    let foundWordLength = 0;
+
+    if (trie) {
+      const match = trie.findLongestMatch(text, currentIndex);
+      if (match) {
+        foundWord = match.key;
+        foundWordLength = match.key.length;
+      }
+    } else if (masterKeySet) {
+      // Legacy fallback
+      const maxLen = 15;
+      for (let len = Math.min(maxLen, textLength - currentIndex); len > 0; len--) {
+        const potentialWord = text.substr(currentIndex, len);
+        if (masterKeySet.has(potentialWord)) {
+          foundWord = potentialWord;
+          foundWordLength = len;
+          break;
+        }
       }
     }
 
     if (foundWord) {
       segments.push(foundWord);
-      currentIndex += foundWord.length;
+      currentIndex += foundWordLength;
     } else {
       segments.push(text[currentIndex]);
       currentIndex++;

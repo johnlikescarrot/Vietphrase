@@ -1,34 +1,46 @@
 import DOMElements from './m_dom.js';
 import { segmentText, translateWord } from './m_dictionary.js';
-import { nameDictionary, temporaryNameDictionary } from './m_nameList.js';
+import { Trie, nameDictionary, temporaryNameDictionary } from './m_nameList.js';
 import { standardizeText } from './m_preprocessor.js';
+import { setLoading } from './m_utils.js';
 
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+const luatNhanRuleCache = new WeakMap();
+
 function applyLuatNhan(text, state) {
-  const luatNhanDict = state.dictionaries.get('LuatNhan')?.dict;
+  const luatNhanDict = state.dictionaries.get("LuatNhan")?.dict;
   if (!luatNhanDict || luatNhanDict.size === 0) {
     return text;
   }
-  let processedText = text;
-  const sortedRules = [...luatNhanDict.entries()].sort((a, b) => b[0].length - a[0].length);
-  for (const [ruleKey, ruleValue] of sortedRules) {
-    if (!ruleKey.includes('{0}')) continue;
 
-    const escapedKey = escapeRegExp(ruleKey).replace('\\{0\\}', '([\u4e00-\u9fa5]+)');
-    const regex = new RegExp(escapedKey, 'g');
+  let cachedRules = luatNhanRuleCache.get(luatNhanDict);
+  if (!cachedRules) {
+    cachedRules = [...luatNhanDict.entries()]
+      .filter(([k]) => k.includes("{0}"))
+      .sort((a, b) => b[0].length - a[0].length)
+      .map(([ruleKey, ruleValue]) => {
+        const escapedKey = escapeRegExp(ruleKey).replace("\\{0\\}", "([\u4e00-\u9fa5]+)");
+        return {
+          regex: new RegExp(escapedKey, "g"),
+          ruleValue
+        };
+      });
+    luatNhanRuleCache.set(luatNhanDict, cachedRules);
+  }
+
+  let processedText = text;
+  for (const { regex, ruleValue } of cachedRules) {
+    if (!regex.test(processedText)) continue;
+    // Reset regex index since it is global
+    regex.lastIndex = 0;
 
     processedText = processedText.replace(regex, (match, capturedWord) => {
-      // Luôn cố gắng dịch phần bên trong {0}
       const translationResult = translateWord(capturedWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
-
-      // Nếu dịch được thì dùng kết quả, không thì dùng lại chính chữ Hán gốc
       const translatedCapturedWord = translationResult.found ? translationResult.best : capturedWord;
-
-      // Áp dụng luật với phần đã được dịch
-      return ruleValue.replace('{0}', translatedCapturedWord);
+      return ruleValue.replace("{0}", translatedCapturedWord);
     });
   }
   return processedText;
@@ -68,6 +80,7 @@ export function synthesizeCompoundTranslation(text, state) {
 }
 
 export function performTranslation(state, options = {}) {
+  setLoading(DOMElements.outputPanel, true);
   console.clear(); // Xóa log cũ
 
   if (!state || !state.dictionaries || !state.dictionaryTrie) {
@@ -85,58 +98,37 @@ export function performTranslation(state, options = {}) {
     state.lastTranslatedText = standardizedText;
   }
 
-  // LỚP 1: TÁCH TẤT CẢ CÁC TỪ ĐIỂN NAME RA XỬ LÝ RIÊNG BẰNG PLACEHOLDER
-  let processedText = standardizedText;
+  // LỚP 1: TÁCH TẤT CẢ CÁC TỪ ĐIỂN NAME RA XỬ LÝ RIÊNG BẰNG PLACEHOLDER (Đã tối ưu O(n))
   const placeholders = new Map();
   let placeholderId = 0;
 
-  // Lấy từ điển Names và Names2 từ state, nếu không có thì tạo Map rỗng để tránh lỗi
-  const namesDict = state.dictionaries.get('Names')?.dict || new Map();
-  const names2Dict = state.dictionaries.get('Names2')?.dict || new Map();
+  // Xây dựng Name Trie cục bộ để xử lý nhanh
+  const nameTrie = new Trie();
+  const namesDict = state.dictionaries.get("Names")?.dict || new Map();
+  const names2Dict = state.dictionaries.get("Names2")?.dict || new Map();
 
-  // Hợp nhất tất cả các từ điển name theo thứ tự ưu tiên:
-  // Names -> Names2 -> NameList (nameDictionary).
-  // Mục được thêm sau sẽ ghi đè lên mục trước đó nếu có key (chữ Hán) trùng lặp.
-  const combinedNameMap = new Map([
-    ...namesDict.entries(),
-    ...names2Dict.entries(),
-    ...nameDictionary.entries() // nameDictionary là Name List của người dùng, có ưu tiên cao nhất
-  ]);
+  // Thứ tự nạp để đảm bảo ưu tiên: Names < Names2 < nameDictionary
+  namesDict.forEach((v, k) => nameTrie.insert(k, { translation: v }));
+  names2Dict.forEach((v, k) => nameTrie.insert(k, { translation: v }, true));
+  nameDictionary.forEach((v, k) => nameTrie.insert(k, { translation: v }, true));
 
-  // Sắp xếp các key (chữ Hán) đã hợp nhất theo độ dài giảm dần.
-  // Điều này cực kỳ quan trọng để ưu tiên khớp các cụm từ dài trước (ví dụ: "Lý Phù Trần" trước "Lý Phù").
-  const sortedCombinedKeys = [...combinedNameMap.keys()].sort((a, b) => {
-    // Ưu tiên 1: Sắp xếp theo độ dài giảm dần
-    if (b.length !== a.length) {
-      return b.length - a.length;
-    }
-    // Ưu tiên 2: Nếu cùng độ dài, ưu tiên tuyệt đối cho Name List của người dùng
-    const aInUserList = nameDictionary.has(a);
-    const bInUserList = nameDictionary.has(b);
-    if (aInUserList && !bInUserList) {
-      return -1; // a đứng trước b
-    }
-    if (!aInUserList && bInUserList) {
-      return 1; // b đứng trước a
-    }
-    // Nếu cả hai đều có hoặc không có trong Name List, giữ nguyên thứ tự
-    return 0;
-  });
-
-  // Bắt đầu quá trình "đục lỗ" với danh sách key đã được hợp nhất và sắp xếp
-  for (const nameKey of sortedCombinedKeys) {
-    if (processedText.includes(nameKey)) {
+  let currentIndex = 0;
+  let resultText = "";
+  while (currentIndex < standardizedText.length) {
+    const match = nameTrie.findLongestMatch(standardizedText, currentIndex);
+    if (match) {
       const placeholder = `%%NAME_${placeholderId}%%`;
-      // Lấy nghĩa từ Map đã hợp nhất
-      const fullMeaning = combinedNameMap.get(nameKey);
-      // Tách chuỗi bằng dấu / hoặc ; và chỉ lấy nghĩa đầu tiên
-      const firstMeaning = fullMeaning.split(/[;/]/)[0].trim();
-      placeholders.set(placeholder, { original: nameKey, translation: firstMeaning });
-      const escapedKey = escapeRegExp(nameKey);
-      processedText = processedText.replace(new RegExp(escapedKey, 'g'), placeholder);
+      const firstMeaning = match.value.translation.split(/[;/]/)[0].trim();
+      placeholders.set(placeholder, { original: match.key, translation: firstMeaning });
+      resultText += placeholder;
+      currentIndex += match.key.length;
       placeholderId++;
+    } else {
+      resultText += standardizedText[currentIndex];
+      currentIndex++;
     }
   }
+  let processedText = resultText;
 
   // LỚP 1.5: ÁP DỤNG LUẬT NHÂN TRƯỚC KHI DỊCH
   processedText = applyLuatNhan(processedText, state);
@@ -147,244 +139,144 @@ export function performTranslation(state, options = {}) {
   const UNAMBIGUOUS_CLOSING = new Set([')', ']', '}', '”', '’', '』', '」', '》', '〉', '】', '〗', '〕', ',', '.', '!', '?', ';', ':', '。', '：', '；', '，', '、', '！', '？', '…', '～']);
   const AMBIGUOUS_QUOTES = new Set(['"', "'"]);
   const ALL_PUNCTUATION = new Set([...UNAMBIGUOUS_OPENING, ...UNAMBIGUOUS_CLOSING, ...AMBIGUOUS_QUOTES]);
-  const lines = processedText.split('\n');
-  const translatedLineHtmls = lines.map(line => {
-    if (line.trim() === '') return null;
+  const lines = processedText.split("\n");
+  const fragment = document.createDocumentFragment();
+
+  lines.forEach(line => {
+    if (line.trim() === "") return;
+    const p = document.createElement("p");
     let isInsideDoubleQuote = false;
     let isInsideSingleQuote = false;
-    let capitalizeNextWord = false; // DÙNG CSS trong thẻ p text-transform: capitalize;
-    let lineHtml = '';
-    let lastChar = '';
+    let capitalizeNextWord = false;
+    let lastChar = "";
     let i = 0;
+
     while (i < line.length) {
       const placeholderMatch = line.substring(i).match(/^%%NAME_\d+%%/);
+      let originalWord = "";
+      let isPlaceholder = false;
+
       if (placeholderMatch) {
-        const placeholder = placeholderMatch[0];
-        let leadingSpace = ' ';
-        if (UNAMBIGUOUS_OPENING.has(lastChar) || (isInsideDoubleQuote && lastChar === '"') || (isInsideSingleQuote && lastChar === "'") || i === 0 || /\s/.test(lastChar)) {
-          leadingSpace = '';
+        isPlaceholder = true;
+        originalWord = placeholderMatch[0];
+      } else {
+        let bestMatch = null;
+        if (temporaryNameDictionary.size > 0) {
+          let longestKey = "";
+          for (const [key] of temporaryNameDictionary.entries()) {
+            if (line.startsWith(key, i) && key.length > longestKey.length) longestKey = key;
+          }
+          if (longestKey) bestMatch = { key: longestKey, value: { translation: temporaryNameDictionary.get(longestKey), type: "temp" } };
         }
-        const span = document.createElement('span');
-        span.className = 'word';
-        span.dataset.original = placeholder;
-        if (capitalizeNextWord) {
-          span.dataset.capitalize = 'true';
+
+        if (!bestMatch) {
+          bestMatch = state.dictionaryTrie.findLongestMatch(line, i);
+        }
+
+        if (bestMatch) {
+          originalWord = bestMatch.key;
+          const value = bestMatch.value;
+
+          if (value.type === "Blacklist" || value.translation === "") {
+            const span = document.createElement("span");
+            span.className = "word blacklisted-word";
+            span.dataset.original = originalWord;
+            p.appendChild(span);
+            lastChar = originalWord.slice(-1);
+            i += originalWord.length;
+            continue;
+          }
+        } else {
+          const currentChar = line[i];
+          let nonMatchEnd = i + 1;
+          if (!ALL_PUNCTUATION.has(currentChar)) {
+            while (nonMatchEnd < line.length) {
+              if (line.substring(nonMatchEnd).match(/^%%NAME_\d+%%/)) break;
+              let isKnownAhead = false;
+              if (temporaryNameDictionary.size > 0) {
+                for (const key of temporaryNameDictionary.keys()) {
+                  if (line.startsWith(key, nonMatchEnd)) { isKnownAhead = true; break; }
+                }
+              }
+              if (!isKnownAhead && state.dictionaryTrie.findLongestMatch(line, nonMatchEnd)) isKnownAhead = true;
+              if (isKnownAhead || (nonMatchEnd < line.length && ALL_PUNCTUATION.has(line[nonMatchEnd]))) break;
+              nonMatchEnd++;
+            }
+          }
+          originalWord = line.substring(i, nonMatchEnd);
+        }
+      }
+
+      const span = document.createElement("span");
+      span.className = "word";
+      let textForSpan = "";
+      let isFromNameDict = false;
+
+      if (isPlaceholder) {
+        const data = placeholders.get(originalWord);
+        textForSpan = data.translation;
+        span.dataset.original = data.original;
+        isFromNameDict = true;
+      } else {
+        const translationResult = translateWord(originalWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
+        textForSpan = !translationResult.found ? originalWord : (isVietphraseMode ? `(${translationResult.all.join("/")})` : translationResult.best);
+        span.dataset.original = originalWord;
+        if (!translationResult.found) {
+          span.classList.add("untranslatable");
+          if (/^[\u4e00-\u9fa5]+$/.test(originalWord)) textForSpan = "";
+        }
+        if (isVietphraseMode && translationResult.found) span.classList.add("vietphrase-word");
+      }
+
+      if (capitalizeNextWord) {
+        const firstChar = textForSpan.trim().charAt(0);
+        if (!/^\d/.test(firstChar) && /\p{L}/u.test(firstChar)) {
+          textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
+          capitalizeNextWord = false;
+        } else if (/^\d/.test(firstChar)) {
           capitalizeNextWord = false;
         }
-        span.textContent = placeholder;
-        lineHtml += leadingSpace + span.outerHTML;
-        i += placeholder.length;
-        lastChar = placeholder.slice(-1);
-        continue;
-      }
-      let bestMatch = null;
-      if (temporaryNameDictionary.size > 0) {
-        let longestKey = '';
-        for (const [key] of temporaryNameDictionary.entries()) {
-          if (line.startsWith(key, i) && key.length > longestKey.length) longestKey = key;
-        }
-        if (longestKey) bestMatch = { key: longestKey, value: { translation: temporaryNameDictionary.get(longestKey), type: 'temp' } };
       }
 
-      //Ưu tiên từ dài nhất trong từ điển tính từ chữ ĐẦU TIÊN nó thấy
-      if (!bestMatch) {
-        const longestMatch = state.dictionaryTrie.findLongestMatch(line, i);
-        if (longestMatch) {
-          bestMatch = longestMatch;
-        }
+      span.textContent = textForSpan;
+      if (isFromNameDict) span.classList.add("from-name-dict");
+
+      const trimmedText = textForSpan.trim();
+      if (/[.!?]$/.test(trimmedText) || UNAMBIGUOUS_OPENING.has(originalWord)) {
+        capitalizeNextWord = true;
       }
 
-      if (bestMatch) {
-        const { key: originalWord, value } = bestMatch;
-
-        if (value.type === 'Blacklist' || value.translation === '') {
-          // Tạo một span ẩn để giữ lại data-original
-          const span = document.createElement('span');
-          span.className = 'word blacklisted-word'; // Thêm class để nhận biết nếu cần
-
-          // Quan trọng: Giữ lại chữ Hán gốc để các bảng dịch có thể lấy được
-          span.dataset.original = originalWord;
-
-          // Quan trọng: Không hiển thị chữ này ra kết quả dịch
-          span.textContent = '';
-
-          lineHtml += span.outerHTML; // Thêm thẻ ẩn vào kết quả
-          lastChar = originalWord.slice(-1);
-          i += originalWord.length;
-          continue; // Tiếp tục vòng lặp
+      let leadingSpace = " ";
+      const firstCharOfOriginal = originalWord.charAt(0);
+      if (AMBIGUOUS_QUOTES.has(firstCharOfOriginal)) {
+        const isDouble = firstCharOfOriginal === '"';
+        const isSingle = firstCharOfOriginal === "'";
+        if (originalWord.length === 1) {
+          if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) capitalizeNextWord = true;
         }
-
-        const translationResult = translateWord(originalWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
-        const span = document.createElement('span');
-        span.className = 'word';
-        span.dataset.original = originalWord;
-        let textForSpan = !translationResult.found ? '' : (isVietphraseMode ? `(${translationResult.all.join('/')})` : translationResult.best);
-        if (!translationResult.found) span.classList.add('untranslatable');
-        if (isVietphraseMode && translationResult.found) span.classList.add('vietphrase-word');
-
-        // Nếu cờ viết hoa đang bật
-        if (capitalizeNextWord) {
-          const firstMeaningfulChar = line.substring(i).trim().charAt(0);
-          // Kiểm tra xem ký tự kế tiếp có phải là số không
-          if (/^\d/.test(firstMeaningfulChar)) {
-            // Nếu là số, tắt cờ viết hoa và không làm gì cả
-            capitalizeNextWord = false;
-          }
-          // Nếu không phải số VÀ từ hiện tại là chữ, thì tiến hành viết hoa
-          else if (/\p{L}/u.test(textForSpan)) {
-            textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
-            capitalizeNextWord = false; // Tắt cờ sau khi đã viết hoa
-          }
-        }
-        span.textContent = textForSpan;
-        if (textForSpan.trim() === '') { leadingSpace = ''; }
-        const trimmedText = textForSpan.trim();
-        if (/[.!?]$/.test(trimmedText)) {
-          capitalizeNextWord = true;
-        }
-
-        if (UNAMBIGUOUS_OPENING.has(originalWord)) {
-          capitalizeNextWord = true;
-        }
-
-        let leadingSpace = ' ';
-        const firstChar = originalWord.charAt(0);
-        if (AMBIGUOUS_QUOTES.has(firstChar)) {
-          const isDouble = firstChar === '"';
-          const isSingle = firstChar === "'";
-          // CHỈ kích hoạt viết hoa nếu KÝ TỰ LÀ MỘT DẤU NGOẶC KÉP DUY NHẤT
-          if (originalWord.length === 1) {
-            if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
-              capitalizeNextWord = true;
-            }
-          }
-          // Logic còn lại để xử lý khoảng trắng và trạng thái vẫn giữ nguyên
-          if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
-            if (UNAMBIGUOUS_OPENING.has(lastChar)) leadingSpace = '';
-          } else {
-            leadingSpace = '';
-          }
-          if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
-          if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
-        } else {
-          if (UNAMBIGUOUS_OPENING.has(lastChar) || (isInsideDoubleQuote && lastChar === '"') || (isInsideSingleQuote && lastChar === "'") || UNAMBIGUOUS_CLOSING.has(firstChar)) {
-            leadingSpace = '';
-          }
-        }
-        if (i === 0 || /\s/.test(lastChar)) leadingSpace = '';
-        lineHtml += leadingSpace + span.outerHTML;
-        lastChar = originalWord.slice(-1);
-        i += originalWord.length;
+        if (!((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote))) leadingSpace = "";
+        if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
+        if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
       } else {
-        const currentChar = line[i];
-        let nonMatchEnd = i + 1;
-        if (!ALL_PUNCTUATION.has(currentChar)) {
-          while (nonMatchEnd < line.length) {
-            if (line.substring(nonMatchEnd).match(/^%%NAME_\d+%%/)) break;
-            let isKnownWordAhead = false;
-            if (temporaryNameDictionary.size > 0) {
-              for (const key of temporaryNameDictionary.keys()) {
-                if (line.startsWith(key, nonMatchEnd)) { isKnownWordAhead = true; break; }
-              }
-            }
-            if (!isKnownWordAhead && state.dictionaryTrie.findLongestMatch(line, nonMatchEnd)) isKnownWordAhead = true;
-            if (isKnownWordAhead || (nonMatchEnd < line.length && ALL_PUNCTUATION.has(line[nonMatchEnd]))) break;
-            nonMatchEnd++;
-          }
+        if (UNAMBIGUOUS_OPENING.has(lastChar) || (isInsideDoubleQuote && lastChar === '"') || (isInsideSingleQuote && lastChar === "'") || UNAMBIGUOUS_CLOSING.has(firstCharOfOriginal)) {
+          leadingSpace = "";
         }
-        const nonMatchBlock = line.substring(i, nonMatchEnd);
-
-        // Giữ lại data-original để các bảng Dịch nhanh/Chỉnh sửa name không bị mất chữ,
-        // nhưng không hiển thị chữ đó ra kết quả dịch cuối cùng.
-        if (/^[\u4e00-\u9fa5]+$/.test(nonMatchBlock)) {
-          const span = document.createElement('span');
-          span.className = 'word untranslatable';
-          span.dataset.original = nonMatchBlock;
-          span.textContent = ''; // Quan trọng: không hiển thị ra kết quả
-          lineHtml += span.outerHTML;
-          lastChar = nonMatchBlock.slice(-1);
-          i = nonMatchEnd;
-          continue;
-        }
-
-        let textForSpan = nonMatchBlock;
-
-        // Nếu cờ viết hoa đang bật
-        if (capitalizeNextWord) {
-          const firstMeaningfulChar = line.substring(i).trim().charAt(0);
-          // Kiểm tra xem ký tự kế tiếp có phải là số không
-          if (/^\d/.test(firstMeaningfulChar)) {
-            // Nếu là số, tắt cờ viết hoa và không làm gì cả
-            capitalizeNextWord = false;
-          }
-          // Nếu không phải số VÀ từ hiện tại là chữ, thì tiến hành viết hoa
-          else if (/\p{L}/u.test(textForSpan)) {
-            textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
-            capitalizeNextWord = false; // Tắt cờ sau khi đã viết hoa
-          }
-        }
-        const span = document.createElement('span');
-        span.className = 'word';
-        span.dataset.original = nonMatchBlock;
-        span.textContent = textForSpan;
-        const trimmedText = textForSpan.trim();
-        if (/[.!?]$/.test(trimmedText)) {
-          capitalizeNextWord = true;
-        }
-
-        if (UNAMBIGUOUS_OPENING.has(nonMatchBlock)) {
-          capitalizeNextWord = true;
-        }
-
-        let leadingSpace = ' ';
-        const firstChar = nonMatchBlock.charAt(0);
-        if (AMBIGUOUS_QUOTES.has(firstChar)) {
-          const isDouble = firstChar === '"';
-          const isSingle = firstChar === "'";
-          // CHỈ kích hoạt viết hoa nếu TỪ GỐC LÀ MỘT DẤU NGOẶC KÉP DUY NHẤT
-          if (nonMatchBlock.length === 1) {
-            if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
-              capitalizeNextWord = true;
-            }
-          }
-          // Logic còn lại để xử lý khoảng trắng và trạng thái vẫn giữ nguyên
-          if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) {
-            if (UNAMBIGUOUS_OPENING.has(lastChar)) leadingSpace = '';
-          } else {
-            leadingSpace = '';
-          }
-          if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
-          if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
-        } else {
-          if (UNAMBIGUOUS_OPENING.has(lastChar) || (isInsideDoubleQuote && lastChar === '"') || (isInsideSingleQuote && lastChar === "'") || UNAMBIGUOUS_CLOSING.has(firstChar)) {
-            leadingSpace = '';
-          }
-        }
-        if (i === 0 || /\s/.test(lastChar)) leadingSpace = '';
-        lineHtml += leadingSpace + span.outerHTML;
-        lastChar = nonMatchBlock.slice(-1);
-        i = nonMatchEnd;
       }
+
+      if (i === 0 || /\s/.test(lastChar) || textForSpan.trim() === "") leadingSpace = "";
+
+      if (leadingSpace) p.appendChild(document.createTextNode(leadingSpace));
+      p.appendChild(span);
+
+      lastChar = originalWord.slice(-1);
+      i += originalWord.length;
     }
-    return `<p>${lineHtml.trim()}</p>`;
-  }).filter(Boolean);
+    fragment.appendChild(p);
+  });
 
-  // LỚP 3: THAY THẾ PLACEHOLDER VÀ VIẾT HOA ĐẦU DÒNG
-  let finalHtml = translatedLineHtmls.join('');
-  for (const [placeholder, data] of placeholders.entries()) {
-    const spanRegex = new RegExp(`(<span class="word" data-original="${escapeRegExp(placeholder)}"[^>]*>)${escapeRegExp(placeholder)}(</span>)`, 'g');
-    finalHtml = finalHtml.replace(spanRegex, (match, openingTag) => {
-      let translation = data.translation;
-      if (openingTag.includes('data-capitalize="true"')) {
-        if (translation) translation = translation.charAt(0).toUpperCase() + translation.slice(1);
-      }
-      return `<span class="word from-name-dict" data-original="${data.original}">${translation}</span>`;
-    });
-  }
-  const finalContainer = document.createElement('div');
-  finalContainer.innerHTML = finalHtml;
-
-  DOMElements.outputPanel.innerHTML = finalContainer.innerHTML;
+  DOMElements.outputPanel.innerHTML = "";
+  DOMElements.outputPanel.appendChild(fragment);
+  setLoading(DOMElements.outputPanel, false);
   if (!options.preserveTempDict) {
     temporaryNameDictionary.clear();
   }

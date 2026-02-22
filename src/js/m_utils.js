@@ -68,3 +68,19 @@ export function hideModalWithAnimation(element, onComplete = null) {
 
   animationTimeouts.set(element, timeoutId);
 }
+
+/**
+ * Toggles a loading state on a specific element.
+ */
+export function setLoading(element, isLoading) {
+  if (!element) return;
+  if (isLoading) {
+    element.classList.add('is-loading');
+    element.style.opacity = '0.5';
+    element.style.pointerEvents = 'none';
+  } else {
+    element.classList.remove('is-loading');
+    element.style.opacity = '1';
+    element.style.pointerEvents = 'auto';
+  }
+}
