@@ -1,4 +1,5 @@
 import DOMElements from './m_dom.js';
+import { showModalWithAnimation, hideModalWithAnimation } from './m_utils.js';
 
 // DOM Elements cho cài đặt
 const settingsBtn = document.getElementById('settings-btn');
@@ -25,6 +26,8 @@ let settings = {
   lineHeight: 1.6,
   width: 1400
 };
+
+let isOpen = false;
 
 // Lưu cài đặt vào localStorage
 function saveSettings() {
@@ -64,6 +67,7 @@ function loadSettings() {
 
 // Cập nhật trạng thái 'active' cho ô màu được chọn
 function updateActiveColorBox(container, color) {
+  if (!container) return;
   container.querySelectorAll('.color-box').forEach(box => {
     if (box.dataset.color === color) {
       box.classList.add('active');
@@ -76,31 +80,20 @@ function updateActiveColorBox(container, color) {
 export function initializeSettings() {
   if (!settingsBtn || !settingsPanel) return;
 
-  let toggleTimeout = null;
-
   function hideSettingsPanel() {
-    if (toggleTimeout) clearTimeout(toggleTimeout);
-    settingsPanel.classList.remove('show');
-    toggleTimeout = setTimeout(() => {
-      settingsPanel.classList.add('hidden');
-      toggleTimeout = null;
-    }, 200);
+    isOpen = false;
+    hideModalWithAnimation(settingsPanel);
   }
 
   // Mở/đóng bảng cài đặt
   settingsBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    const isHidden = settingsPanel.classList.contains('hidden');
-    if (isHidden) {
-      if (toggleTimeout) clearTimeout(toggleTimeout);
-      settingsPanel.classList.remove('hidden');
+    if (!isOpen) {
+      isOpen = true;
       const btnRect = settingsBtn.getBoundingClientRect();
       settingsPanel.style.top = `${btnRect.bottom + window.scrollY + 5}px`;
       settingsPanel.style.right = `${window.innerWidth - btnRect.right - window.scrollX}px`;
-      toggleTimeout = setTimeout(() => {
-        settingsPanel.classList.add('show');
-        toggleTimeout = null;
-      }, 10);
+      showModalWithAnimation(settingsPanel);
     } else {
       hideSettingsPanel();
     }
@@ -108,7 +101,7 @@ export function initializeSettings() {
 
   closeBtn.addEventListener('click', hideSettingsPanel);
   document.addEventListener('click', (e) => {
-    if (!settingsPanel.classList.contains('hidden') && !settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+    if (isOpen && !settingsPanel.contains(e.target) && e.target !== settingsBtn) {
       hideSettingsPanel();
     }
   });

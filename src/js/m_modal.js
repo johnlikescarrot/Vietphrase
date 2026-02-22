@@ -1,8 +1,8 @@
 import DOMElements from './m_dom.js';
-import { getHanViet, translateWord, segmentText, getAllMeanings } from './m_dictionary.js';
+import { getHanViet, getAllMeanings } from './m_dictionary.js';
 import { debounce } from './m_utils.js';
 import { nameDictionary, temporaryNameDictionary, saveNameDictionaryToStorage, renderNameList, rebuildMasterData, updateMasterDataForDeletion } from './m_nameList.js';
-import { synthesizeCompoundTranslation, performTranslation } from './m_translation.js';
+import { performTranslation } from './m_translation.js';
 import { customConfirm } from './m_dialog.js';
 
 let isEditModalLocked = localStorage.getItem('isEditModalLocked') === 'true';
@@ -17,7 +17,7 @@ const selectionState = {
   endIndex: -1
 };
 
-function updateLockIcon(button, isLocked, tooltips) {
+export function updateLockIcon(button, isLocked, tooltips) {
   if (!button) return;
   const svgLocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
   const svgUnlocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
@@ -28,7 +28,8 @@ function updateLockIcon(button, isLocked, tooltips) {
 
 export function initializeModal(state) {
   const debouncedPopulateQuickEdit = debounce((selection, state) => {
-    populateQuickEditPanel(selection.text, state);
+    // Regression fix: use selection.originalText (Chinese) instead of selection.text (Vietnamese)
+    populateQuickEditPanel(selection.originalText, state);
   }, 100);
 
   const debouncedUpdateOldModal = debounce((text, state) => {
@@ -272,6 +273,7 @@ function hideQuickEditPanel() {
     panel.classList.remove('show');
     setTimeout(() => {
         panel.classList.add('hidden');
+        panel.style.visibility = ''; // Clear stale inline style
         isPanelVisible = false;
         if (window.getSelection) window.getSelection().removeAllRanges();
     }, 200);
@@ -311,6 +313,10 @@ function closeOldModal() {
   setTimeout(() => {
     DOMElements.editModal.style.display = 'none';
     DOMElements.vietphraseOptionsContainer.classList.add('hidden');
+
+    // Logic from closeOldModal in earlier turn - preserve lock state sync if needed
+    // but bot said: "Previous revisions reset the lock state on close; now the lock persists... correct."
+    // We will keep persistence.
   }, 200);
 }
 
@@ -332,6 +338,7 @@ function updateOldModalFields(text, state) {
   const all = getAllMeanings(text, state.dictionaries, nameDictionary);
   if (all.name) uniqueMeanings.add(all.name);
   all.names.forEach(m => uniqueMeanings.add(m));
+  all.names2.forEach(m => uniqueMeanings.add(m));
   all.vietphrase.forEach(m => uniqueMeanings.add(m));
 
   optionsContainer.innerHTML = '';

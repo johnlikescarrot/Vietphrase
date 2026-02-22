@@ -6,6 +6,7 @@ import { initializeModal } from './m_modal.js';
 import { performTranslation } from './m_translation.js';
 import { updateClock } from './m_ui.js';
 import { initializeSettings } from './m_settings.js';
+import { showModalWithAnimation, hideModalWithAnimation } from './m_utils.js';
 
 function appendLog(message, type) {
   const li = document.createElement('li');
@@ -56,7 +57,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   let isImporting = false;
-  let importHasFinished = false;
   let singleImportType = null;
 
   initializeSettings();
@@ -69,51 +69,29 @@ document.addEventListener('DOMContentLoaded', async () => {
       DOMElements.loader.style.display = 'flex';
       DOMElements.loaderText.textContent = 'Đang hoàn tất và áp dụng từ điển...';
 
-      // Dùng setTimeout để đảm bảo trình duyệt kịp hiển thị text mới trước khi bắt đầu tác vụ nặng cuối cùng
       setTimeout(() => {
         rebuildMasterData(state);
-        renderNameList(); // Cập nhật lại giao diện Name List
-
-        // Kích hoạt các nút bấm và ẩn màn hình chờ SAU KHI xử lý xong
+        renderNameList();
         DOMElements.translateBtn.disabled = false;
         DOMElements.modeToggle.disabled = false;
         DOMElements.loader.style.display = 'none';
-      }, 500); // Cho trình duyệt 0.5s để "thở" và cập nhật UI
+      }, 500);
     }
   };
 
   const db = await initializeDictionaries();
   if (db) {
-    // Nếu có từ điển trong CSDL, hiển thị thông báo và bắt đầu xử lý
     DOMElements.loaderText.textContent = 'Đang nạp và xử lý từ điển...';
-    // Dùng setTimeout để đảm bảo trình duyệt kịp hiển thị text mới trước khi bắt đầu tác vụ nặng
     setTimeout(() => {
       updateState(db);
     }, 500);
   } else {
-    // Nếu không có từ điển, không cần xử lý gì, ẩn màn hình chờ ngay
     DOMElements.loader.style.display = 'none';
   }
 
   const importOptionsModal = document.getElementById('import-options-modal');
   const closeImportOptionsModalBtn = document.getElementById('close-import-options-modal-btn');
   const singleFileImporter = document.getElementById('single-file-importer');
-
-  const showModalWithAnimation = (modalEl) => {
-    modalEl.classList.remove('hidden');
-    setTimeout(() => {
-      const mc = modalEl.querySelector('.modal-content');
-      if (mc) mc.classList.add('show');
-    }, 10);
-  };
-
-  const hideModalWithAnimation = (modalEl) => {
-    const mc = modalEl.querySelector('.modal-content');
-    if (mc) mc.classList.remove('show');
-    setTimeout(() => {
-      modalEl.classList.add('hidden');
-    }, 200);
-  };
 
   DOMElements.importLocalBtn.addEventListener('click', () => {
     if (isImporting) return;
@@ -131,9 +109,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('import-multi-file-btn').addEventListener('click', () => {
     hideImportOptionsModal();
     if (isImporting) return;
-    importHasFinished = false;
-    showModalWithAnimation(DOMElements.logModal);
     DOMElements.logList.innerHTML = '';
+    showModalWithAnimation(DOMElements.logModal);
     DOMElements.fileImporter.click();
   });
 
@@ -145,22 +122,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   ];
 
   singleImportButtons.forEach(({ btnId, type }) => {
-    document.getElementById(btnId).addEventListener('click', () => {
-      singleImportType = type;
-      hideImportOptionsModal();
-      singleFileImporter.click();
-    });
+    const btn = document.getElementById(btnId);
+    if (btn) {
+        btn.addEventListener('click', () => {
+          singleImportType = type;
+          hideImportOptionsModal();
+          singleFileImporter.click();
+        });
+    }
   });
 
-  // HÀM DUY NHẤT ĐỂ XỬ LÝ TẤT CẢ CÁC TRƯỜNG HỢP NHẬP FILE
   const handleFileImport = async (files, importConfig) => {
     if (isImporting || !files || files.length === 0) return;
 
     isImporting = true;
     DOMElements.importLocalBtn.disabled = true;
     DOMElements.importServerBtn.disabled = true;
-    showModalWithAnimation(DOMElements.logModal);
     DOMElements.logList.innerHTML = '';
+    showModalWithAnimation(DOMElements.logModal);
 
     const logHandler = { append: appendLog, update: updateLog };
     const currentDicts = state.dictionaries || new Map();
@@ -186,16 +165,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  // Gán sự kiện cho các nút, gọi đến hàm xử lý duy nhất
   singleFileImporter.addEventListener('change', (e) => {
     handleFileImport(e.target.files, { isSingleFile: true, type: singleImportType });
-    e.target.value = null; // Reset input
+    e.target.value = null;
     singleImportType = null;
   });
 
   DOMElements.fileImporter.addEventListener('change', (e) => {
     handleFileImport(e.target.files, { isSingleFile: false });
-    e.target.value = null; // Reset input
+    e.target.value = null;
   });
 
   DOMElements.importServerBtn.addEventListener('click', async () => {
@@ -204,8 +182,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     isImporting = true;
     DOMElements.importLocalBtn.disabled = true;
     DOMElements.importServerBtn.disabled = true;
-    showModalWithAnimation(DOMElements.logModal);
     DOMElements.logList.innerHTML = '';
+    showModalWithAnimation(DOMElements.logModal);
 
     const logHandler = { append: appendLog, update: updateLog };
 
@@ -233,10 +211,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   function closeLogModal() {
-    hideModalWithAnimation(DOMElements.logModal);
-    setTimeout(() => {
+    hideModalWithAnimation(DOMElements.logModal, () => {
       DOMElements.logList.innerHTML = '';
-    }, 200);
+    });
   }
 
   DOMElements.closeLogModalBtn.addEventListener('click', closeLogModal);
@@ -255,35 +232,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // "Dán và Dịch" khi nhấn chuột phải
   DOMElements.translateBtn.addEventListener('contextmenu', async (e) => {
-    // Ngăn không cho menu chuột phải mặc định của trình duyệt hiện ra
     e.preventDefault();
 
-    // Kiểm tra xem đã có từ điển hay chưa, tương tự như khi nhấn chuột trái
     if (!state.dictionaries || state.dictionaries.size === 0) {
       customAlert('Vui lòng tải Từ Điển trước khi dịch.');
       return;
     }
 
     try {
-      // Đọc văn bản đang có trong clipboard (bộ nhớ tạm)
       const textFromClipboard = await navigator.clipboard.readText();
-
-      // Nếu clipboard có nội dung
       if (textFromClipboard) {
-        // Gán nội dung đó vào ô văn bản. Thao tác này sẽ tự động XÓA nội dung cũ.
         DOMElements.inputText.value = textFromClipboard;
-
-        // Lưu ngay vào cache nếu người dùng đã bật chức năng lưu
         if (DOMElements.saveTextToggle.checked) {
           localStorage.setItem('savedInputText', textFromClipboard);
         }
-
-        // Xóa dữ liệu tạm thời cũ
         temporaryNameDictionary.clear();
-
-        // Gọi hàm dịch ngay lập tức
         performTranslation(state);
       }
     } catch (err) {
@@ -298,32 +262,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   DOMElements.clearBtn.addEventListener('click', () => {
     DOMElements.inputText.value = '';
+    localStorage.removeItem('savedInputText');
   });
 
-  // Xử lý nút "Nhập và Dịch"
   DOMElements.importAndTranslateBtn.addEventListener('click', () => {
-    // Kích hoạt trình chọn tệp ẩn
     DOMElements.textFileImporter.click();
   });
 
-  // Xử lý khi người dùng đã chọn xong tệp
   DOMElements.textFileImporter.addEventListener('change', async (e) => {
     const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    // Nếu không có tệp nào được chọn thì không làm gì cả
-    if (!files || files.length === 0) {
-      return;
-    }
-
-    // Kiểm tra xem đã có từ điển hay chưa
     if (!state.dictionaries || state.dictionaries.size === 0) {
       customAlert('Vui lòng tải Từ Điển trước khi nhập tệp và dịch.');
       return;
     }
 
     try {
-      // Tạo một mảng các "lời hứa" để đọc từng tệp.
-      // Điều này đảm bảo chúng ta đọc tất cả các tệp một cách bất đồng bộ nhưng vẫn giữ đúng thứ tự.
       const readPromises = Array.from(files).map(file => {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -332,25 +287,15 @@ document.addEventListener('DOMContentLoaded', async () => {
           reader.readAsText(file, 'UTF-8');
         });
       });
-
-      // Chờ cho tất cả các tệp được đọc xong
       const fileContents = await Promise.all(readPromises);
-
-      // Gộp nội dung của tất cả các tệp, mỗi tệp cách nhau bằng một dòng trống
       const combinedText = fileContents.join('\n\n');
-
-      // Đưa nội dung đã gộp vào ô văn bản
       DOMElements.inputText.value = combinedText;
-
-      // Tự động thực hiện dịch
       temporaryNameDictionary.clear();
       performTranslation(state);
-
     } catch (error) {
       console.error('Lỗi khi đọc tệp:', error);
       customAlert('Đã xảy ra lỗi trong quá trình đọc tệp. Vui lòng thử lại.');
     } finally {
-      // Reset trình chọn tệp để người dùng có thể chọn lại cùng một tệp nếu muốn
       e.target.value = null;
     }
   });
@@ -370,32 +315,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       await navigator.clipboard.writeText(textToCopy);
-
       const originalText = DOMElements.copyBtn.textContent;
       DOMElements.copyBtn.textContent = 'Copied!';
       DOMElements.copyBtn.disabled = true;
-
       setTimeout(() => {
         DOMElements.copyBtn.textContent = originalText;
         DOMElements.copyBtn.disabled = false;
       }, 200);
-
     } catch (err) {
       console.error('Không thể sao chép tự động:', err);
     }
   });
 
-  // Xử lý nút Xuất file txt
   DOMElements.exportBtn.addEventListener('click', () => {
     const outputPanel = DOMElements.outputPanel;
     const textToExport = outputPanel.innerText;
 
-    // Kiểm tra xem có nội dung để xuất không
     if (textToExport.trim().length === 0 || textToExport.trim() === 'Kết quả sẽ hiện ở đây...') {
-      return; // Không làm gì nếu không có nội dung
+      return;
     }
 
-    // Tạo tên file theo định dạng YYYY-MM-DD_HH-mm-ss
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -404,34 +343,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
 
-    // Bước 1: Lấy dòng đầu tiên và xóa khoảng trắng ở 2 ĐẦU
     const firstLine = textToExport.split('\n')[0].trim();
-
-    // Bước 2: Xóa khoảng trắng thừa Ở GIỮA
     const singleSpacedLine = firstLine.replace(/\s+/g, ' ');
-
-    // Bước 3: Loại bỏ các ký tự không hợp lệ trong tên file
     const sanitizedFirstLine = singleSpacedLine.replace(/[\\/:*?"<>|]/g, '');
-
-    // Bước 4: Giới hạn độ dài còn 80 ký tự
     const truncatedFirstLine = sanitizedFirstLine.substring(0, 80);
-
-    // Bước 5: Tạo tên file cuối cùng
     const fileName = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}_${truncatedFirstLine}.txt`;
 
-    // Tạo một đối tượng Blob (dữ liệu file)
     const blob = new Blob([textToExport], { type: 'text/plain;charset=utf-8' });
-    // Tạo một đường link ẩn để kích hoạt tải file
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = fileName;
-
-    // Thêm link vào trang, nhấn vào nó, rồi xóa đi
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    // Giải phóng bộ nhớ
     URL.revokeObjectURL(link.href);
   });
 
@@ -451,7 +375,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   DOMElements.saveTextToggle.addEventListener('change', () => {
     const isChecked = DOMElements.saveTextToggle.checked;
     localStorage.setItem('shouldSaveTextInput', isChecked);
-
     if (!isChecked) {
       localStorage.removeItem('savedInputText');
     } else {
@@ -463,11 +386,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (DOMElements.saveTextToggle.checked) {
       localStorage.setItem('savedInputText', DOMElements.inputText.value);
     }
-  });
-
-  DOMElements.clearBtn.addEventListener('click', () => {
-    DOMElements.inputText.value = '';
-    localStorage.removeItem('savedInputText');
   });
 
   let currentFontSize = parseInt(localStorage.getItem('translatorFontSize') || '36');

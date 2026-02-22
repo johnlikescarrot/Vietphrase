@@ -1,6 +1,6 @@
 import DOMElements from './m_dom.js';
 import { debounce } from './m_utils.js';
-import { customConfirm } from './m_dialog.js';
+import { customConfirm, customAlert } from './m_dialog.js';
 import { performTranslation } from './m_translation.js';
 
 class TrieNode {
@@ -59,11 +59,13 @@ export function renderNameList(sortType = 'newest') {
   }
 
   let sortedEntries;
+  // nameDictionary (a Map) preserves insertion order per spec.
   const entries = Array.from(nameDictionary.entries());
 
   switch (sortType) {
     case 'oldest':
-      sortedEntries = entries.reverse();
+      // Produce a non-mutating reversed array
+      sortedEntries = entries.slice().reverse();
       break;
     case 'vn-az':
       sortedEntries = entries.sort((a, b) => a[1].localeCompare(b[1], 'vi'));
@@ -90,20 +92,22 @@ export function renderNameList(sortType = 'newest') {
 export function saveNameDictionaryToStorage() {
   try {
     localStorage.setItem('nameDictionary', JSON.stringify(Array.from(nameDictionary.entries())));
+    return true;
   } catch (e) {
     console.error("Lỗi khi lưu Name List vào localStorage:", e);
+    return false;
   }
 }
 
 function loadNameDictionaryFromStorage() {
-  const stored = localStorage.getItem('nameDictionary');
-  if (stored) {
-    try {
-        nameDictionary = new Map(JSON.parse(stored));
-    } catch (e) {
-        console.error("Lỗi khi load Name List:", e);
-        nameDictionary = new Map();
+  try {
+    const stored = localStorage.getItem('nameDictionary');
+    if (stored) {
+      nameDictionary = new Map(JSON.parse(stored));
     }
+  } catch (e) {
+    console.error("Lỗi khi load Name List:", e);
+    nameDictionary = new Map();
   }
 }
 
@@ -142,27 +146,38 @@ export function initializeNameList(state) {
         newDict.set(parts[0].trim(), parts.slice(1).join("=").trim());
       }
     });
+    const oldDict = nameDictionary;
     nameDictionary = newDict;
-    saveNameDictionaryToStorage();
-    rebuildMasterData(state);
-    performTranslation(state, { forceText: state.lastTranslatedText });
 
-    const originalText = DOMElements.nameListSaveBtn.textContent;
-    DOMElements.nameListSaveBtn.textContent = 'Đã lưu!';
-    DOMElements.nameListSaveBtn.disabled = true;
-    setTimeout(() => {
-      DOMElements.nameListSaveBtn.textContent = originalText;
-      DOMElements.nameListSaveBtn.disabled = false;
-    }, 1500);
+    if (saveNameDictionaryToStorage()) {
+      rebuildMasterData(state);
+      performTranslation(state, { forceText: state.lastTranslatedText });
+
+      const originalText = DOMElements.nameListSaveBtn.textContent;
+      DOMElements.nameListSaveBtn.textContent = 'Đã lưu!';
+      DOMElements.nameListSaveBtn.disabled = true;
+      setTimeout(() => {
+        DOMElements.nameListSaveBtn.textContent = originalText;
+        DOMElements.nameListSaveBtn.disabled = false;
+      }, 1500);
+    } else {
+      nameDictionary = oldDict; // Khôi phục nếu lưu thất bại
+      customAlert('Không thể lưu Name List. Có thể bộ nhớ trình duyệt đã đầy hoặc đang ở chế độ ẩn danh.');
+    }
   });
 
   DOMElements.nameListDeleteBtn.addEventListener('click', async () => {
     if (await customConfirm('Bạn có chắc muốn xóa toàn bộ Bảng Thuật Ngữ? Hành động này không thể hoàn tác.')) {
+      const oldDict = new Map(nameDictionary);
       nameDictionary.clear();
-      saveNameDictionaryToStorage();
-      renderNameList();
-      rebuildMasterData(state);
-      performTranslation(state, { forceText: state.lastTranslatedText });
+      if (saveNameDictionaryToStorage()) {
+        renderNameList();
+        rebuildMasterData(state);
+        performTranslation(state, { forceText: state.lastTranslatedText });
+      } else {
+        nameDictionary = oldDict;
+        customAlert('Không thể xóa Name List do lỗi lưu trữ.');
+      }
     }
   });
 
@@ -187,16 +202,21 @@ export function initializeNameList(state) {
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target.result;
+      const oldDict = new Map(nameDictionary);
       text.split('\n').forEach(line => {
         const parts = line.split('=');
         if (parts.length >= 2) {
           nameDictionary.set(parts[0].trim(), parts.slice(1).join("=").trim());
         }
       });
-      saveNameDictionaryToStorage();
-      renderNameList();
-      rebuildMasterData(state);
-      performTranslation(state, { forceText: state.lastTranslatedText });
+      if (saveNameDictionaryToStorage()) {
+        renderNameList();
+        rebuildMasterData(state);
+        performTranslation(state, { forceText: state.lastTranslatedText });
+      } else {
+        nameDictionary = oldDict;
+        customAlert('Không thể nhập Name List do lỗi lưu trữ.');
+      }
     };
     reader.readAsText(file);
     e.target.value = '';
@@ -239,5 +259,6 @@ export function rebuildMasterData(state) {
 export function updateMasterDataForDeletion(cn, state) {
   if (!state || !state.masterKeySet || !state.dictionaryTrie) return;
   state.masterKeySet.delete(cn);
-  state.dictionaryTrie.insert(cn, null, true);
+  // Re-build the trie to restore lower-priority dictionary entries (e.g., Names/Names2)
+  rebuildMasterData(state);
 }
