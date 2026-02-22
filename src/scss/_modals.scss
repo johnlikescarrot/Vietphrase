@@ -173,12 +173,8 @@
         opacity: 0.8;
     }
 }
-.modal-content.show {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-}
-
+.modal-content.show,
 #quick-edit-panel.show {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
+    opacity: 1;
+    transform: translateY(0);
 }

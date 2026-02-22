@@ -79,11 +79,11 @@ function openDB() {
   return new Promise((resolve, reject) => {
     try {
       if (!window.indexedDB) {
-        reject('Trình duyệt không hỗ trợ IndexedDB.');
+        reject(new Error('Trình duyệt không hỗ trợ IndexedDB.'));
         return;
       }
       const request = indexedDB.open(DB_NAME);
-      request.onerror = () => reject('Lỗi khi mở IndexedDB. Có thể do chế độ ẩn danh.');
+      request.onerror = () => reject(new Error('Lỗi khi mở IndexedDB. Có thể do chế độ ẩn danh.'));
       request.onsuccess = () => resolve(request.result);
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
@@ -92,7 +92,7 @@ function openDB() {
         }
       };
     } catch (e) {
-      reject('Lỗi hệ thống khi mở IndexedDB: ' + e.message);
+      reject(new Error('Lỗi hệ thống khi mở IndexedDB: ' + e.message));
     }
   });
 }

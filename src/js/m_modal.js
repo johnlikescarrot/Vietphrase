@@ -1,5 +1,6 @@
 import DOMElements from './m_dom.js';
 import { getHanViet, translateWord, segmentText, getAllMeanings } from './m_dictionary.js';
+import { debounce } from './m_utils.js';
 import { nameDictionary, temporaryNameDictionary, saveNameDictionaryToStorage, renderNameList, rebuildMasterData, updateMasterDataForDeletion } from './m_nameList.js';
 import { synthesizeCompoundTranslation, performTranslation } from './m_translation.js';
 import { customConfirm } from './m_dialog.js';
@@ -39,13 +40,7 @@ async function deletePermanentName(cn, state) {
   }
 }
 
-function debounce(func, delay) {
-  let timeout;
-  return function (...args) {
-    const context = this;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), delay);
-  };
+;
 }
 
 let selectionState = {
@@ -113,8 +108,20 @@ function groupSimilarMeanings(meanings, state) {
 }
 
 function closeOldModal() {
-  DOMElements.editModal.style.display = 'none';
-  DOMElements.vietphraseOptionsContainer.classList.add('hidden');
+  const modalContent = DOMElements.editModal.querySelector(".modal-content");
+  if (modalContent) modalContent.classList.remove("show");
+
+  setTimeout(() => {
+    DOMElements.editModal.style.display = "none";
+    DOMElements.vietphraseOptionsContainer.classList.add("hidden");
+    isEditModalLocked = false;
+    const lockIcon = DOMElements.editModalLockBtn;
+    updateLockIcon(lockIcon, false, {
+      locked: "Bỏ ghim bảng (Đang ghim)",
+      unlocked: "Ghim bảng này (Đang thả)"
+    });
+  }, 200);
+}, 200);
 }
 
 function showQuickEditPanel(selection, state) {
@@ -238,11 +245,18 @@ function populateQuickEditPanel(text, state, isInitialLoad = false) {
 
 function hideQuickEditPanel() {
   if (isPanelVisible) {
-    DOMElements.quickEditPanel.classList.add('hidden');
-    isPanelVisible = false;
-    if (window.getSelection) {
-      window.getSelection().removeAllRanges();
-    }
+    if (isQuickEditLocked) return;
+    DOMElements.quickEditPanel.classList.remove("show");
+    setTimeout(() => {
+      DOMElements.quickEditPanel.classList.add("hidden");
+      isPanelVisible = false;
+      if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+      }
+    }, 200);
+  }
+}
+    }, 200);
   }
 }
 
@@ -317,7 +331,6 @@ export function initializeModal(state) {
       hideQuickEditPanel();
     }
   });
-
 
   let isDoubleClick = false;
   // === DOUBLE CLICK ===
@@ -520,57 +533,6 @@ export function initializeModal(state) {
     }
   });
 
-  function updateTranslationInPlace(newText) {
-    const { spans, startIndex, endIndex } = selectionState;
-    if (startIndex === -1 || endIndex === -1) return;
-
-    // Lấy ra các span cũ đang được chọn
-    const spansToRemove = spans.slice(startIndex, endIndex + 1);
-    if (spansToRemove.length === 0) return;
-
-    // Tạo một span mới để thay thế
-    const newSpan = document.createElement('span');
-    newSpan.className = 'word user-defined-temp'; // Thêm class mới để tạo kiểu
-    newSpan.textContent = newText;
-    newSpan.dataset.original = selectionState.originalText;
-
-    // Chèn span mới vào trước span đầu tiên trong vùng chọn
-    const firstSpan = spansToRemove[0];
-    firstSpan.parentNode.insertBefore(newSpan, firstSpan);
-
-    // Xóa tất cả các span cũ
-    spansToRemove.forEach(span => span.remove());
-
-    // Cập nhật lại danh sách các span trong state để các lần chỉnh sửa sau không bị lỗi
-    const allSpansAfterUpdate = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
-    selectionState.spans = allSpansAfterUpdate;
-  }
-
-  // CẬP NHẬT BẢN DỊCH TẠI CHỖ
-  function updateTranslationInPlace(newText) {
-    const { spans, startIndex, endIndex } = selectionState;
-    if (startIndex === -1 || endIndex === -1 || !spans) return;
-
-    const spansToRemove = spans.slice(startIndex, endIndex + 1);
-    if (spansToRemove.length === 0) return;
-
-    // Tạo một span mới để thay thế
-    const newSpan = document.createElement('span');
-    newSpan.className = 'word user-defined-temp'; // Thêm class mới để tạo kiểu
-    newSpan.textContent = newText;
-    newSpan.dataset.original = selectionState.originalText;
-
-    // Chèn span mới vào trước span đầu tiên trong vùng chọn
-    const firstSpan = spansToRemove[0];
-    firstSpan.parentNode.insertBefore(newSpan, firstSpan);
-
-    // Xóa tất cả các span cũ
-    spansToRemove.forEach(span => span.remove());
-
-    // Cập nhật lại danh sách các span trong state để các lần chỉnh sửa sau không bị lỗi
-    selectionState.spans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
-  }
-
   document.querySelectorAll('.q-temp-add-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const targetInputId = e.target.dataset.target;
@@ -582,6 +544,32 @@ export function initializeModal(state) {
         temporaryNameDictionary.set(cnText, vnText);
 
         // Cập nhật ngay lập-tức tại vị trí đang chọn
+
+  // CẬP NHẬT BẢN DỊCH TẠI CHỖ
+  function updateTranslationInPlace(newText) {
+    const { spans, startIndex, endIndex } = selectionState;
+    if (startIndex === -1 || endIndex === -1 || !spans) return;
+
+    const spansToRemove = spans.slice(startIndex, endIndex + 1);
+    if (spansToRemove.length === 0) return;
+
+    // Tạo span mới
+    const newSpan = document.createElement('span');
+    newSpan.className = 'word from-name-dict';
+    newSpan.dataset.original = selectionState.originalText;
+    newSpan.textContent = newText;
+
+    // Chèn span mới vào vị trí span đầu tiên
+    const firstSpan = spansToRemove[0];
+    firstSpan.parentNode.insertBefore(newSpan, firstSpan);
+
+    // Xóa các span cũ
+    spansToRemove.forEach(span => span.remove());
+
+    // Cập nhật lại selectionState.spans cho các thao tác tiếp theo (nếu ghim panel)
+    selectionState.spans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
+  }
+
         updateTranslationInPlace(vnText);
 
         // Ẩn bảng dịch nhanh sau khi hoàn tất

@@ -1,3 +1,9 @@
+import DOMElements from './m_dom.js';
+import { debounce } from './m_utils.js';
+import { customConfirm } from './m_dialog.js';
+import { performTranslation } from './m_translation.js';
+import { standardizeDictionaryLine } from './m_preprocessor.js';
+
 // CẤU TRÚC DỮ LIỆU TRIE ĐỂ TĂNG TỐC TÌM KIẾM
 class TrieNode {
   constructor() {
@@ -63,22 +69,6 @@ class Trie {
     return matches;
   }
 }
-
-import DOMElements from './m_dom.js';
-
-function debounce(func, delay) {
-  let timeoutId;
-  return function (...args) {
-    if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => {
-      func.apply(this, args);
-    }, delay);
-  };
-}
-
-import { customConfirm } from './m_dialog.js';
-import { performTranslation } from './m_translation.js';
-import { standardizeDictionaryLine } from './m_preprocessor.js';
 
 export let nameDictionary = new Map();
 export let temporaryNameDictionary = new Map();
@@ -159,7 +149,8 @@ export function initializeNameList(state) {
     nameDictionary = parseDictionary(standardizedText);
 
     saveNameDictionaryToStorage();
-    debouncedRebuildMasterData(state);
+    rebuildMasterData(state);
+    performTranslation(state, { forceText: state.lastTranslatedText });
 
     const originalText = DOMElements.nameListSaveBtn.textContent;
     DOMElements.nameListSaveBtn.textContent = 'Đã lưu!';
@@ -169,8 +160,7 @@ export function initializeNameList(state) {
 
       DOMElements.nameListSaveBtn.disabled = false;
     }, 1500);
-    // Dịch lại toàn bộ văn bản sau khi lưu
-    performTranslation(state, { forceText: state.lastTranslatedText });
+
   });
 
   DOMElements.nameListDeleteBtn.addEventListener('click', async () => {
@@ -178,9 +168,8 @@ export function initializeNameList(state) {
       nameDictionary.clear();
       saveNameDictionaryToStorage();
       renderNameList();
-      debouncedRebuildMasterData(state);
-      // Dịch lại toàn bộ văn bản sau khi xóa
-      performTranslation(state, { forceText: state.lastTranslatedText });
+      rebuildMasterData(state);
+    performTranslation(state, { forceText: state.lastTranslatedText });
     }
 
   });
@@ -250,7 +239,7 @@ function loadNameDictionaryFromStorage() {
   if (stored) nameDictionary = new Map(JSON.parse(stored));
 }
 
-export const debouncedRebuildMasterData = debounce(rebuildMasterData, 100);
+export const debouncedRebuildMasterData = debounce((state, shouldTranslate) => rebuildMasterData(state, shouldTranslate), 100);
 
 export function rebuildMasterData(state) {
   if (!state || !state.dictionaries) {
@@ -298,6 +287,7 @@ export function rebuildMasterData(state) {
 
   state.dictionaryTrie = dictionaryTrie; // Lưu Trie vào state
   console.timeEnd('rebuildMasterData'); // Kết thúc đếm thời gian
+
 }
 
 // Hàm tối ưu chỉ để xóa một từ khỏi Trie và Set mà không cần rebuild toàn bộ
@@ -313,4 +303,8 @@ export function updateMasterDataForDeletion(cn, state) {
   // Và "xóa" khỏi Trie bằng cách ghi đè giá trị của nó thành null.
   // Thao tác này cực kỳ nhanh so với việc build lại toàn bộ Trie.
   state.dictionaryTrie.insert(cn, null, true);
+}
+
+, delay);
+  };
 }

@@ -44,10 +44,10 @@ function openDB() {
   return new Promise((resolve, reject) => {
     try {
       const request = indexedDB.open(DB_NAME);
-      request.onerror = () => reject('Lỗi khi mở IndexedDB từ Worker. Có thể do chế độ ẩn danh.');
+      request.onerror = () => reject(new Error('Lỗi khi mở IndexedDB từ Worker. Có thể do chế độ ẩn danh.'));
       request.onsuccess = () => resolve(request.result);
     } catch (e) {
-      reject('Lỗi hệ thống khi mở IndexedDB: ' + e.message);
+      reject(new Error('Lỗi hệ thống khi mở IndexedDB: ' + e.message));
     }
   });
 }
@@ -108,7 +108,7 @@ self.onmessage = async function (e) {
 
       let contentToParse = item.content;
       // Nếu file này nằm trong danh sách cần chuẩn hóa, hãy xử lý nó
-      if (dictionariesToStandardize.has(dictionaryId) && /[。、．，：；？！～“”（）‘《》『』「」【】]/.test(contentToParse)) {
+      if (dictionariesToStandardize.has(dictionaryId)) {
         contentToParse = contentToParse
           .split(/\r?\n/)
           .map(standardizeDictionaryLine)
