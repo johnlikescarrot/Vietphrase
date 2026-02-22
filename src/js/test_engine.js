@@ -4,7 +4,7 @@ import { Trie } from './m_nameList.js';
 /**
  * Logic Verification Suite for Vietphrase ZXC Engine
  */
-export function runTests(state) {
+export function runTests() {
   console.log('%c --- Bắt đầu kiểm tra Engine --- ', 'background: #222; color: #bada55; font-size: 1.2em;');
 
   const results = {
@@ -46,9 +46,24 @@ export function runTests(state) {
     translation.best === 'Lý Thái Bạch',
     `Expected 'Lý Thái Bạch', got '${translation.best}'`);
 
-  // --- Test 3: Punctuation Handling ---
-  // Note: This requires full performTranslation mock which is complex,
-  // so we test the logic inside segmentText for non-chinese blocks
+  // --- Test 3: Overlapping Keys Priority ---
+  const overlapTrie = new Trie();
+  // Simulate insertion order for priority: lower priority (higher value) first, then override
+  overlapTrie.insert('大', { translation: 'đại', type: 'Vietphrase' });
+  overlapTrie.insert('大家', { translation: 'mọi người', type: 'Names' }, true);
+
+  const overlapSegments = segmentText('大家', overlapTrie);
+  assert('Overlapping Keys (Longest Match)',
+    overlapSegments.length === 1 && overlapSegments[0] === '大家',
+    `Expected '大家', got: ${JSON.stringify(overlapSegments)}`);
+
+  // --- Test 4: Empty Input ---
+  const emptySegments = segmentText('', testTrie);
+  assert('Empty Input Handling',
+    emptySegments.length === 0 || (emptySegments.length === 1 && emptySegments[0] === ''),
+    `Expected empty segments for empty input. Got: ${JSON.stringify(emptySegments)}`);
+
+  // --- Test 5: Non-Chinese Block Preservation ---
   const mixedSegments = segmentText('你好! Hello.', testTrie);
   assert('Non-Chinese Block Preservation',
     mixedSegments.includes('! Hello.'),

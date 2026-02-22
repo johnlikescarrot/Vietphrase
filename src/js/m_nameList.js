@@ -3,7 +3,7 @@ import { debounce } from './m_utils.js';
 import { customConfirm, customAlert } from './m_dialog.js';
 import { performTranslation } from './m_translation.js';
 
-export export class TrieNode {
+export class TrieNode {
   constructor() {
     this.children = {};
     this.value = null;

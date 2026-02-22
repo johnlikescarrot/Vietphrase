@@ -11,7 +11,7 @@ function escapeRegExp(string) {
 const luatNhanRuleCache = new WeakMap();
 
 function applyLuatNhan(text, state) {
-  const luatNhanDict = state.dictionaries.get("LuatNhan")?.dict;
+  const luatNhanDict = state.dictionaries.get('LuatNhan')?.dict;
   if (!luatNhanDict || luatNhanDict.size === 0) {
     return text;
   }
@@ -19,12 +19,12 @@ function applyLuatNhan(text, state) {
   let cachedRules = luatNhanRuleCache.get(luatNhanDict);
   if (!cachedRules) {
     cachedRules = [...luatNhanDict.entries()]
-      .filter(([k]) => k.includes("{0}"))
+      .filter(([k]) => k.includes('{0}'))
       .sort((a, b) => b[0].length - a[0].length)
       .map(([ruleKey, ruleValue]) => {
-        const escapedKey = escapeRegExp(ruleKey).replace("\\{0\\}", "([\u4e00-\u9fa5]+)");
+        const escapedKey = escapeRegExp(ruleKey).replace('\\{0\\}', '([\u4e00-\u9fa5]+)');
         return {
-          regex: new RegExp(escapedKey, "g"),
+          regex: new RegExp(escapedKey, 'g'),
           ruleValue
         };
       });
@@ -33,14 +33,10 @@ function applyLuatNhan(text, state) {
 
   let processedText = text;
   for (const { regex, ruleValue } of cachedRules) {
-    if (!regex.test(processedText)) continue;
-    // Reset regex index since it is global
-    regex.lastIndex = 0;
-
     processedText = processedText.replace(regex, (match, capturedWord) => {
       const translationResult = translateWord(capturedWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
       const translatedCapturedWord = translationResult.found ? translationResult.best : capturedWord;
-      return ruleValue.replace("{0}", translatedCapturedWord);
+      return ruleValue.replace('{0}', translatedCapturedWord);
     });
   }
   return processedText;
@@ -51,7 +47,7 @@ export function synthesizeCompoundTranslation(text, state) {
   if (translationCache.has(text)) {
     return translationCache.get(text);
   }
-  const segments = segmentText(text, state.masterKeySet);
+  const segments = segmentText(text, state.dictionaryTrie, state.masterKeySet);
   if (segments.length <= 1) return [];
   // Giới hạn PHÂN ĐOẠN
   if (segments.length > 7) return [`${segments.join(' ')} - Quá dài để gợi ý`];
@@ -85,6 +81,7 @@ export function performTranslation(state, options = {}) {
 
   if (!state || !state.dictionaries || !state.dictionaryTrie) {
     DOMElements.outputPanel.textContent = 'Lỗi: Từ điển chưa được tải hoặc xử lý.';
+    setLoading(DOMElements.outputPanel, false);
     return;
   }
 
@@ -92,6 +89,7 @@ export function performTranslation(state, options = {}) {
   const standardizedText = standardizeText(textToTranslate);
   if (!standardizedText.trim()) {
     DOMElements.outputPanel.textContent = 'Kết quả sẽ hiện ở đây...';
+    setLoading(DOMElements.outputPanel, false);
     return;
   }
   if (!options.forceText) {
@@ -102,18 +100,16 @@ export function performTranslation(state, options = {}) {
   const placeholders = new Map();
   let placeholderId = 0;
 
-  // Xây dựng Name Trie cục bộ để xử lý nhanh
   const nameTrie = new Trie();
-  const namesDict = state.dictionaries.get("Names")?.dict || new Map();
-  const names2Dict = state.dictionaries.get("Names2")?.dict || new Map();
+  const namesDict = state.dictionaries.get('Names')?.dict || new Map();
+  const names2Dict = state.dictionaries.get('Names2')?.dict || new Map();
 
-  // Thứ tự nạp để đảm bảo ưu tiên: Names < Names2 < nameDictionary
   namesDict.forEach((v, k) => nameTrie.insert(k, { translation: v }));
   names2Dict.forEach((v, k) => nameTrie.insert(k, { translation: v }, true));
   nameDictionary.forEach((v, k) => nameTrie.insert(k, { translation: v }, true));
 
   let currentIndex = 0;
-  let resultText = "";
+  let resultText = '';
   while (currentIndex < standardizedText.length) {
     const match = nameTrie.findLongestMatch(standardizedText, currentIndex);
     if (match) {
@@ -139,34 +135,48 @@ export function performTranslation(state, options = {}) {
   const UNAMBIGUOUS_CLOSING = new Set([')', ']', '}', '”', '’', '』', '」', '》', '〉', '】', '〗', '〕', ',', '.', '!', '?', ';', ':', '。', '：', '；', '，', '、', '！', '？', '…', '～']);
   const AMBIGUOUS_QUOTES = new Set(['"', "'"]);
   const ALL_PUNCTUATION = new Set([...UNAMBIGUOUS_OPENING, ...UNAMBIGUOUS_CLOSING, ...AMBIGUOUS_QUOTES]);
-  const lines = processedText.split("\n");
+
+  // Tối ưu hóa: Xây dựng Trie cho temporaryNameDictionary nếu có
+  let tempNameTrie = null;
+  if (temporaryNameDictionary.size > 0) {
+    tempNameTrie = new Trie();
+    temporaryNameDictionary.forEach((v, k) => tempNameTrie.insert(k, { translation: v }));
+  }
+
+  const lines = processedText.split('\n');
   const fragment = document.createDocumentFragment();
 
   lines.forEach(line => {
-    if (line.trim() === "") return;
-    const p = document.createElement("p");
+    const p = document.createElement('p');
+    if (line.trim() === '') {
+      p.innerHTML = '&nbsp;';
+      fragment.appendChild(p);
+      return;
+    }
+
     let isInsideDoubleQuote = false;
     let isInsideSingleQuote = false;
     let capitalizeNextWord = false;
-    let lastChar = "";
+    let lastChar = '';
     let i = 0;
 
     while (i < line.length) {
       const placeholderMatch = line.substring(i).match(/^%%NAME_\d+%%/);
-      let originalWord = "";
+      let originalWord = '';
       let isPlaceholder = false;
+      let placeholderVal = null;
 
       if (placeholderMatch) {
         isPlaceholder = true;
         originalWord = placeholderMatch[0];
+        placeholderVal = placeholders.get(originalWord);
       } else {
         let bestMatch = null;
-        if (temporaryNameDictionary.size > 0) {
-          let longestKey = "";
-          for (const [key] of temporaryNameDictionary.entries()) {
-            if (line.startsWith(key, i) && key.length > longestKey.length) longestKey = key;
+        if (tempNameTrie) {
+          bestMatch = tempNameTrie.findLongestMatch(line, i);
+          if (bestMatch) {
+            bestMatch.value = { translation: bestMatch.value.translation, type: 'temp' };
           }
-          if (longestKey) bestMatch = { key: longestKey, value: { translation: temporaryNameDictionary.get(longestKey), type: "temp" } };
         }
 
         if (!bestMatch) {
@@ -177,9 +187,9 @@ export function performTranslation(state, options = {}) {
           originalWord = bestMatch.key;
           const value = bestMatch.value;
 
-          if (value.type === "Blacklist" || value.translation === "") {
-            const span = document.createElement("span");
-            span.className = "word blacklisted-word";
+          if (value.type === 'Blacklist' || value.translation === '') {
+            const span = document.createElement('span');
+            span.className = 'word blacklisted-word';
             span.dataset.original = originalWord;
             p.appendChild(span);
             lastChar = originalWord.slice(-1);
@@ -193,11 +203,7 @@ export function performTranslation(state, options = {}) {
             while (nonMatchEnd < line.length) {
               if (line.substring(nonMatchEnd).match(/^%%NAME_\d+%%/)) break;
               let isKnownAhead = false;
-              if (temporaryNameDictionary.size > 0) {
-                for (const key of temporaryNameDictionary.keys()) {
-                  if (line.startsWith(key, nonMatchEnd)) { isKnownAhead = true; break; }
-                }
-              }
+              if (tempNameTrie && tempNameTrie.findLongestMatch(line, nonMatchEnd)) isKnownAhead = true;
               if (!isKnownAhead && state.dictionaryTrie.findLongestMatch(line, nonMatchEnd)) isKnownAhead = true;
               if (isKnownAhead || (nonMatchEnd < line.length && ALL_PUNCTUATION.has(line[nonMatchEnd]))) break;
               nonMatchEnd++;
@@ -207,63 +213,73 @@ export function performTranslation(state, options = {}) {
         }
       }
 
-      const span = document.createElement("span");
-      span.className = "word";
-      let textForSpan = "";
+      const span = document.createElement('span');
+      span.className = 'word';
+      let textForSpan = '';
       let isFromNameDict = false;
 
       if (isPlaceholder) {
-        const data = placeholders.get(originalWord);
-        textForSpan = data.translation;
-        span.dataset.original = data.original;
+        textForSpan = placeholderVal.translation;
+        span.dataset.original = placeholderVal.original;
         isFromNameDict = true;
       } else {
         const translationResult = translateWord(originalWord, state.dictionaries, nameDictionary, temporaryNameDictionary);
-        textForSpan = !translationResult.found ? originalWord : (isVietphraseMode ? `(${translationResult.all.join("/")})` : translationResult.best);
+        textForSpan = !translationResult.found ? originalWord : (isVietphraseMode ? `(${translationResult.all.join('/')})` : translationResult.best);
         span.dataset.original = originalWord;
         if (!translationResult.found) {
-          span.classList.add("untranslatable");
-          if (/^[\u4e00-\u9fa5]+$/.test(originalWord)) textForSpan = "";
+          span.classList.add('untranslatable');
+          if (/^[\u4e00-\u9fa5]+$/.test(originalWord)) textForSpan = '';
         }
-        if (isVietphraseMode && translationResult.found) span.classList.add("vietphrase-word");
+        if (isVietphraseMode && translationResult.found) span.classList.add('vietphrase-word');
       }
 
       if (capitalizeNextWord) {
-        const firstChar = textForSpan.trim().charAt(0);
-        if (!/^\d/.test(firstChar) && /\p{L}/u.test(firstChar)) {
-          textForSpan = textForSpan.charAt(0).toUpperCase() + textForSpan.slice(1);
-          capitalizeNextWord = false;
-        } else if (/^\d/.test(firstChar)) {
-          capitalizeNextWord = false;
+        const idx = textForSpan.search(/\p{L}/u);
+        if (idx !== -1) {
+          const firstLetter = textForSpan.charAt(idx);
+          if (!/^\d/.test(firstLetter)) {
+            textForSpan = textForSpan.slice(0, idx) + firstLetter.toUpperCase() + textForSpan.slice(idx + 1);
+            capitalizeNextWord = false;
+          } else {
+            capitalizeNextWord = false;
+          }
         }
       }
 
       span.textContent = textForSpan;
-      if (isFromNameDict) span.classList.add("from-name-dict");
+      if (isFromNameDict) span.classList.add('from-name-dict');
 
       const trimmedText = textForSpan.trim();
       if (/[.!?]$/.test(trimmedText) || UNAMBIGUOUS_OPENING.has(originalWord)) {
         capitalizeNextWord = true;
       }
 
-      let leadingSpace = " ";
+      let leadingSpace = ' ';
       const firstCharOfOriginal = originalWord.charAt(0);
       if (AMBIGUOUS_QUOTES.has(firstCharOfOriginal)) {
         const isDouble = firstCharOfOriginal === '"';
         const isSingle = firstCharOfOriginal === "'";
+        const isOpening = (isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote);
+
         if (originalWord.length === 1) {
-          if ((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote)) capitalizeNextWord = true;
+          if (isOpening) capitalizeNextWord = true;
         }
-        if (!((isDouble && !isInsideDoubleQuote) || (isSingle && !isInsideSingleQuote))) leadingSpace = "";
+
+        if (isOpening) {
+           if (UNAMBIGUOUS_OPENING.has(lastChar)) leadingSpace = '';
+        } else {
+           leadingSpace = '';
+        }
+
         if (isDouble) isInsideDoubleQuote = !isInsideDoubleQuote;
         if (isSingle) isInsideSingleQuote = !isInsideSingleQuote;
       } else {
         if (UNAMBIGUOUS_OPENING.has(lastChar) || (isInsideDoubleQuote && lastChar === '"') || (isInsideSingleQuote && lastChar === "'") || UNAMBIGUOUS_CLOSING.has(firstCharOfOriginal)) {
-          leadingSpace = "";
+          leadingSpace = '';
         }
       }
 
-      if (i === 0 || /\s/.test(lastChar) || textForSpan.trim() === "") leadingSpace = "";
+      if (i === 0 || /\s/.test(lastChar) || textForSpan.trim() === '') leadingSpace = '';
 
       if (leadingSpace) p.appendChild(document.createTextNode(leadingSpace));
       p.appendChild(span);
@@ -274,7 +290,7 @@ export function performTranslation(state, options = {}) {
     fragment.appendChild(p);
   });
 
-  DOMElements.outputPanel.innerHTML = "";
+  DOMElements.outputPanel.innerHTML = '';
   DOMElements.outputPanel.appendChild(fragment);
   setLoading(DOMElements.outputPanel, false);
   if (!options.preserveTempDict) {

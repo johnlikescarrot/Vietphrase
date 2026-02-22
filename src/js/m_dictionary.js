@@ -399,7 +399,7 @@ export function segmentText(text, trie, masterKeySet) {
       // Legacy fallback
       const maxLen = 15;
       for (let len = Math.min(maxLen, textLength - currentIndex); len > 0; len--) {
-        const potentialWord = text.substr(currentIndex, len);
+        const potentialWord = text.slice(currentIndex, currentIndex + len);
         if (masterKeySet.has(potentialWord)) {
           foundWord = potentialWord;
           foundWordLength = len;

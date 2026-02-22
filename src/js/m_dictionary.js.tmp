@@ -1,2 +1,0 @@
-import { HAN_VIET_DICT_NAME, DICTIONARY_FILES } from './m_dictionary.js';
-// Wait, I should read the whole file first to make sure I don't mess up imports.
