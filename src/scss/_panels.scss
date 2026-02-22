@@ -43,8 +43,12 @@
 
         &.search-highlight {
             background-color: var(--accent-color) !important;
-            color: white !important;
+            color: #1a1a2e !important;
             opacity: 1 !important;
+        }
+
+        &.search-dim {
+            opacity: 0.3 !important;
         }
     }
 

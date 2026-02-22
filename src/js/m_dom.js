@@ -63,6 +63,8 @@ const DOMElements = {
   helpModal: document.getElementById('help-modal'),
   closeHelpModalBtn: document.getElementById('close-help-modal-btn'),
   helpOkBtn: document.getElementById('help-ok-btn'),
+  mobileSearchToggle: document.getElementById('mobile-search-toggle'),
+  searchContainer: document.getElementById('search-container'),
 };
 
 export default DOMElements;

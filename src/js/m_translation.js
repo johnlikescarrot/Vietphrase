@@ -237,7 +237,6 @@ export function performTranslation(state, options = {}) {
           }
         }
         span.textContent = textForSpan;
-        if (textForSpan.trim() === '') { leadingSpace = ''; }
         const trimmedText = textForSpan.trim();
         if (/[.!?]$/.test(trimmedText)) {
           capitalizeNextWord = true;
@@ -248,6 +247,7 @@ export function performTranslation(state, options = {}) {
         }
 
         leadingSpace = ' ';
+        if (textForSpan.trim() === '') { leadingSpace = ''; }
         const firstChar = originalWord.charAt(0);
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
           const isDouble = firstChar === '"';

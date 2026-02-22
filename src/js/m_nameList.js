@@ -248,11 +248,13 @@ export function rebuildMasterData(state) {
   console.time('TrieBuiding'); // Bắt đầu đếm thời gian xây dựng Trie
 
   // 1. Xây dựng lại masterKeySet như cũ để các chức năng khác không bị ảnh hưởng
-  const allKeys = [...nameDictionary.keys()];
+  const masterKeySet = new Set(nameDictionary.keys());
   state.dictionaries.forEach(d => {
-    allKeys.push(...d.dict.keys());
+    for (const key of d.dict.keys()) {
+      masterKeySet.add(key);
+    }
   });
-  state.masterKeySet = new Set(allKeys);
+  state.masterKeySet = masterKeySet;
   console.log(`Master key set rebuilt with ${state.masterKeySet.size} unique keys.`);
 
   // 2. Khởi tạo Trie và định nghĩa độ ưu tiên của từ điển

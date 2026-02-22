@@ -265,12 +265,18 @@ export async function loadDictionariesFromFile(files, currentDictionaries, logHa
 
         // Tải lại dữ liệu mới nhất từ CSDL
         const finalLi = logHandler.append('Đang nạp từ điển vào ứng dụng...', 'loading');
-        const newDictionaries = await initializeDictionaries();
-        logHandler.update(finalLi, 'Đã nạp xong.', 'success');
+        try {
+          const newDictionaries = await initializeDictionaries();
+          logHandler.update(finalLi, 'Đã nạp xong.', 'success');
 
-        worker.terminate();
-        logHandler.append('Quá trình hoàn tất.', 'complete');
-        resolve(newDictionaries);
+          worker.terminate();
+          logHandler.append('Quá trình hoàn tất.', 'complete');
+          resolve(newDictionaries);
+        } catch (initError) {
+          logHandler.update(finalLi, `Lỗi khởi tạo từ điển: ${initError.message}`, 'error');
+          worker.terminate();
+          reject(initError);
+        }
       }
     };
 
@@ -319,12 +325,18 @@ export async function loadSingleDictionaryFromFile(file, dictionaryId, currentDi
 
         // Tải lại toàn bộ dữ liệu mới nhất từ CSDL
         const finalLi = logHandler.append('Đang nạp lại từ điển vào ứng dụng...', 'loading');
-        const newDictionaries = await initializeDictionaries();
-        logHandler.update(finalLi, 'Đã nạp xong.', 'success');
+        try {
+          const newDictionaries = await initializeDictionaries();
+          logHandler.update(finalLi, 'Đã nạp xong.', 'success');
 
-        worker.terminate();
-        logHandler.append('Quá trình hoàn tất.', 'complete');
-        resolve(newDictionaries);
+          worker.terminate();
+          logHandler.append('Quá trình hoàn tất.', 'complete');
+          resolve(newDictionaries);
+        } catch (initError) {
+          logHandler.update(finalLi, `Lỗi khởi tạo từ điển: ${initError.message}`, 'error');
+          worker.terminate();
+          reject(initError);
+        }
       }
     };
 

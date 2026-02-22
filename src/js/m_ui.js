@@ -22,7 +22,7 @@ export function updateClock() {
 }
 
 export function initializeSearch(DOMElements) {
-  if (!DOMElements.searchInput) return;
+  if (!DOMElements.searchInput || !DOMElements.outputPanel) return;
 
   const debounce = (func, delay) => {
     let timeout;
@@ -38,25 +38,31 @@ export function initializeSearch(DOMElements) {
 
     words.forEach(word => {
       if (!term) {
-        word.classList.remove('search-highlight');
-        word.style.opacity = '1';
+        word.classList.remove('search-highlight', 'search-dim');
         return;
       }
 
       const text = word.textContent.toLowerCase();
       const original = (word.dataset.original || '').toLowerCase();
+      const matched = text.includes(term) || original.includes(term);
 
-      if (text.includes(term) || original.includes(term)) {
-        word.classList.add('search-highlight');
-        word.style.opacity = '1';
-      } else {
-        word.classList.remove('search-highlight');
-        word.style.opacity = '0.3';
-      }
+      word.classList.toggle('search-highlight', matched);
+      word.classList.toggle('search-dim', !matched);
     });
   };
 
   DOMElements.searchInput.addEventListener('input', debounce(handleSearch, 250));
+
+  // Mobile search toggle logic
+  if (DOMElements.mobileSearchToggle && DOMElements.searchContainer) {
+    DOMElements.mobileSearchToggle.addEventListener('click', () => {
+      const isHidden = DOMElements.searchContainer.classList.toggle('hidden');
+      DOMElements.searchContainer.classList.toggle('flex', !isHidden);
+      if (!isHidden) {
+        DOMElements.searchInput.focus();
+      }
+    });
+  }
 }
 
 export function initializeHelp(DOMElements) {
@@ -65,16 +71,28 @@ export function initializeHelp(DOMElements) {
   const openHelp = () => {
     DOMElements.helpModal.classList.remove('hidden');
     DOMElements.helpModal.setAttribute('aria-hidden', 'false');
+    // Set focus to the primary control
+    if (DOMElements.helpOkBtn) {
+      DOMElements.helpOkBtn.focus();
+    }
   };
 
   const closeHelp = () => {
     DOMElements.helpModal.classList.add('hidden');
     DOMElements.helpModal.setAttribute('aria-hidden', 'true');
+    // Return focus to the trigger button
+    DOMElements.openHelpBtn.focus();
   };
 
   DOMElements.openHelpBtn.addEventListener('click', openHelp);
-  DOMElements.closeHelpModalBtn.addEventListener('click', closeHelp);
-  DOMElements.helpOkBtn.addEventListener('click', closeHelp);
+
+  if (DOMElements.closeHelpModalBtn) {
+    DOMElements.closeHelpModalBtn.addEventListener('click', closeHelp);
+  }
+
+  if (DOMElements.helpOkBtn) {
+    DOMElements.helpOkBtn.addEventListener('click', closeHelp);
+  }
 
   DOMElements.helpModal.addEventListener('click', (e) => {
     if (e.target === DOMElements.helpModal) closeHelp();

@@ -182,10 +182,10 @@ function showQuickEditPanel(selection, state) {
   }
 
   // ĐẢM BẢO KHÔNG TRÀN VIEWPORT (Clamping)
-  if (topPosition < margin) topPosition = margin;
   if (topPosition + panelHeight + margin > viewportHeight) {
     topPosition = viewportHeight - panelHeight - margin;
   }
+  if (topPosition < margin) topPosition = margin;
 
   // Áp dụng vị trí cuối cùng (cộng với vị trí cuộn trang)
   panel.style.left = `${window.scrollX + leftPosition}px`;
@@ -512,31 +512,7 @@ export function initializeModal(state) {
     }
   });
 
-  function updateTranslationInPlace(newText) {
-    const { spans, startIndex, endIndex } = selectionState;
-    if (startIndex === -1 || endIndex === -1) return;
 
-    // Lấy ra các span cũ đang được chọn
-    const spansToRemove = spans.slice(startIndex, endIndex + 1);
-    if (spansToRemove.length === 0) return;
-
-    // Tạo một span mới để thay thế
-    const newSpan = document.createElement('span');
-    newSpan.className = 'word user-defined-temp'; // Thêm class mới để tạo kiểu
-    newSpan.textContent = newText;
-    newSpan.dataset.original = selectionState.originalText;
-
-    // Chèn span mới vào trước span đầu tiên trong vùng chọn
-    const firstSpan = spansToRemove[0];
-    firstSpan.parentNode.insertBefore(newSpan, firstSpan);
-
-    // Xóa tất cả các span cũ
-    spansToRemove.forEach(span => span.remove());
-
-    // Cập nhật lại danh sách các span trong state để các lần chỉnh sửa sau không bị lỗi
-    const allSpansAfterUpdate = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
-    selectionState.spans = allSpansAfterUpdate;
-  }
 
   // CẬP NHẬT BẢN DỊCH TẠI CHỖ
   function updateTranslationInPlace(newText) {
