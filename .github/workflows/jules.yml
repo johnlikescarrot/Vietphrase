@@ -15,4 +15,4 @@ jobs:
         uses: BeksOmega/jules-comms@v1.0.0
         with:
           jules_api_key: ${{ secrets.JULES_API_KEY }}
-          feedback_users: "gemini-code-assist[bot],coderabbitai[bot],bito-code-review[bot],qodo-code-review[bot]"
+          feedback_users: "gemini-code-assist[bot],coderabbitai[bot],bito-code-review[bot],qodo-code-review[bot],cubic-dev-ai[bot]"
