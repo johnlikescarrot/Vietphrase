@@ -170,7 +170,8 @@
         <h2 class="text-xl font-semibold text-text-highlight" aria-hidden="true">Kết quả dịch (Tiếng Việt)</h2>
         <div class="flex items-center gap-4">
           <div id="search-container" class="relative">
-            <input type="text" id="search-input" placeholder="Tìm kiếm..." class="text-sm p-1 rounded bg-bg-input border border-border-color w-32 md:w-48 focus:w-64 transition-all outline-none">
+            <label for="search-input" class="sr-only">Tìm kiếm</label>
+            <input type="text" id="search-input" aria-label="Tìm kiếm" placeholder="Tìm kiếm..." class="text-sm p-1 rounded bg-bg-input border border-border-color w-32 md:w-48 focus:w-64 transition-all outline-none">
           </div>
           <div class="flex items-center gap-2">
             <button id="decrease-font-btn" aria-label="Giảm cỡ chữ" title="Giảm cỡ chữ" class="btn btn-secondary !p-2 w-8 h-8">-</button>
