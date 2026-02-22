@@ -702,3 +702,9 @@ input[type=color]::-moz-color-swatch {
   font-style: italic;
   opacity: 0.8;
 }/*# sourceMappingURL=style.css.map */
+/* Search Highlight - Added for launch readiness */
+#output-panel .word.search-highlight {
+    background-color: var(--accent-color) !important;
+    color: white !important;
+    opacity: 1 !important;
+}

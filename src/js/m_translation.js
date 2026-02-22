@@ -157,10 +157,10 @@ export function performTranslation(state, options = {}) {
     let lastChar = '';
     let i = 0;
     while (i < line.length) {
+      let leadingSpace = ' ';
       const placeholderMatch = line.substring(i).match(/^%%NAME_\d+%%/);
       if (placeholderMatch) {
         const placeholder = placeholderMatch[0];
-        let leadingSpace = ' ';
         if (UNAMBIGUOUS_OPENING.has(lastChar) || (isInsideDoubleQuote && lastChar === '"') || (isInsideSingleQuote && lastChar === "'") || i === 0 || /\s/.test(lastChar)) {
           leadingSpace = '';
         }
@@ -247,7 +247,7 @@ export function performTranslation(state, options = {}) {
           capitalizeNextWord = true;
         }
 
-        let leadingSpace = ' ';
+        leadingSpace = ' ';
         const firstChar = originalWord.charAt(0);
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
           const isDouble = firstChar === '"';
@@ -336,7 +336,7 @@ export function performTranslation(state, options = {}) {
           capitalizeNextWord = true;
         }
 
-        let leadingSpace = ' ';
+        leadingSpace = ' ';
         const firstChar = nonMatchBlock.charAt(0);
         if (AMBIGUOUS_QUOTES.has(firstChar)) {
           const isDouble = firstChar === '"';

@@ -95,6 +95,14 @@
         <button id="import-local-btn" class="btn">Tải Từ Điển (Cá nhân)</button>
         <button id="import-server-btn" class="btn">Tải Từ Điển (Từ Server)</button>
         <button id="clear-db-btn" class="btn btn-secondary">Xóa Từ Điển</button>
+        <button id="open-help-btn" class="btn btn-secondary flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          Hướng dẫn
+        </button>
       </div>
 
     </header>
@@ -169,6 +177,13 @@
       <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
         <h2 class="text-xl font-semibold text-text-highlight" aria-hidden="true">Kết quả dịch (Tiếng Việt)</h2>
         <div class="flex items-center gap-4" aria-hidden="true">
+          <div class="hidden md:flex items-center bg-bg-input border border-border-color rounded-md px-2 focus-within:border-accent-color transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="search-input" placeholder="Tìm trong kết quả..." class="bg-transparent border-none outline-none p-1 text-sm w-32 focus:w-48 transition-all">
+          </div>
           <div class="flex items-center gap-2">
             <button id="decrease-font-btn" title="Giảm cỡ chữ" class="btn btn-secondary !p-2 w-8 h-8">-</button>
             <span id="font-size-label" class="text-sm w-12 text-center" title="Cỡ chữ hiện tại"></span>
@@ -551,6 +566,56 @@
   <input type="file" id="text-file-importer" multiple class="hidden" accept=".txt">
   <input type="file" id="file-importer" multiple class="hidden" accept=".txt">
   <input type="file" id="single-file-importer" class="hidden" accept=".txt">
+  <div id="help-modal" aria-hidden="true" class="fixed inset-0 flex items-center justify-center hidden z-[10002]">
+    <div class="modal-content bg-bg-panel p-6 rounded-lg border border-border-color shadow-2xl w-[90%] max-w-[600px] max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold text-text-highlight">Hướng dẫn sử dụng</h3>
+        <button id="close-help-modal-btn" class="p-1 hover:text-accent-color transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-6 text-sm leading-relaxed text-text-color">
+        <section>
+          <h4 class="text-lg font-bold text-accent-color mb-2">1. Bắt đầu dịch</h4>
+          <p>Dán văn bản tiếng Trung vào ô nhập liệu bên trái. Nhấn nút <strong>Dịch</strong> hoặc chuột phải vào nút Dịch để <strong>Dán & Dịch</strong> nhanh.</p>
+        </section>
+
+        <section>
+          <h4 class="text-lg font-bold text-accent-color mb-2">2. Chỉnh sửa nhanh</h4>
+          <p>Nhấn vào bất kỳ từ nào trong kết quả dịch để mở <strong>Bảng Dịch Nhanh</strong>. Tại đây bạn có thể chọn nghĩa khác hoặc thêm vào danh sách Name tạm thời/vĩnh viễn.</p>
+        </section>
+
+        <section>
+          <h4 class="text-lg font-bold text-accent-color mb-2">3. Quản lý Name (Thuật ngữ)</h4>
+          <p>Sử dụng tab <strong>Bảng Thuật Ngữ</strong> để quản lý danh sách tên riêng và cụm từ tùy chỉnh của bạn. Bạn có thể Nhập/Xuất file .txt để lưu trữ.</p>
+        </section>
+
+        <section>
+          <h4 class="text-lg font-bold text-accent-color mb-2">4. Tìm kiếm & Tùy chỉnh</h4>
+          <p>Sử dụng thanh tìm kiếm phía trên kết quả dịch để tìm nhanh các từ cụ thể. Bạn cũng có thể thay đổi cỡ chữ, màu nền và font trong phần <strong>Cài đặt</strong>.</p>
+        </section>
+
+        <section>
+          <h4 class="text-lg font-bold text-accent-color mb-2">5. Phím tắt</h4>
+          <ul class="list-disc list-inside space-y-1">
+            <li><strong>Double Click:</strong> Mở bảng chỉnh sửa chuyên sâu.</li>
+            <li><strong>Phím mũi tên:</strong> Di chuyển giữa các từ trong bảng gợi ý.</li>
+            <li><strong>Enter:</strong> Chọn nghĩa đang highlight.</li>
+            <li><strong>Esc:</strong> Đóng các bảng điều khiển.</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="mt-8 flex justify-center">
+        <button id="help-ok-btn" class="btn px-8">Đã hiểu!</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="src/js/main.js"></script>
 </body>
 

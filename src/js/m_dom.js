@@ -58,6 +58,11 @@ const DOMElements = {
   qDeleteBtn: document.getElementById('q-delete-btn'),
   qLockBtn: document.getElementById('q-lock-btn'),
   qCloseBtn: document.getElementById('q-close-btn'),
+  searchInput: document.getElementById('search-input'),
+  openHelpBtn: document.getElementById('open-help-btn'),
+  helpModal: document.getElementById('help-modal'),
+  closeHelpModalBtn: document.getElementById('close-help-modal-btn'),
+  helpOkBtn: document.getElementById('help-ok-btn'),
 };
 
 export default DOMElements;

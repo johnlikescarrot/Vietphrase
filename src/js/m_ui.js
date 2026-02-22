@@ -30,3 +30,52 @@ export function updateClock() {
 
   clockElement.textContent = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+export function initializeSearch(DOMElements) {
+  if (!DOMElements.searchInput) return;
+
+  DOMElements.searchInput.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase().trim();
+    const words = DOMElements.outputPanel.querySelectorAll('.word');
+
+    words.forEach(word => {
+      if (!term) {
+        word.classList.remove('search-highlight');
+        word.style.opacity = '1';
+        return;
+      }
+
+      const text = word.textContent.toLowerCase();
+      const original = (word.dataset.original || '').toLowerCase();
+
+      if (text.includes(term) || original.includes(term)) {
+        word.classList.add('search-highlight');
+        word.style.opacity = '1';
+      } else {
+        word.classList.remove('search-highlight');
+        word.style.opacity = '0.3';
+      }
+    });
+  });
+}
+
+export function initializeHelp(DOMElements) {
+  if (!DOMElements.openHelpBtn || !DOMElements.helpModal) return;
+
+  const openHelp = () => {
+    DOMElements.helpModal.classList.remove('hidden');
+    DOMElements.helpModal.setAttribute('aria-hidden', 'false');
+  };
+
+  const closeHelp = () => {
+    DOMElements.helpModal.classList.add('hidden');
+    DOMElements.helpModal.setAttribute('aria-hidden', 'true');
+  };
+
+  DOMElements.openHelpBtn.addEventListener('click', openHelp);
+  DOMElements.closeHelpModalBtn.addEventListener('click', closeHelp);
+  DOMElements.helpOkBtn.addEventListener('click', closeHelp);
+
+  DOMElements.helpModal.addEventListener('click', (e) => {
+    if (e.target === DOMElements.helpModal) closeHelp();
+  });
+}

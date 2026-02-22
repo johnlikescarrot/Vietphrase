@@ -1,0 +1,13 @@
+127.0.0.1 - - [22/Feb/2026 15:04:30] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:30] "GET /src/scss/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:30] "GET /src/js/main.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:30] "GET /lib/tailwindcss.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:31] "GET /src/js/m_dom.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:31] "GET /src/js/m_dictionary.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:31] "GET /src/js/m_nameList.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:31] "GET /src/js/m_modal.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:31] "GET /src/js/m_dialog.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:31] "GET /src/js/m_translation.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:31] "GET /src/js/m_ui.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:31] "GET /src/js/m_settings.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Feb/2026 15:04:31] "GET /src/js/m_preprocessor.js HTTP/1.1" 200 -

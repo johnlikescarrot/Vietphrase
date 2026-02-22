@@ -40,6 +40,12 @@
             color: #ffffff; // Chữ màu trắng
             cursor: pointer;
         }
+
+        &.search-highlight {
+            background-color: var(--accent-color) !important;
+            color: white !important;
+            opacity: 1 !important;
+        }
     }
 
     .untranslatable {

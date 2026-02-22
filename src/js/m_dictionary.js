@@ -162,9 +162,13 @@ export async function loadDictionariesFromServer(logHandler) {
       }
       const loadingLi = logHandler.append(`Đang tải ${fileInfo.id}...`, 'loading');
       if (response && response.ok) {
-        const content = await response.text();
-        filesContent.push({ content, fileInfo });
-        logHandler.update(loadingLi, `Đã tải xong: ${foundName}`, 'success');
+        try {
+          const content = await response.text();
+          filesContent.push({ content, fileInfo });
+          logHandler.update(loadingLi, `Đã tải xong: ${foundName}`, 'success');
+        } catch (textError) {
+          logHandler.update(loadingLi, `Lỗi đọc dữ liệu từ server (${fileInfo.id}): ${textError.message}`, 'error');
+        }
       } else {
         logHandler.update(loadingLi, `Không tìm thấy ${fileInfo.id} trên server.`, 'info');
       }
@@ -188,12 +192,18 @@ export async function loadDictionariesFromServer(logHandler) {
 
         // Tải lại dữ liệu mới nhất từ CSDL 
         const finalLi = logHandler.append('Đang nạp từ điển vào ứng dụng...', 'loading');
-        const newDictionaries = await initializeDictionaries();
-        logHandler.update(finalLi, 'Đã nạp xong.', 'success');
+        try {
+          const newDictionaries = await initializeDictionaries();
+          logHandler.update(finalLi, 'Đã nạp xong.', 'success');
 
-        worker.terminate();
-        logHandler.append('Quá trình hoàn tất.', 'complete');
-        resolve(newDictionaries);
+          worker.terminate();
+          logHandler.append('Quá trình hoàn tất.', 'complete');
+          resolve(newDictionaries);
+        } catch (initError) {
+          logHandler.update(finalLi, `Lỗi khởi tạo từ điển: ${initError.message}`, 'error');
+          worker.terminate();
+          reject(initError);
+        }
       }
     };
 

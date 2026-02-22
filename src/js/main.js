@@ -4,7 +4,7 @@ import { customAlert, customConfirm } from './m_dialog.js';
 import { initializeNameList, rebuildMasterData, renderNameList, temporaryNameDictionary } from './m_nameList.js';
 import { initializeModal } from './m_modal.js';
 import { performTranslation } from './m_translation.js';
-import { updateClock } from './m_ui.js';
+import { updateClock, initializeSearch, initializeHelp } from './m_ui.js';
 import { initializeSettings } from './m_settings.js';
 
 function appendLog(message, type) {
@@ -62,6 +62,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initializeSettings();
   initializeNameList(state);
   initializeModal(state);
+  initializeSearch(DOMElements);
+  initializeHelp(DOMElements);
 
   const updateState = (newDicts) => {
     state.dictionaries = newDicts;

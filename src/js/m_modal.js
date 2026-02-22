@@ -181,6 +181,12 @@ function showQuickEditPanel(selection, state) {
     topPosition = rect.bottom + margin;
   }
 
+  // ĐẢM BẢO KHÔNG TRÀN VIEWPORT (Clamping)
+  if (topPosition < margin) topPosition = margin;
+  if (topPosition + panelHeight + margin > viewportHeight) {
+    topPosition = viewportHeight - panelHeight - margin;
+  }
+
   // Áp dụng vị trí cuối cùng (cộng với vị trí cuộn trang)
   panel.style.left = `${window.scrollX + leftPosition}px`;
   panel.style.top = `${window.scrollY + topPosition}px`;
