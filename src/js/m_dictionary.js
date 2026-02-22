@@ -102,7 +102,7 @@ async function saveDataToDB(db, data) {
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.put(data);
-    request.onerror = () => reject("Không thể lưu dữ liệu vào DB.");
+    request.onerror = () => reject(new Error("Không thể lưu dữ liệu vào DB."));
     request.onsuccess = () => resolve();
   });
 }
@@ -112,23 +112,19 @@ async function getDataFromDB(db, id) {
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(id);
-    request.onerror = () => reject("Không thể đọc dữ liệu từ DB.");
+    request.onerror = () => reject(new Error("Không thể đọc dữ liệu từ DB."));
     request.onsuccess = () => resolve(request.result);
   });
 }
 
 export async function clearAllDictionaries() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const db = await openDB();
-      const transaction = db.transaction([STORE_NAME], 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.clear();
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject('Không thể xóa dữ liệu.');
-    } catch (error) {
-      reject(error);
-    }
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(new Error('Không thể xóa dữ liệu.'));
   });
 }
 

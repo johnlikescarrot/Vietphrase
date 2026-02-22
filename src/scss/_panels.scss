@@ -102,6 +102,11 @@
     transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
     opacity: 0;
     transform: translateY(10px);
+
+    &:not(.hidden) {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 // Loader is a full-screen panel

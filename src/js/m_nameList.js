@@ -2,9 +2,7 @@ import DOMElements from './m_dom.js';
 import { debounce } from './m_utils.js';
 import { customConfirm } from './m_dialog.js';
 import { performTranslation } from './m_translation.js';
-import { standardizeDictionaryLine } from './m_preprocessor.js';
 
-// CẤU TRÚC DỮ LIỆU TRIE ĐỂ TĂNG TỐC TÌM KIẾM
 class TrieNode {
   constructor() {
     this.children = {};
@@ -49,31 +47,12 @@ class Trie {
     }
     return longestMatch;
   }
-
-  findAllMatches(text, startIndex) {
-    let node = this.root;
-    const matches = [];
-    for (let i = startIndex; i < text.length; i++) {
-      const char = text[i];
-      if (!node.children[char]) {
-        break;
-      }
-      node = node.children[char];
-      if (node.value !== null) {
-        matches.push({
-          key: text.substring(startIndex, i + 1),
-          value: node.value,
-        });
-      }
-    }
-    return matches;
-  }
 }
 
 export let nameDictionary = new Map();
 export let temporaryNameDictionary = new Map();
 
-function renderSortedNameList(sortType = 'newest') {
+export function renderNameList(sortType = 'newest') {
   if (nameDictionary.size === 0) {
     DOMElements.nameListTextarea.value = '';
     return;
@@ -108,6 +87,22 @@ function renderSortedNameList(sortType = 'newest') {
   DOMElements.nameListTextarea.value = text;
 }
 
+export function saveNameDictionaryToStorage() {
+  localStorage.setItem('nameDictionary', JSON.stringify(Array.from(nameDictionary.entries())));
+}
+
+function loadNameDictionaryFromStorage() {
+  const stored = localStorage.getItem('nameDictionary');
+  if (stored) {
+    try {
+        nameDictionary = new Map(JSON.parse(stored));
+    } catch (e) {
+        console.error("Lỗi khi load Name List:", e);
+        nameDictionary = new Map();
+    }
+  }
+}
+
 export function initializeNameList(state) {
   loadNameDictionaryFromStorage();
   renderNameList();
@@ -116,38 +111,34 @@ export function initializeNameList(state) {
   const sortBtn = document.getElementById('name-list-sort-btn');
   const sortDropdown = document.getElementById('name-list-sort-dropdown');
 
-  sortBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    sortDropdown.classList.toggle('hidden');
-  });
+  if (sortBtn && sortDropdown) {
+      sortBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sortDropdown.classList.toggle('hidden');
+      });
 
-  document.querySelectorAll('.sort-option').forEach(button => {
-    button.addEventListener('click', () => {
-      const sortType = button.dataset.sort;
-      renderSortedNameList(sortType);
-      sortDropdown.classList.add('hidden');
-    });
-  });
+      document.addEventListener('click', () => {
+        sortDropdown.classList.add('hidden');
+      });
 
-  document.addEventListener('click', (e) => {
-    if (!sortBtn.contains(e.target) && !sortDropdown.contains(e.target)) {
-      sortDropdown.classList.add('hidden');
-    }
-  });
+      sortDropdown.querySelectorAll('.sort-option').forEach(option => {
+        option.addEventListener('click', () => {
+          renderNameList(option.dataset.sort);
+          sortDropdown.classList.add('hidden');
+        });
+      });
+  }
 
   DOMElements.nameListSaveBtn.addEventListener('click', () => {
-    const rawText = DOMElements.nameListTextarea.value;
-    // Chuẩn hóa từng dòng trong Name List trước khi parse và lưu
-    const standardizedText = rawText
-      .split(/\r?\n/)
-      .map(standardizeDictionaryLine)
-      .join('\n');
-
-    // Gán lại giá trị đã chuẩn hóa vào ô textarea để người dùng thấy
-    DOMElements.nameListTextarea.value = standardizedText;
-
-    nameDictionary = parseDictionary(standardizedText);
-
+    const text = DOMElements.nameListTextarea.value;
+    const newDict = new Map();
+    text.split('\n').forEach(line => {
+      const parts = line.split('=');
+      if (parts.length >= 2) {
+        newDict.set(parts[0].trim(), parts[1].trim());
+      }
+    });
+    nameDictionary = newDict;
     saveNameDictionaryToStorage();
     rebuildMasterData(state);
     performTranslation(state, { forceText: state.lastTranslatedText });
@@ -157,10 +148,8 @@ export function initializeNameList(state) {
     DOMElements.nameListSaveBtn.disabled = true;
     setTimeout(() => {
       DOMElements.nameListSaveBtn.textContent = originalText;
-
       DOMElements.nameListSaveBtn.disabled = false;
     }, 1500);
-
   });
 
   DOMElements.nameListDeleteBtn.addEventListener('click', async () => {
@@ -169,113 +158,68 @@ export function initializeNameList(state) {
       saveNameDictionaryToStorage();
       renderNameList();
       rebuildMasterData(state);
-    performTranslation(state, { forceText: state.lastTranslatedText });
+      performTranslation(state, { forceText: state.lastTranslatedText });
     }
-
   });
 
   DOMElements.nameListExportBtn.addEventListener('click', () => {
-    const text = DOMElements.nameListTextarea.value;
+    const text = Array.from(nameDictionary.entries()).map(([cn, vn]) => `${cn}=${vn}`).join('\n');
     const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'NameList.txt';
+    a.href = url;
+    a.download = 'NamesUser.txt';
     a.click();
-    URL.revokeObjectURL(a.href);
+    URL.revokeObjectURL(url);
   });
-  DOMElements.nameListImportBtn.addEventListener('click', () => DOMElements.nameListFileInput.click());
+
+  DOMElements.nameListImportBtn.addEventListener('click', () => {
+    DOMElements.nameListFileInput.click();
+  });
+
   DOMElements.nameListFileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        DOMElements.nameListTextarea.value = event.target.result;
-        DOMElements.nameListSaveBtn.click();
-
-      };
-      reader.readAsText(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target.result;
+      text.split('\n').forEach(line => {
+        const parts = line.split('=');
+        if (parts.length >= 2) {
+          nameDictionary.set(parts[0].trim(), parts[1].trim());
+        }
+      });
+      saveNameDictionaryToStorage();
+      renderNameList();
+      rebuildMasterData(state);
+      performTranslation(state, { forceText: state.lastTranslatedText });
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   });
 }
 
-function parseDictionary(text) {
-  const dictionary = new Map();
-  const lines = text.split(/\r?\n/);
-  lines.forEach(line => {
-    if (line.startsWith('#') || line.trim() === '') return;
-    const parts = line.split('=');
-    if (parts.length >= 2) {
-      let key = parts[0].trim();
-      const value = parts.slice(1).join('=').trim();
-      if (key.startsWith('$')) {
-        // Nếu có, loại bỏ ký tự '$' ở đầu đi
-        key = key.substring(1).trim();
-      }
-
-      if (key) {
-        dictionary.set(key, value);
-      }
-    }
-  });
-  return dictionary;
-}
-
-export function renderNameList() {
-  if (nameDictionary.size === 0) {
-    DOMElements.nameListTextarea.value = '';
-    return;
-  }
-  const sortedNames = [...nameDictionary.entries()];
-  const text = sortedNames.map(([cn, vn]) => `${cn}=${vn}`).join('\n');
-  DOMElements.nameListTextarea.value = text;
-}
-
-export function saveNameDictionaryToStorage() {
-  localStorage.setItem('nameDictionary', JSON.stringify(Array.from(nameDictionary.entries())));
-}
-
-function loadNameDictionaryFromStorage() {
-  const stored = localStorage.getItem('nameDictionary');
-  if (stored) nameDictionary = new Map(JSON.parse(stored));
-}
-
-export const debouncedRebuildMasterData = debounce((state, shouldTranslate) => rebuildMasterData(state, shouldTranslate), 100);
+export const debouncedRebuildMasterData = debounce((state) => rebuildMasterData(state), 100);
 
 export function rebuildMasterData(state) {
-  if (!state || !state.dictionaries) {
-    console.warn("rebuildMasterData được gọi nhưng từ điển chưa sẵn sàng.");
-    return;
-  }
+  if (!state || !state.dictionaries) return;
 
-  console.time('rebuildMasterData'); // Bắt đầu đếm thời gian xây dựng Trie
-
-  // 1. Xây dựng lại masterKeySet như cũ để các chức năng khác không bị ảnh hưởng
   state.masterKeySet = new Set([...nameDictionary.keys()]);
   state.dictionaries.forEach(d => {
     d.dict.forEach((_, key) => state.masterKeySet.add(key));
   });
-  console.log(`Master key set rebuilt with ${state.masterKeySet.size} unique keys.`);
 
-  // 2. Khởi tạo Trie và định nghĩa độ ưu tiên của từ điển
   const dictionaryTrie = new Trie();
   const priorityOrder = [
-    'NamesUser',
-    'Names2', 'Names',
-    'LuatNhan',
-    'Vietphrase', 'Chapter', 'Number',
-    'Pronouns', 'PhienAm',
-    'English',
-    'Blacklist'
+    'NamesUser', 'Names2', 'Names', 'LuatNhan', 'Vietphrase',
+    'Chapter', 'Number', 'Pronouns', 'PhienAm', 'English', 'Blacklist'
   ];
 
   const allDictionaries = new Map(state.dictionaries);
-
-  // Thêm Name List của người dùng vào như một từ điển riêng với độ ưu tiên cao nhất (0)
   if (nameDictionary.size > 0) {
     allDictionaries.set('NamesUser', { priority: 0, dict: nameDictionary });
   }
 
-  // 3. Nạp từ điển vào Trie theo đúng thứ tự ưu tiên
   priorityOrder.forEach(dictName => {
     const dictInfo = allDictionaries.get(dictName);
     if (dictInfo && dictInfo.dict) {
@@ -285,26 +229,11 @@ export function rebuildMasterData(state) {
     }
   });
 
-  state.dictionaryTrie = dictionaryTrie; // Lưu Trie vào state
-  console.timeEnd('rebuildMasterData'); // Kết thúc đếm thời gian
-
+  state.dictionaryTrie = dictionaryTrie;
 }
 
-// Hàm tối ưu chỉ để xóa một từ khỏi Trie và Set mà không cần rebuild toàn bộ
 export function updateMasterDataForDeletion(cn, state) {
-  if (!state || !state.masterKeySet || !state.dictionaryTrie) {
-    console.warn("updateMasterDataForDeletion được gọi nhưng state chưa sẵn sàng.");
-    return;
-  }
-
-  // Chỉ cần xóa khỏi Set
+  if (!state || !state.masterKeySet || !state.dictionaryTrie) return;
   state.masterKeySet.delete(cn);
-
-  // Và "xóa" khỏi Trie bằng cách ghi đè giá trị của nó thành null.
-  // Thao tác này cực kỳ nhanh so với việc build lại toàn bộ Trie.
   state.dictionaryTrie.insert(cn, null, true);
-}
-
-, delay);
-  };
 }

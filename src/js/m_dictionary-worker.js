@@ -57,7 +57,7 @@ async function saveDataToDB(db, data) {
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.put(data);
-    request.onerror = () => reject("Không thể lưu dữ liệu vào DB từ Worker.");
+    request.onerror = () => reject(new Error("Không thể lưu dữ liệu vào DB từ Worker."));
     request.onsuccess = () => resolve();
   });
 }
@@ -67,7 +67,7 @@ async function getDataFromDB(db, id) {
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(id);
-    request.onerror = () => reject("Không thể đọc dữ liệu từ DB từ Worker.");
+    request.onerror = () => reject(new Error("Không thể đọc dữ liệu từ DB từ Worker."));
     request.onsuccess = () => resolve(request.result);
   });
 }
