@@ -1,4 +1,5 @@
 import DOMElements from './m_dom.js';
+import { showModalWithAnimation, hideModalWithAnimation } from './m_utils.js';
 
 // DOM Elements cho cài đặt
 const settingsBtn = document.getElementById('settings-btn');
@@ -25,6 +26,8 @@ let settings = {
   lineHeight: 1.6,
   width: 1400
 };
+
+let isOpen = false;
 
 // Lưu cài đặt vào localStorage
 function saveSettings() {
@@ -64,6 +67,7 @@ function loadSettings() {
 
 // Cập nhật trạng thái 'active' cho ô màu được chọn
 function updateActiveColorBox(container, color) {
+  if (!container) return;
   container.querySelectorAll('.color-box').forEach(box => {
     if (box.dataset.color === color) {
       box.classList.add('active');
@@ -76,19 +80,29 @@ function updateActiveColorBox(container, color) {
 export function initializeSettings() {
   if (!settingsBtn || !settingsPanel) return;
 
+  function hideSettingsPanel() {
+    isOpen = false;
+    hideModalWithAnimation(settingsPanel);
+  }
+
   // Mở/đóng bảng cài đặt
   settingsBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    settingsPanel.classList.toggle('hidden');
-    // Định vị lại panel gần nút settings
-    const btnRect = settingsBtn.getBoundingClientRect();
-    settingsPanel.style.top = `${btnRect.bottom + window.scrollY + 5}px`;
-    settingsPanel.style.right = `${window.innerWidth - btnRect.right - window.scrollX}px`;
+    if (!isOpen) {
+      isOpen = true;
+      const btnRect = settingsBtn.getBoundingClientRect();
+      settingsPanel.style.top = `${btnRect.bottom + window.scrollY + 5}px`;
+      settingsPanel.style.right = `${window.innerWidth - btnRect.right - window.scrollX}px`;
+      showModalWithAnimation(settingsPanel);
+    } else {
+      hideSettingsPanel();
+    }
   });
-  closeBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+
+  closeBtn.addEventListener('click', hideSettingsPanel);
   document.addEventListener('click', (e) => {
-    if (!settingsPanel.classList.contains('hidden') && !settingsPanel.contains(e.target) && e.target !== settingsBtn) {
-      settingsPanel.classList.add('hidden');
+    if (isOpen && !settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+      hideSettingsPanel();
     }
   });
 

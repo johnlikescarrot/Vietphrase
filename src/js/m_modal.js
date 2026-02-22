@@ -1,590 +1,201 @@
 import DOMElements from './m_dom.js';
-import { getHanViet, translateWord, segmentText, getAllMeanings } from './m_dictionary.js';
+import { getHanViet, getAllMeanings } from './m_dictionary.js';
+import { debounce } from './m_utils.js';
 import { nameDictionary, temporaryNameDictionary, saveNameDictionaryToStorage, renderNameList, rebuildMasterData, updateMasterDataForDeletion } from './m_nameList.js';
-import { synthesizeCompoundTranslation, performTranslation } from './m_translation.js';
+import { performTranslation } from './m_translation.js';
 import { customConfirm } from './m_dialog.js';
 
-// XỬ LÝ VIỆC THÊM NAME
-function addPermanentName(cn, vn, state) {
-  if (!cn) return;
-
-  // 1. Cập nhật từ điển và lưu trữ
-  nameDictionary.set(cn, vn);
-  saveNameDictionaryToStorage();
-  renderNameList();
-
-  // 2. Cập nhật "bộ não" Trie một cách nhanh chóng
-  state.masterKeySet.add(cn);
-  state.dictionaryTrie.insert(cn, { translation: vn, type: 'name' }, true);
-
-  // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi, giữ lại từ điển tạm thời
-  performTranslation(state, { forceText: state.lastTranslatedText, preserveTempDict: true });
-}
-
-// XỬ LÝ VIỆC XÓA NAME
-async function deletePermanentName(cn, state) {
-  if (!cn || !nameDictionary.has(cn)) return;
-
-  if (await customConfirm(`Bạn có chắc muốn xóa "${cn}" khỏi Bảng Thuật Ngữ?`)) {
-    // 1. Cập nhật từ điển và lưu trữ
-    nameDictionary.delete(cn);
-    saveNameDictionaryToStorage();
-    renderNameList();
-
-    // 2. Cập nhật lại "bộ não" dịch LẠI HOÀN TOÀN
-    rebuildMasterData(state);
-
-    // 3. Dịch lại toàn bộ văn bản để áp dụng thay đổi, giữ lại từ điển tạm thời
-    performTranslation(state, { forceText: state.lastTranslatedText, preserveTempDict: true });
-  }
-}
-
-function debounce(func, delay) {
-  let timeout;
-  return function (...args) {
-    const context = this;
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), delay);
-  };
-}
-
-let selectionState = {
-  spans: [],
-  startIndex: -1,
-  endIndex: -1,
-  originalText: '',
-};
-let isPanelVisible = false;
-let isPanelLocked = localStorage.getItem('isPanelLocked') === 'true';
 let isEditModalLocked = localStorage.getItem('isEditModalLocked') === 'true';
+let isPanelLocked = localStorage.getItem('isQuickEditLocked') === 'true';
+let isPanelVisible = false;
 
-function applyCase(caseType) {
-  const input = DOMElements.customMeaningInput;
-  let text = input.value;
-  if (!text) return;
-  switch (caseType) {
-    case 'cap': text = text.charAt(0).toUpperCase() + text.slice(1).toLowerCase(); break;
-    case 'upper': text = text.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '); break;
-    case 'cap2':
-      const words2 = text.split(' ');
-      text = words2.slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') + (words2.length > 2 ? ' ' + words2.slice(2).map(word => word.toLowerCase()).join(' ') : '');
-      break;
-    case 'lowerLast':
-      const words = text.split(' ');
-      if (words.length > 1) {
-        const firstPart = words.slice(0, -1)
-          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-          .join(' ');
-        const lastPart = words[words.length - 1].toLowerCase();
-        text = `${firstPart} ${lastPart}`;
-      } else {
-        text = text.toLowerCase();
-      }
-      break;
-    case 'hanviet-upper':
-      text = text.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      break;
-    case 'hanviet-lower':
-      text = text.toLowerCase();
-      break;
-  }
-  input.value = text;
-}
+const selectionState = {
+  text: '',
+  originalText: '',
+  spans: null,
+  startIndex: -1,
+  endIndex: -1
+};
 
-function groupSimilarMeanings(meanings, state) {
-  if (meanings.length <= 1) return meanings.join(' / ');
-  const segments = segmentText(meanings.join(''), state.masterKeySet);
-  const vpParts = segments.map(segment => {
-    if (!/[\u4e00-\u9fa5]/.test(segment)) {
-      return segment;
-    }
-    const translation = translateWord(segment, state.dictionaries, nameDictionary, temporaryNameDictionary);
-    const meanings = translation.all;
-    if (meanings.length > 1) {
-      return `(${meanings.join('/')})`;
-    }
-    else if (meanings.length === 1) {
-      return meanings[0];
-    } else {
-      return segment;
-    }
-  });
-  return vpParts.join(' ');
-}
+export function updateLockIcon(button, isLocked, tooltips) {
+  if (!button) return;
+  const svgLocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
+  const svgUnlocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
 
-function closeOldModal() {
-  DOMElements.editModal.style.display = 'none';
-  DOMElements.vietphraseOptionsContainer.classList.add('hidden');
-}
-
-function showQuickEditPanel(selection, state) {
-  const range = selection.getRangeAt(0);
-  const allSpans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
-
-  // Lấy tất cả các span nằm trong vùng người dùng chọn
-  const initiallySelectedSpans = allSpans.filter(span => selection.containsNode(span, true));
-
-  // Nếu không chọn được span nào thì thoát
-  if (initiallySelectedSpans.length === 0) {
-    if (isPanelVisible && !isPanelLocked) hideQuickEditPanel();
-    return;
-  }
-
-  // Xác định chỉ số bắt đầu và kết thúc ban đầu
-  let startIndex = allSpans.indexOf(initiallySelectedSpans[0]);
-  let endIndex = allSpans.indexOf(initiallySelectedSpans[initiallySelectedSpans.length - 1]);
-
-  // Cập nhật lại trạng thái với vùng chọn đã được mở rộng
-  selectionState.startIndex = startIndex;
-  selectionState.endIndex = endIndex;
-  selectionState.spans = allSpans;
-  const finalSpans = allSpans.slice(startIndex, endIndex + 1);
-  selectionState.originalText = finalSpans.map(s => s.dataset.original).join('');
-
-  populateQuickEditPanel(selectionState.originalText, state, true);
-
-  // ===== CĂN LỀ BẢNG DỊCH NHANH =====
-  const panel = DOMElements.quickEditPanel;
-  const rect = range.getBoundingClientRect();
-
-  panel.style.visibility = 'hidden';
-  panel.classList.remove('hidden');
-
-  const panelWidth = panel.offsetWidth;
-  const panelHeight = panel.offsetHeight;
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const margin = 5; // Khoảng cách lề
-
-  // --- Tính toán vị trí chiều ngang (Trái/Phải) ---
-  let leftPosition = rect.left; // Bắt đầu bằng cách căn lề trái của panel với lề trái của chữ
-
-  // Nếu tràn lề phải, thử căn lề phải của panel với lề phải của chữ
-  if (leftPosition + panelWidth + margin > viewportWidth) {
-    leftPosition = rect.right - panelWidth;
-  }
-
-  // Sau khi điều chỉnh, nếu vẫn tràn lề trái, đặt nó ở sát lề trái màn hình
-  if (leftPosition < margin) {
-    leftPosition = margin;
-  }
-
-  // --- Tính toán vị trí chiều dọc (Trên/Dưới) ---
-  let topPosition;
-
-  // Kiểm tra xem có bị tràn lề dưới VÀ có đủ không gian ở trên không
-  if (rect.bottom + panelHeight + margin > viewportHeight && rect.top > panelHeight + margin) {
-    // Nếu có, hiển thị panel BÊN TRÊN chữ
-    topPosition = rect.top - panelHeight - margin;
-  } else {
-    // Nếu không, hiển thị panel BÊN DƯỚI như bình thường
-    topPosition = rect.bottom + margin;
-  }
-
-  // Áp dụng vị trí cuối cùng (cộng với vị trí cuộn trang)
-  panel.style.left = `${window.scrollX + leftPosition}px`;
-  panel.style.top = `${window.scrollY + topPosition}px`;
-
-  panel.style.visibility = 'visible';
-  isPanelVisible = true;
-}
-
-function populateQuickEditPanel(text, state, isInitialLoad = false) {
-  DOMElements.qInputZw.value = text;
-  // Lấy tất cả các nghĩa bằng hàm đã được nâng cấp
-  const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
-  // Điền Hán Việt
-  if (allMeanings.hanviet) {
-    const hanvietLower = allMeanings.hanviet.toLowerCase();
-    DOMElements.qInputHv.value = hanvietLower;
-    DOMElements.qInputHV.value = hanvietLower.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-  } else {
-    DOMElements.qInputHv.value = '';
-    DOMElements.qInputHV.value = '';
-  }
-
-  // Luôn cập nhật [Vp] mỗi khi chữ Hán thay đổi
-  let vpDisplayValue = '';
-  const vpMeaningsForFullPhrase = allMeanings.vietphrase;
-
-  // Ưu tiên 1: Hiển thị nghĩa của cả cụm từ nếu có.
-  if (vpMeaningsForFullPhrase.length > 0) {
-    vpDisplayValue = vpMeaningsForFullPhrase.join('/');
-  }
-
-  // Ưu tiên 2: Nếu là từ ghép (>1 ký tự) và không có nghĩa chung, thì ghép nghĩa của từng ký tự.
-  else if (text.length > 1) {
-    const charMeaningsList = text.split('')
-      .filter(char => /[\u4e00-\u9fa5]/.test(char)) // Chỉ xử lý ký tự tiếng Trung
-      .map(char => {
-        const meanings = getAllMeanings(char, state.dictionaries, nameDictionary).vietphrase;
-        return meanings.length > 0 ? meanings.join('/') : null; // Trả về null nếu ký tự không có nghĩa
-      })
-      .filter(Boolean);// Lọc bỏ các kết quả null
-    vpDisplayValue = charMeaningsList.join(' | ');
-  }
-
-  DOMElements.qInputVp.value = vpDisplayValue;
-
-  // Chỉ điền [tc] khi bảng được mở lần đầu để không ghi đè nội dung người dùng đã sửa
-  if (isInitialLoad) {
-    // Ô tùy chỉnh vẫn ưu tiên Name List đầu tiên
-    DOMElements.qInputTc.value = allMeanings.name || '';
-  }
-
-  // Vô hiệu hóa nút xóa nếu từ không có trong Name List
-  DOMElements.qDeleteBtn.disabled = !nameDictionary.has(text);
-}
-
-function hideQuickEditPanel() {
-  if (isPanelVisible) {
-    DOMElements.quickEditPanel.classList.add('hidden');
-    isPanelVisible = false;
-    if (window.getSelection) {
-      window.getSelection().removeAllRanges();
-    }
-  }
-}
-
-function expandQuickSelection(direction, state) {
-  const { spans, startIndex, endIndex } = selectionState;
-  let newStart = startIndex, newEnd = endIndex;
-
-  if (direction === 'left' && startIndex > 0) newStart--;
-  else if (direction === 'right' && endIndex < spans.length - 1) newEnd++;
-  else return;
-  selectionState.startIndex = newStart;
-  selectionState.endIndex = newEnd;
-  selectionState.originalText = spans.slice(newStart, newEnd + 1).map(s => s.dataset.original).join('');
-
-  const newRange = document.createRange();
-  newRange.setStartBefore(spans[newStart]);
-  newRange.setEndAfter(spans[newEnd]);
-  const selection = window.getSelection();
-  selection.removeAllRanges();
-  selection.addRange(newRange);
-
-  populateQuickEditPanel(selectionState.originalText, state, true);
-}
-
-function populateOldModal(text, state) {
-  const originalWordInput = document.getElementById('original-word-input');
-  originalWordInput.value = text;
-  const bestMeaning = updateOldModalFields(text, state); // Lấy nghĩa gợi ý
-
-  // Đặt giá trị ban đầu cho ô "Nghĩa tùy chỉnh"
-  const hanvietValue = document.getElementById('hanviet-input').value;
-  // Ưu tiên điền Hán Việt nếu có, nếu không thì điền nghĩa Vietphrase tốt nhất
-  if (hanvietValue && hanvietValue !== 'Không tìm thấy Hán Việt.') {
-    DOMElements.customMeaningInput.value = hanvietValue;
-  } else {
-    DOMElements.customMeaningInput.value = bestMeaning;
-  }
-}
-
-function openOldModal(state) {
-  const text = selectionState.originalText;
-  populateOldModal(text, state);
-  hideQuickEditPanel();
-  DOMElements.editModal.style.display = 'flex';
-}
-
-function expandOldModalSelection(direction, state) {
-  const { spans, startIndex, endIndex } = selectionState;
-  let newStartIdx = startIndex, newEndIdx = endIndex;
-
-  if (direction === 'left' && startIndex > 0) newStartIdx--;
-  else if (direction === 'right' && endIndex < spans.length - 1) newEndIdx++;
-  else return;
-  selectionState.startIndex = newStartIdx;
-  selectionState.endIndex = newEndIdx;
-  selectionState.originalText = selectionState.spans.slice(newStartIdx, newEndIdx + 1).map(s => s.dataset.original).join('');
-
-  populateOldModal(selectionState.originalText, state);
+  button.innerHTML = isLocked ? svgLocked : svgUnlocked;
+  button.title = isLocked ? (tooltips.unlock || "Bỏ ghim bảng") : (tooltips.lock || "Ghim bảng này");
 }
 
 export function initializeModal(state) {
+  const debouncedPopulateQuickEdit = debounce((selection, state) => {
+    // Regression fix: use selection.originalText (Chinese) instead of selection.text (Vietnamese)
+    populateQuickEditPanel(selection.originalText, state);
+  }, 100);
 
-  let isDoubleClick = false;
-  // === DOUBLE CLICK ===
-  DOMElements.outputPanel.addEventListener('dblclick', (e) => {
-    const targetSpan = e.target.closest('.word');
-    if (targetSpan) {
-      isDoubleClick = true; // Bật cờ lên báo hiệu vừa có double click
-      e.preventDefault();
+  const debouncedUpdateOldModal = debounce((text, state) => {
+    updateOldModalFields(text, state);
+  }, 100);
 
-      const allSpans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
-      const clickedIndex = allSpans.indexOf(targetSpan);
-      if (clickedIndex === -1) return;
+  DOMElements.outputPanel.addEventListener('pointerup', (e) => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString().trim();
 
-      selectionState.spans = allSpans;
-      selectionState.startIndex = clickedIndex;
-      selectionState.endIndex = clickedIndex;
-      selectionState.originalText = targetSpan.dataset.original;
+    if (selectedText) {
+      const range = selection.getRangeAt(0);
+      const container = range.commonAncestorContainer;
+      const parentElement = container.nodeType === 3 ? container.parentElement : container;
 
-      openOldModal(state);
-    }
-  });
+      if (DOMElements.outputPanel.contains(parentElement)) {
+        selectionState.text = selectedText;
+        selectionState.spans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
 
-  // Cập nhật trạng thái icon khóa khi tải trang
-  if (isPanelLocked) {
-    const lockIcon = DOMElements.qLockBtn;
-    lockIcon.classList.add('is-locked');
-    lockIcon.title = "Bỏ ghim bảng dịch nhanh";
-    lockIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
-  }
-  if (isEditModalLocked) {
-    const lockIcon = DOMElements.editModalLockBtn;
-    lockIcon.classList.add('is-locked');
-    lockIcon.title = "Bỏ ghim bảng";
-    lockIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
-  }
-  document.addEventListener('pointerup', (e) => {
-    const outputPanel = DOMElements.outputPanel;
-    const quickEditPanel = DOMElements.quickEditPanel;
-    const optionsContainer = DOMElements.vietphraseOptionsContainer;
+        const selectedNodes = [];
+        let curr = range.startContainer.nodeType === 3 ? range.startContainer.parentNode : range.startContainer;
+        while (curr) {
+          if (curr.nodeType === 1 && curr.classList.contains('word')) selectedNodes.push(curr);
+          if (curr === range.endContainer || (curr.contains && curr.contains(range.endContainer))) break;
 
-    if (isPanelVisible && !isPanelLocked && !quickEditPanel.contains(e.target) && !outputPanel.contains(e.target) && !optionsContainer.contains(e.target)) {
-      hideQuickEditPanel();
-    }
-    if (!optionsContainer.classList.contains('hidden') && !optionsContainer.contains(e.target) && !e.target.closest('#vietphrase-toggle-btn') && !e.target.closest('#vietphrase-input') && !e.target.closest('#q-input-Vp')) {
-      optionsContainer.classList.add('hidden');
-    }
-    if (!outputPanel.contains(e.target) || quickEditPanel.contains(e.target)) {
-      return;
-    }
+          if (curr.firstChild) {
+              curr = curr.firstChild;
+          } else if (curr.nextSibling) {
+              curr = curr.nextSibling;
+          } else {
+              let p = curr.parentNode;
+              while(p && !p.nextSibling) p = p.parentNode;
+              curr = p ? p.nextSibling : null;
+          }
+        }
 
-    setTimeout(() => {
+        const words = selectedNodes.filter(n => n.classList.contains('word'));
+        if (words.length > 0) {
+          selectionState.originalText = words.map(s => s.dataset.original || s.textContent).join('');
+          selectionState.startIndex = selectionState.spans.indexOf(words[0]);
+          selectionState.endIndex = selectionState.spans.indexOf(words[words.length - 1]);
 
-      if (isDoubleClick) {
-        isDoubleClick = false; // Reset lại cờ cho lần sau
-        return; // Dừng lại, không chạy code mở bảng Dịch nhanh nữa
+          showQuickEditPanel(selection);
+          debouncedPopulateQuickEdit(selectionState, state);
+        }
       }
-      const selection = window.getSelection();
-      const targetSpan = e.target.closest('.word');
-      if (targetSpan && selection.isCollapsed) {
-        const range = document.createRange();
-        range.selectNode(targetSpan);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        showQuickEditPanel(selection, state);
-        return;
-      }
-
-      if (selection.toString().trim() !== '') {
-        showQuickEditPanel(selection, state);
-      } else if (isPanelVisible && !isPanelLocked) {
+    } else {
+      if (!isPanelLocked && !DOMElements.quickEditPanel.contains(e.target)) {
         hideQuickEditPanel();
       }
-    }, 50);
+    }
   });
 
-  DOMElements.qCloseBtn.addEventListener('click', hideQuickEditPanel);
-
-  DOMElements.qDeleteBtn.addEventListener('click', () => {
-    const cn = DOMElements.qInputZw.value.trim();
-    deletePermanentName(cn, state);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (DOMElements.editModal.style.display !== 'none') closeOldModal();
+      hideQuickEditPanel();
+    }
   });
 
-  DOMElements.editModalDeleteBtn.addEventListener('click', () => {
-    const cn = DOMElements.originalWordInput.value.trim();
-    deletePermanentName(cn, state);
+  DOMElements.qCloseBtn.addEventListener('click', () => {
+    isPanelLocked = false;
+    localStorage.setItem('isQuickEditLocked', 'false');
+    hideQuickEditPanel();
   });
-
-  function updateLockIcon(button, isLocked, tooltips) {
-    button.classList.toggle('is-locked', isLocked);
-    button.title = isLocked ? tooltips.unlock : tooltips.lock;
-    const svgLocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`; // SVG icon đã khóa
-    const svgUnlocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`; // SVG icon đã mở
-    button.innerHTML = isLocked ? svgLocked : svgUnlocked;
-  }
 
   DOMElements.qLockBtn.addEventListener('click', () => {
     isPanelLocked = !isPanelLocked;
-    localStorage.setItem('isPanelLocked', isPanelLocked);
-    updateLockIcon(DOMElements.qLockBtn, isPanelLocked, {
-      lock: "Ghim bảng dịch nhanh",
-      unlock: "Bỏ ghim bảng dịch nhanh"
-    });
+    localStorage.setItem('isQuickEditLocked', isPanelLocked);
+    updateLockIcon(DOMElements.qLockBtn, isPanelLocked, { lock: "Ghim bảng này", unlock: "Bỏ ghim bảng" });
+  });
+
+  DOMElements.qExpandLeftBtn.addEventListener('click', () => expandSelection('left', state));
+  DOMElements.qExpandRightBtn.addEventListener('click', () => expandSelection('right', state));
+
+  DOMElements.qAddNameBtn.addEventListener('click', async () => {
+    const cn = DOMElements.qInputZw.value.trim();
+    const vn = DOMElements.qInputTc.value.trim();
+    if (cn && vn) {
+      try {
+        await addPermanentName(cn, vn, state);
+        hideQuickEditPanel();
+      } catch (e) {
+        console.error("Lỗi khi lưu Name:", e);
+      }
+    }
+  });
+
+  DOMElements.qSearchBtn.addEventListener('click', () => {
+    openOldModal(state);
+  });
+
+  DOMElements.qDeleteBtn.addEventListener('click', async () => {
+    const text = DOMElements.qInputZw.value.trim();
+    if (text && await customConfirm(`Xóa "${text}" khỏi Name List?`)) {
+      try {
+        await deletePermanentName(text, state);
+        hideQuickEditPanel();
+      } catch (e) {
+        console.error("Lỗi khi xóa Name:", e);
+      }
+    }
   });
 
   DOMElements.editModalLockBtn.addEventListener('click', () => {
     isEditModalLocked = !isEditModalLocked;
     localStorage.setItem('isEditModalLocked', isEditModalLocked);
-    const lockIcon = DOMElements.editModalLockBtn;
-    if (isEditModalLocked) {
-      lockIcon.classList.add('is-locked');
-      lockIcon.title = "Bỏ ghim bảng";
-      lockIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
-    } else {
-      lockIcon.classList.remove('is-locked');
-      lockIcon.title = "Ghim bảng";
-      lockIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
-    }
+    updateLockIcon(DOMElements.editModalLockBtn, isEditModalLocked, { lock: "Ghim bảng này", unlock: "Bỏ ghim bảng" });
   });
 
-  DOMElements.qExpandLeftBtn.addEventListener('click', () => expandQuickSelection('left', state));
-  DOMElements.qExpandRightBtn.addEventListener('click', () => expandQuickSelection('right', state));
-  DOMElements.qAddNameBtn.addEventListener('click', () => openOldModal(state));
-
-  const debouncedPopulateQuickEdit = debounce(() => {
-    const newText = DOMElements.qInputZw.value;
-    populateQuickEditPanel(newText, state, false);
-  }, 250);
-  DOMElements.qInputZw.addEventListener('input', debouncedPopulateQuickEdit);
-
-  DOMElements.qInputVp.addEventListener('contextmenu', (e) => {
-    e.preventDefault(); // Ngăn menu chuột phải mặc định của trình duyệt
-    const zwText = DOMElements.qInputZw.value.trim();
-    if (zwText) {
-      showVpOptionsForQuickEdit(e.target, zwText, state);
-    }
-  });
-
-  const debouncedUpdateOldModal = debounce(() => {
-    const newText = DOMElements.originalWordInput.value;
-    updateOldModalFields(newText, state);
-  }, 250);
-  DOMElements.originalWordInput.addEventListener('input', debouncedUpdateOldModal);
-
-  DOMElements.qSearchBtn.addEventListener('click', () => {
-    const text = DOMElements.qInputZw.value.trim();
-    if (text) window.open(`https://translate.google.com/?sl=zh-CN&tl=vi&text=${encodeURIComponent(text)}`, '_blank');
-  });
-  DOMElements.qCopyBtn.addEventListener('click', () => {
-    const text = DOMElements.qInputZw.value.trim();
-    if (text) navigator.clipboard.writeText(text);
-  });
-
-  const hanvietInput = document.getElementById('hanviet-input');
-  hanvietInput.addEventListener('click', () => {
-    const hanvietValue = hanvietInput.value;
-    if (hanvietValue && hanvietValue !== 'Không tìm thấy Hán Việt.') {
-      DOMElements.customMeaningInput.value = hanvietValue;
-    }
-  });
-
-  hanvietInput.addEventListener('input', () => {
-    DOMElements.customMeaningInput.value = hanvietInput.value;
-  });
-
-  DOMElements.vietphraseInput.addEventListener('input', () => {
-    DOMElements.customMeaningInput.value = DOMElements.vietphraseInput.value;
-    DOMElements.vietphraseOptionsContainer.classList.add('hidden');
-  });
-
-  DOMElements.vietphraseInput.addEventListener('focus', () => {
-    DOMElements.customMeaningInput.value = DOMElements.vietphraseInput.value;
+  DOMElements.originalWordInput.addEventListener('input', (e) => {
+    debouncedUpdateOldModal(e.target.value.trim(), state);
   });
 
   DOMElements.vietphraseToggleBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     const container = DOMElements.vietphraseOptionsContainer;
-    const input = DOMElements.vietphraseInput;
-
-    if (container.classList.contains('hidden')) {
-      const inputRect = input.getBoundingClientRect();
-      const mainWidthInput = document.getElementById('width-input');
-
-      // Lấy chiều rộng từ cài đặt, với giá trị mặc định là 1280 nếu không tìm thấy
-      const resultPanelWidth = mainWidthInput ? parseInt(mainWidthInput.value, 10) : 1280;
-
-      // 1. Chiều rộng TỐI ĐA của danh sách sẽ bằng chiều rộng của khung kết quả
-      container.style.maxWidth = `${resultPanelWidth}px`;
-      // 2. Chiều rộng TỐI THIỂU sẽ bằng chiều rộng của ô input để không bị quá hẹp
-      container.style.minWidth = `${inputRect.width}px`;
-      // 3. Xóa width cố định để nó tự co giãn giữa min và max
-      container.style.width = '';
-
-      // Định vị danh sách ngay bên dưới ô input
+    const isHidden = container.classList.contains('hidden');
+    if (isHidden) {
+      const inputRect = DOMElements.customMeaningInput.getBoundingClientRect();
+      container.style.position = 'fixed';
       container.style.top = `${inputRect.bottom + 2}px`;
       container.style.left = `${inputRect.left}px`;
-
+      container.style.width = `${inputRect.width}px`;
       container.classList.remove('hidden');
     } else {
       container.classList.add('hidden');
     }
   });
 
-  function updateTranslationInPlace(newText) {
-    const { spans, startIndex, endIndex } = selectionState;
-    if (startIndex === -1 || endIndex === -1) return;
-
-    // Lấy ra các span cũ đang được chọn
-    const spansToRemove = spans.slice(startIndex, endIndex + 1);
-    if (spansToRemove.length === 0) return;
-
-    // Tạo một span mới để thay thế
-    const newSpan = document.createElement('span');
-    newSpan.className = 'word user-defined-temp'; // Thêm class mới để tạo kiểu
-    newSpan.textContent = newText;
-    newSpan.dataset.original = selectionState.originalText;
-
-    // Chèn span mới vào trước span đầu tiên trong vùng chọn
-    const firstSpan = spansToRemove[0];
-    firstSpan.parentNode.insertBefore(newSpan, firstSpan);
-
-    // Xóa tất cả các span cũ
-    spansToRemove.forEach(span => span.remove());
-
-    // Cập nhật lại danh sách các span trong state để các lần chỉnh sửa sau không bị lỗi
-    const allSpansAfterUpdate = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
-    selectionState.spans = allSpansAfterUpdate;
-  }
-
-  // CẬP NHẬT BẢN DỊCH TẠI CHỖ
-  function updateTranslationInPlace(newText) {
-    const { spans, startIndex, endIndex } = selectionState;
-    if (startIndex === -1 || endIndex === -1 || !spans) return;
-
-    const spansToRemove = spans.slice(startIndex, endIndex + 1);
-    if (spansToRemove.length === 0) return;
-
-    // Tạo một span mới để thay thế
-    const newSpan = document.createElement('span');
-    newSpan.className = 'word user-defined-temp'; // Thêm class mới để tạo kiểu
-    newSpan.textContent = newText;
-    newSpan.dataset.original = selectionState.originalText;
-
-    // Chèn span mới vào trước span đầu tiên trong vùng chọn
-    const firstSpan = spansToRemove[0];
-    firstSpan.parentNode.insertBefore(newSpan, firstSpan);
-
-    // Xóa tất cả các span cũ
-    spansToRemove.forEach(span => span.remove());
-
-    // Cập nhật lại danh sách các span trong state để các lần chỉnh sửa sau không bị lỗi
-    selectionState.spans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
-  }
-
   document.querySelectorAll('.q-temp-add-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const targetInputId = e.target.dataset.target;
-      const vnText = document.getElementById(targetInputId).value; // Lấy nghĩa Tiếng Việt
-      const cnText = selectionState.originalText; // Lấy chữ Hán gốc đang chọn
+      const targetInputId = btn.dataset.target;
+      if (!targetInputId) return;
+      const input = document.getElementById(targetInputId);
+      if (!input) return;
+      const vnText = input.value;
+      const cnText = selectionState.originalText;
 
-      if (typeof vnText === 'string' && cnText) {
-        // Lưu cặp "Tiếng Trung = Tiếng Việt" vào bộ nhớ tạm
+      if (vnText && cnText) {
         temporaryNameDictionary.set(cnText, vnText);
-
-        // Cập nhật ngay lập-tức tại vị trí đang chọn
         updateTranslationInPlace(vnText);
-
-        // Ẩn bảng dịch nhanh sau khi hoàn tất
         hideQuickEditPanel();
       }
     });
   });
 
   document.querySelectorAll('.q-perm-add-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       const zwText = DOMElements.qInputZw.value.trim();
-      const targetInputId = e.target.dataset.target;
-      const vnText = document.getElementById(targetInputId).value.trim();
-      addPermanentName(zwText, vnText, state);
-      hideQuickEditPanel();
+      const targetInputId = btn.dataset.target;
+      if (!targetInputId) return;
+      const input = document.getElementById(targetInputId);
+      if (!input) return;
+      const vnText = input.value.trim();
+      if (zwText && vnText) {
+        try {
+          await addPermanentName(zwText, vnText, state);
+          hideQuickEditPanel();
+        } catch (err) {
+          console.error("Lỗi khi lưu Name:", err);
+        }
+      }
     });
   });
+
   DOMElements.editModal.addEventListener('click', (e) => {
     if (e.target === DOMElements.editModal && !isEditModalLocked) closeOldModal();
   });
@@ -594,17 +205,23 @@ export function initializeModal(state) {
   DOMElements.expandLeftBtn.addEventListener('click', () => expandOldModalSelection('left', state));
   DOMElements.expandRightBtn.addEventListener('click', () => expandOldModalSelection('right', state));
 
-  DOMElements.addToNameListBtn.addEventListener('click', () => {
-    const cn = document.getElementById('original-word-input').value.trim();
+  DOMElements.addToNameListBtn.addEventListener('click', async () => {
+    const cn = DOMElements.originalWordInput.value.trim();
     const vn = DOMElements.customMeaningInput.value.trim();
-    addPermanentName(cn, vn, state);
-    closeOldModal();
+    if (cn && vn) {
+      try {
+        await addPermanentName(cn, vn, state);
+        closeOldModal();
+      } catch (e) {
+        console.error("Lỗi khi lưu Name:", e);
+      }
+    }
   });
 
   DOMElements.addTempBtn.addEventListener('click', () => {
-    const cn = document.getElementById('original-word-input').value.trim();
+    const cn = DOMElements.originalWordInput.value.trim();
     const vn = DOMElements.customMeaningInput.value.trim();
-    if (cn) {
+    if (cn && vn) {
       temporaryNameDictionary.set(cn, vn);
       performTranslation(state, { forceText: state.lastTranslatedText, preserveTempDict: true });
       closeOldModal();
@@ -612,27 +229,9 @@ export function initializeModal(state) {
   });
 
   document.querySelectorAll('.case-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => applyCase(e.target.dataset.case));
-
-    btn.addEventListener('dblclick', () => {
-      applyCase(btn.dataset.case);
-      const cn = document.getElementById('original-word-input').value.trim();
-      const vn = DOMElements.customMeaningInput.value.trim();
-      if (cn && vn) {
-        addPermanentName(cn, vn, state);
-        closeOldModal();
-
-        const addButton = DOMElements.addToNameListBtn;
-        const originalText = addButton.textContent;
-        addButton.textContent = 'Đã lưu!';
-        addButton.disabled = true;
-        setTimeout(() => {
-          addButton.textContent = originalText;
-          addButton.disabled = false;
-        }, 1500);
-      }
-    });
+    btn.addEventListener('click', (e) => applyCase(btn.dataset.case));
   });
+
   document.addEventListener('click', () => {
     const container = DOMElements.vietphraseOptionsContainer;
     if (!container.classList.contains('hidden')) {
@@ -640,94 +239,83 @@ export function initializeModal(state) {
     }
   });
 
-  DOMElements.vietphraseOptionsContainer.addEventListener('click', (e) => {
-    e.stopPropagation(); // Ngăn nó tự đóng khi bấm vào chính nó
-  });
-
+  updateLockIcon(DOMElements.qLockBtn, isPanelLocked, { lock: "Ghim bảng này", unlock: "Bỏ ghim bảng" });
+  updateLockIcon(DOMElements.editModalLockBtn, isEditModalLocked, { lock: "Ghim bảng này", unlock: "Bỏ ghim bảng" });
 }
 
-function showVpOptionsForQuickEdit(anchorElement, text, state) {
-  const optionsContainer = DOMElements.vietphraseOptionsContainer;
-  const targetInput = DOMElements.qInputTc;
+function showQuickEditPanel(selection) {
+  const panel = DOMElements.quickEditPanel;
+  panel.style.visibility = 'hidden';
+  panel.classList.remove('hidden');
 
-  // 1. Lấy danh sách gợi ý
-  const uniqueMeanings = new Set();
+  setTimeout(() => { panel.classList.add('show'); }, 10);
+
+  const range = selection.getRangeAt(0);
+  const rect = range.getBoundingClientRect();
+
+  let top = rect.top + window.scrollY - panel.offsetHeight - 10;
+  let left = rect.left + window.scrollX + (rect.width / 2) - (panel.offsetWidth / 2);
+
+  if (top < 0) top = rect.bottom + window.scrollY + 10;
+  if (left < 0) left = 10;
+  if (left + panel.offsetWidth > window.innerWidth) left = window.innerWidth - panel.offsetWidth - 10;
+
+  panel.style.top = `${top}px`;
+  panel.style.left = `${left}px`;
+  panel.style.visibility = 'visible';
+  isPanelVisible = true;
+}
+
+function hideQuickEditPanel() {
+  if (isPanelVisible) {
+    if (isPanelLocked) return;
+    const panel = DOMElements.quickEditPanel;
+    panel.classList.remove('show');
+    setTimeout(() => {
+        panel.classList.add('hidden');
+        panel.style.visibility = ''; // Clear stale inline style
+        isPanelVisible = false;
+        if (window.getSelection) window.getSelection().removeAllRanges();
+    }, 200);
+  }
+}
+
+function populateQuickEditPanel(text, state) {
+  if (!text) return;
+  DOMElements.qInputZw.value = text;
+  DOMElements.qInputHv.value = getHanViet(text, state.dictionaries) || '';
+
   const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
-  if (allMeanings.name) uniqueMeanings.add(allMeanings.name);
-  if (allMeanings.names2.length > 0) allMeanings.names2.forEach(m => uniqueMeanings.add(m));
-  if (allMeanings.names.length > 0) allMeanings.names.forEach(m => uniqueMeanings.add(m));
-  if (allMeanings.vietphrase.length > 0) allMeanings.vietphrase.forEach(m => uniqueMeanings.add(m));
-  if (allMeanings.chapter.length > 0) allMeanings.chapter.forEach(m => uniqueMeanings.add(m));
-  if (allMeanings.number.length > 0) allMeanings.number.forEach(m => uniqueMeanings.add(m));
+  DOMElements.qInputTc.value = allMeanings.name || (allMeanings.vietphrase.length > 0 ? allMeanings.vietphrase[0] : '');
 
-  const segments = segmentText(text, state.masterKeySet);
-  if (segments.length > 1) {
-    const sentenceSuggestions = synthesizeCompoundTranslation(text, state);
-    sentenceSuggestions.forEach(suggestion => {
-      if (!suggestion.includes(' - Quá dài') && !suggestion.includes(' - Số lượng tổ hợp')) {
-        uniqueMeanings.add(suggestion);
-      }
-    });
-  }
+  DOMElements.qInputHV.value = DOMElements.qInputHv.value.toUpperCase();
+  DOMElements.qInputVp.value = allMeanings.vietphrase.length > 0 ? allMeanings.vietphrase[0] : '';
 
-  const combinedMeanings = Array.from(uniqueMeanings);
-  optionsContainer.innerHTML = '';
+  DOMElements.qDeleteBtn.disabled = !nameDictionary.has(text);
+}
 
-  // 2. Tạo các tùy chọn mới
-  if (combinedMeanings.length > 0) {
-    combinedMeanings.forEach(meaning => {
-      const optionEl = document.createElement('div');
-      optionEl.className = 'vietphrase-option';
-      optionEl.textContent = meaning;
-      optionEl.title = meaning;
-      optionEl.addEventListener('click', () => {
-        targetInput.value = meaning;
-        optionsContainer.classList.add('hidden');
-      });
-      optionsContainer.appendChild(optionEl);
-    });
-  } else {
-    optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Không tìm thấy gợi ý</div>';
-  }
+function openOldModal(state) {
+  const text = selectionState.originalText;
+  DOMElements.originalWordInput.value = text;
+  updateOldModalFields(text, state);
+  hideQuickEditPanel();
+  DOMElements.editModal.style.display = 'flex';
+  setTimeout(() => {
+    const mc = DOMElements.editModal.querySelector('.modal-content');
+    if (mc) mc.classList.add('show');
+  }, 10);
+}
 
-  // 3. ĐỊNH VỊ ỔN ĐỊNH
-  // Reset vị trí của container ra ngoài màn hình để đo kích thước thật của nó
-  optionsContainer.style.position = 'fixed';
-  optionsContainer.style.left = '-9999px';
-  optionsContainer.style.top = '-9999px';
-  optionsContainer.classList.remove('hidden');
+function closeOldModal() {
+  const mc = DOMElements.editModal.querySelector('.modal-content');
+  if (mc) mc.classList.remove('show');
 
-  // Lấy kích thước thật và các thông số cần thiết
-  const containerHeight = optionsContainer.offsetHeight;
-  const containerWidth = optionsContainer.offsetWidth;
-  const inputRect = anchorElement.getBoundingClientRect();
-  const viewportHeight = window.innerHeight;
-  const viewportWidth = window.innerWidth;
-  const margin = 5;
+  setTimeout(() => {
+    DOMElements.editModal.style.display = 'none';
+    DOMElements.vietphraseOptionsContainer.classList.add('hidden');
 
-  // --- Tính toán vị trí TOP (Trên/Dưới) ---
-  let finalTop;
-  const hasSpaceBelow = (inputRect.bottom + containerHeight + margin) < viewportHeight;
-  const hasSpaceAbove = (inputRect.top - containerHeight - margin) > 0;
-
-  if (hasSpaceBelow || !hasSpaceAbove) {
-    finalTop = inputRect.bottom + margin;
-  } else {
-    finalTop = inputRect.top - containerHeight - margin;
-  }
-
-  // --- Tính toán vị trí LEFT (Trái/Phải) ---
-  let finalLeft = inputRect.left;
-  if (finalLeft + containerWidth + margin > viewportWidth) {
-    finalLeft = viewportWidth - containerWidth - margin;
-  }
-  if (finalLeft < margin) {
-    finalLeft = margin;
-  }
-
-  // Áp dụng vị trí cuối cùng
-  optionsContainer.style.top = `${finalTop}px`;
-  optionsContainer.style.left = `${finalLeft}px`;
+    // Lock state intentionally persists across modal close/open cycles
+  }, 200);
 }
 
 function updateOldModalFields(text, state) {
@@ -739,74 +327,112 @@ function updateOldModalFields(text, state) {
   if (!text) {
     hanvietInput.value = '';
     vietphraseInput.value = '';
-    optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Nhập Tiếng Trung để xem gợi ý</div>';
-    return ''; // Trả về chuỗi rỗng
+    return;
   }
 
-  // Giới hạn ký tự | DỊCH CHÍNH
-  const CHAR_LIMIT = 25;
-  if (text.length > CHAR_LIMIT) {
-    hanvietInput.value = getHanViet(text, state.dictionaries)?.toLowerCase() || '...';
-    vietphraseInput.value = '';
-    optionsContainer.innerHTML = '<div class="vietphrase-option text-red-400">[Câu quá dài, vượt giới hạn ký tự]</div>';
-    return ''; // Trả về chuỗi rỗng
-  }
-
-  hanvietInput.value = getHanViet(text, state.dictionaries) ?
-    getHanViet(text, state.dictionaries).toLowerCase() : 'Không tìm thấy Hán Việt.';
+  hanvietInput.value = (getHanViet(text, state.dictionaries) || '').toLowerCase();
 
   const uniqueMeanings = new Set();
-  const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
-  if (allMeanings.name) uniqueMeanings.add(allMeanings.name);
-  if (allMeanings.names2.length > 0) allMeanings.names2.forEach(m => uniqueMeanings.add(m));
-  if (allMeanings.names.length > 0) allMeanings.names.forEach(m => uniqueMeanings.add(m));
-  if (allMeanings.vietphrase.length > 0) allMeanings.vietphrase.forEach(m => uniqueMeanings.add(m));
-  if (allMeanings.chapter.length > 0) allMeanings.chapter.forEach(m => uniqueMeanings.add(m));
-  if (allMeanings.number.length > 0) allMeanings.number.forEach(m => uniqueMeanings.add(m));
+  const all = getAllMeanings(text, state.dictionaries, nameDictionary);
+  if (all.name) uniqueMeanings.add(all.name);
+  all.names.forEach(m => uniqueMeanings.add(m));
+  all.names2.forEach(m => uniqueMeanings.add(m));
+  all.vietphrase.forEach(m => uniqueMeanings.add(m));
 
-  const segments = segmentText(text, state.masterKeySet);
-  let synthesisError = null;
-  if (segments.length > 1) {
-    const sentenceSuggestions = synthesizeCompoundTranslation(text, state);
-    sentenceSuggestions.forEach(suggestion => {
-      if (suggestion.includes(' - Quá dài') || suggestion.includes(' - Số lượng tổ hợp')) {
-        synthesisError = suggestion.substring(suggestion.indexOf(' - ') + 3);
-      } else {
-        uniqueMeanings.add(suggestion);
-      }
-    });
-  }
-
-  const combinedMeanings = Array.from(uniqueMeanings);
   optionsContainer.innerHTML = '';
-  let bestMeaning = ''; // Biến để lưu nghĩa tốt nhất
-
-  if (combinedMeanings.length > 0) {
-    combinedMeanings.forEach(meaning => {
-      const optionEl = document.createElement('div');
-      optionEl.className = 'vietphrase-option';
-      optionEl.textContent = meaning;
-      optionEl.title = meaning;
-      optionEl.addEventListener('click', () => {
-        vietphraseInput.value = meaning;
-        customMeaningInput.value = meaning;
-        optionsContainer.classList.add('hidden');
-      });
-      optionsContainer.appendChild(optionEl);
+  uniqueMeanings.forEach(meaning => {
+    const div = document.createElement('div');
+    div.className = 'vietphrase-option';
+    div.textContent = meaning;
+    div.addEventListener('click', () => {
+      vietphraseInput.value = meaning;
+      customMeaningInput.value = meaning;
+      optionsContainer.classList.add('hidden');
     });
+    optionsContainer.appendChild(div);
+  });
 
-    bestMeaning = combinedMeanings[0] || '';
-    vietphraseInput.value = bestMeaning;
-  } else {
-    if (synthesisError) {
-      optionsContainer.innerHTML = `<div class="vietphrase-option text-red-400">[${synthesisError}]</div>`;
-    } else {
-      optionsContainer.innerHTML = '<div class="vietphrase-option text-gray-400">Không tìm thấy Vietphrase/Name</div>';
-    }
-    vietphraseInput.value = '';
-  }
-  // Vô hiệu hóa nút xóa nếu từ không có trong Name List
+  const best = Array.from(uniqueMeanings)[0] || '';
+  vietphraseInput.value = best;
+  customMeaningInput.value = best;
+
   DOMElements.editModalDeleteBtn.disabled = !nameDictionary.has(text);
+}
 
-  return bestMeaning; // Trả về nghĩa gợi ý tốt nhất
+function expandSelection(direction, state) {
+  const { spans, startIndex, endIndex } = selectionState;
+  if (!spans) return;
+
+  if (direction === 'left' && startIndex > 0) {
+    selectionState.startIndex--;
+  } else if (direction === 'right' && endIndex < spans.length - 1) {
+    selectionState.endIndex++;
+  } else {
+    return;
+  }
+
+  const selectedSpans = spans.slice(selectionState.startIndex, selectionState.endIndex + 1);
+  selectionState.originalText = selectedSpans.map(s => s.dataset.original || s.textContent).join('');
+  populateQuickEditPanel(selectionState.originalText, state);
+}
+
+function expandOldModalSelection(direction, state) {
+    expandSelection(direction, state);
+    DOMElements.originalWordInput.value = selectionState.originalText;
+    updateOldModalFields(selectionState.originalText, state);
+}
+
+async function addPermanentName(cn, vn, state) {
+  nameDictionary.set(cn, vn);
+  saveNameDictionaryToStorage();
+  renderNameList();
+  rebuildMasterData(state);
+  await performTranslation(state, { forceText: state.lastTranslatedText });
+}
+
+async function deletePermanentName(cn, state) {
+  nameDictionary.delete(cn);
+  saveNameDictionaryToStorage();
+  renderNameList();
+  updateMasterDataForDeletion(cn, state);
+  await performTranslation(state, { forceText: state.lastTranslatedText });
+}
+
+function updateTranslationInPlace(newText) {
+    const { spans, startIndex, endIndex } = selectionState;
+    if (startIndex === -1 || endIndex === -1 || !spans) return;
+
+    const spansToRemove = spans.slice(startIndex, endIndex + 1);
+    const firstSpan = spansToRemove[0];
+
+    const newSpan = document.createElement('span');
+    newSpan.className = 'word from-name-dict';
+    newSpan.dataset.original = selectionState.originalText;
+    newSpan.textContent = newText;
+
+    firstSpan.parentNode.insertBefore(newSpan, firstSpan);
+    spansToRemove.forEach(s => s.remove());
+    selectionState.spans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
+}
+
+function applyCase(caseType) {
+  const input = DOMElements.customMeaningInput;
+  let val = input.value;
+  if (!val) return;
+
+  switch (caseType) {
+    case 'cap':
+      val = val.charAt(0).toUpperCase() + val.slice(1);
+      break;
+    case 'cap2':
+      val = val.split(' ').map((w, i) => i < 2 ? w.charAt(0).toUpperCase() + w.slice(1) : w).join(' ');
+      break;
+    case 'lowerLast':
+      val = val.slice(0, -1) + val.slice(-1).toLowerCase();
+      break;
+    case 'upper':
+      val = val.toUpperCase();
+      break;
+  }
+  input.value = val;
 }

@@ -42,10 +42,13 @@ const STORE_NAME = 'dictionaryStore';
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME);
-    request.onerror = () => reject("Lỗi khi mở IndexedDB từ Worker.");
-    request.onsuccess = () => resolve(request.result);
-    // Worker không thể tạo CSDL, nó chỉ có thể sử dụng CSDL đã được luồng chính tạo
+    try {
+      const request = indexedDB.open(DB_NAME);
+      request.onerror = () => reject(new Error('Lỗi khi mở IndexedDB từ Worker. Có thể do chế độ ẩn danh.'));
+      request.onsuccess = () => resolve(request.result);
+    } catch (e) {
+      reject(new Error('Lỗi hệ thống khi mở IndexedDB: ' + e.message));
+    }
   });
 }
 
@@ -54,7 +57,7 @@ async function saveDataToDB(db, data) {
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.put(data);
-    request.onerror = () => reject("Không thể lưu dữ liệu vào DB từ Worker.");
+    request.onerror = () => reject(new Error("Không thể lưu dữ liệu vào DB từ Worker."));
     request.onsuccess = () => resolve();
   });
 }
@@ -64,7 +67,7 @@ async function getDataFromDB(db, id) {
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(id);
-    request.onerror = () => reject("Không thể đọc dữ liệu từ DB từ Worker.");
+    request.onerror = () => reject(new Error("Không thể đọc dữ liệu từ DB từ Worker."));
     request.onsuccess = () => resolve(request.result);
   });
 }

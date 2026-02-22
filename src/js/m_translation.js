@@ -143,8 +143,8 @@ export function performTranslation(state, options = {}) {
 
   // LỚP 2: DỊCH PHẦN VĂN BẢN CÒN LẠI VÀ XỬ LÝ LOGIC VIẾT HOA
   const isVietphraseMode = DOMElements.modeToggle.checked;
-  const UNAMBIGUOUS_OPENING = new Set(['(', '[', '{', '“', '‘']);
-  const UNAMBIGUOUS_CLOSING = new Set([')', ']', '}', '”', '’', ',', '.', '!', '?', ';', ':', '。', '：', '；', '，', '、', '！', '？', '……', '～']);
+  const UNAMBIGUOUS_OPENING = new Set(['(', '[', '{', '“', '‘', '『', '「', '《', '〈', '【', '〖', '〔']);
+  const UNAMBIGUOUS_CLOSING = new Set([')', ']', '}', '”', '’', '』', '」', '》', '〉', '】', '〗', '〕', ',', '.', '!', '?', ';', ':', '。', '：', '；', '，', '、', '！', '？', '…', '～']);
   const AMBIGUOUS_QUOTES = new Set(['"', "'"]);
   const ALL_PUNCTUATION = new Set([...UNAMBIGUOUS_OPENING, ...UNAMBIGUOUS_CLOSING, ...AMBIGUOUS_QUOTES]);
   const lines = processedText.split('\n');

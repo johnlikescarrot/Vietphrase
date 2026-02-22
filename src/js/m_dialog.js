@@ -1,9 +1,12 @@
+import { showModalWithAnimation, hideModalWithAnimation } from './m_utils.js';
+
 const modal = document.getElementById('custom-dialog-modal');
 const messageEl = document.getElementById('custom-dialog-message');
 const okBtn = document.getElementById('custom-dialog-ok-btn');
 const cancelBtn = document.getElementById('custom-dialog-cancel-btn');
 
-let resolveCallback;
+let resolveCallback = null;
+let isClosing = false;
 
 function handleKeyDown(e) {
   if (e.key === 'Enter') {
@@ -16,6 +19,7 @@ function handleKeyDown(e) {
 }
 
 function showModal(message, showCancelButton = false) {
+  isClosing = false;
   messageEl.textContent = message;
 
   if (showCancelButton) {
@@ -24,7 +28,7 @@ function showModal(message, showCancelButton = false) {
     cancelBtn.classList.add('hidden');
   }
 
-  modal.classList.remove('hidden');
+  showModalWithAnimation(modal);
   okBtn.focus();
 
   document.addEventListener('keydown', handleKeyDown);
@@ -34,16 +38,26 @@ function showModal(message, showCancelButton = false) {
   });
 }
 
-okBtn.addEventListener('click', () => {
-  modal.classList.add('hidden');
+function closeModal(result) {
+  if (isClosing) return;
+  isClosing = true;
+
   document.removeEventListener('keydown', handleKeyDown);
-  if (resolveCallback) resolveCallback(true);
+
+  const callback = resolveCallback;
+  resolveCallback = null;
+
+  hideModalWithAnimation(modal, () => {
+    if (callback) callback(result);
+  });
+}
+
+okBtn.addEventListener('click', () => {
+  closeModal(true);
 });
 
 cancelBtn.addEventListener('click', () => {
-  modal.classList.add('hidden');
-  document.removeEventListener('keydown', handleKeyDown);
-  if (resolveCallback) resolveCallback(false);
+  closeModal(false);
 });
 
 export function customAlert(message) {

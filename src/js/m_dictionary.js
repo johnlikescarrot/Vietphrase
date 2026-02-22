@@ -77,15 +77,23 @@ function serializeDictionaries(dictionaries) {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME);
-    request.onerror = () => reject("Lỗi khi mở IndexedDB.");
-    request.onsuccess = () => resolve(request.result);
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+    try {
+      if (!window.indexedDB) {
+        reject(new Error('Trình duyệt không hỗ trợ IndexedDB.'));
+        return;
       }
-    };
+      const request = indexedDB.open(DB_NAME);
+      request.onerror = () => reject(new Error('Lỗi khi mở IndexedDB. Có thể do chế độ ẩn danh.'));
+      request.onsuccess = () => resolve(request.result);
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        }
+      };
+    } catch (e) {
+      reject(new Error('Lỗi hệ thống khi mở IndexedDB: ' + e.message));
+    }
   });
 }
 
@@ -94,7 +102,7 @@ async function saveDataToDB(db, data) {
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.put(data);
-    request.onerror = () => reject("Không thể lưu dữ liệu vào DB.");
+    request.onerror = () => reject(new Error("Không thể lưu dữ liệu vào DB."));
     request.onsuccess = () => resolve();
   });
 }
@@ -104,23 +112,19 @@ async function getDataFromDB(db, id) {
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(id);
-    request.onerror = () => reject("Không thể đọc dữ liệu từ DB.");
+    request.onerror = () => reject(new Error("Không thể đọc dữ liệu từ DB."));
     request.onsuccess = () => resolve(request.result);
   });
 }
 
 export async function clearAllDictionaries() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const db = await openDB();
-      const transaction = db.transaction([STORE_NAME], 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.clear();
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject('Không thể xóa dữ liệu.');
-    } catch (error) {
-      reject(error);
-    }
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(new Error('Không thể xóa dữ liệu.'));
   });
 }
 
