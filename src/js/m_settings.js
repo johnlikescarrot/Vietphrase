@@ -76,24 +76,35 @@ function updateActiveColorBox(container, color) {
 export function initializeSettings() {
   if (!settingsBtn || !settingsPanel) return;
 
+  let toggleTimeout = null;
+
+  function hideSettingsPanel() {
+    if (toggleTimeout) clearTimeout(toggleTimeout);
+    settingsPanel.classList.remove('show');
+    toggleTimeout = setTimeout(() => {
+      settingsPanel.classList.add('hidden');
+      toggleTimeout = null;
+    }, 200);
+  }
+
   // Mở/đóng bảng cài đặt
   settingsBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     const isHidden = settingsPanel.classList.contains('hidden');
     if (isHidden) {
+      if (toggleTimeout) clearTimeout(toggleTimeout);
       settingsPanel.classList.remove('hidden');
       const btnRect = settingsBtn.getBoundingClientRect();
       settingsPanel.style.top = `${btnRect.bottom + window.scrollY + 5}px`;
       settingsPanel.style.right = `${window.innerWidth - btnRect.right - window.scrollX}px`;
-      setTimeout(() => settingsPanel.classList.add('show'), 10);
+      toggleTimeout = setTimeout(() => {
+        settingsPanel.classList.add('show');
+        toggleTimeout = null;
+      }, 10);
     } else {
       hideSettingsPanel();
     }
   });
-  function hideSettingsPanel() {
-    settingsPanel.classList.remove('show');
-    setTimeout(() => settingsPanel.classList.add('hidden'), 200);
-  }
 
   closeBtn.addEventListener('click', hideSettingsPanel);
   document.addEventListener('click', (e) => {

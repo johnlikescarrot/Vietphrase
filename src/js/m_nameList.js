@@ -88,7 +88,11 @@ export function renderNameList(sortType = 'newest') {
 }
 
 export function saveNameDictionaryToStorage() {
-  localStorage.setItem('nameDictionary', JSON.stringify(Array.from(nameDictionary.entries())));
+  try {
+    localStorage.setItem('nameDictionary', JSON.stringify(Array.from(nameDictionary.entries())));
+  } catch (e) {
+    console.error("Lỗi khi lưu Name List vào localStorage:", e);
+  }
 }
 
 function loadNameDictionaryFromStorage() {
@@ -170,7 +174,7 @@ export function initializeNameList(state) {
     a.href = url;
     a.download = 'NamesUser.txt';
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
   });
 
   DOMElements.nameListImportBtn.addEventListener('click', () => {

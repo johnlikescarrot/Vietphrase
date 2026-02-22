@@ -71,7 +71,7 @@ export function initializeModal(state) {
           selectionState.startIndex = selectionState.spans.indexOf(words[0]);
           selectionState.endIndex = selectionState.spans.indexOf(words[words.length - 1]);
 
-          showQuickEditPanel(selection, state);
+          showQuickEditPanel(selection);
           debouncedPopulateQuickEdit(selectionState, state);
         }
       }
@@ -104,12 +104,16 @@ export function initializeModal(state) {
   DOMElements.qExpandLeftBtn.addEventListener('click', () => expandSelection('left', state));
   DOMElements.qExpandRightBtn.addEventListener('click', () => expandSelection('right', state));
 
-  DOMElements.qAddNameBtn.addEventListener('click', () => {
+  DOMElements.qAddNameBtn.addEventListener('click', async () => {
     const cn = DOMElements.qInputZw.value.trim();
     const vn = DOMElements.qInputTc.value.trim();
     if (cn && vn) {
-      addPermanentName(cn, vn, state);
-      hideQuickEditPanel();
+      try {
+        await addPermanentName(cn, vn, state);
+        hideQuickEditPanel();
+      } catch (e) {
+        console.error("Lỗi khi lưu Name:", e);
+      }
     }
   });
 
@@ -120,8 +124,12 @@ export function initializeModal(state) {
   DOMElements.qDeleteBtn.addEventListener('click', async () => {
     const text = DOMElements.qInputZw.value.trim();
     if (text && await customConfirm(`Xóa "${text}" khỏi Name List?`)) {
-      await deletePermanentName(text, state);
-      hideQuickEditPanel();
+      try {
+        await deletePermanentName(text, state);
+        hideQuickEditPanel();
+      } catch (e) {
+        console.error("Lỗi khi xóa Name:", e);
+      }
     }
   });
 
@@ -169,7 +177,7 @@ export function initializeModal(state) {
   });
 
   document.querySelectorAll('.q-perm-add-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       const zwText = DOMElements.qInputZw.value.trim();
       const targetInputId = btn.dataset.target;
       if (!targetInputId) return;
@@ -177,8 +185,12 @@ export function initializeModal(state) {
       if (!input) return;
       const vnText = input.value.trim();
       if (zwText && vnText) {
-          addPermanentName(zwText, vnText, state);
+        try {
+          await addPermanentName(zwText, vnText, state);
           hideQuickEditPanel();
+        } catch (err) {
+          console.error("Lỗi khi lưu Name:", err);
+        }
       }
     });
   });
@@ -192,12 +204,16 @@ export function initializeModal(state) {
   DOMElements.expandLeftBtn.addEventListener('click', () => expandOldModalSelection('left', state));
   DOMElements.expandRightBtn.addEventListener('click', () => expandOldModalSelection('right', state));
 
-  DOMElements.addToNameListBtn.addEventListener('click', () => {
+  DOMElements.addToNameListBtn.addEventListener('click', async () => {
     const cn = DOMElements.originalWordInput.value.trim();
     const vn = DOMElements.customMeaningInput.value.trim();
     if (cn && vn) {
-        addPermanentName(cn, vn, state);
+      try {
+        await addPermanentName(cn, vn, state);
         closeOldModal();
+      } catch (e) {
+        console.error("Lỗi khi lưu Name:", e);
+      }
     }
   });
 
@@ -226,7 +242,7 @@ export function initializeModal(state) {
   updateLockIcon(DOMElements.editModalLockBtn, isEditModalLocked, { lock: "Ghim bảng này", unlock: "Bỏ ghim bảng" });
 }
 
-function showQuickEditPanel(selection, state) {
+function showQuickEditPanel(selection) {
   const panel = DOMElements.quickEditPanel;
   panel.style.visibility = 'hidden';
   panel.classList.remove('hidden');
@@ -264,16 +280,16 @@ function hideQuickEditPanel() {
 
 function populateQuickEditPanel(text, state) {
   if (!text) return;
-  DOMElements.qInputZw.value = selectionState.originalText;
-  DOMElements.qInputHv.value = getHanViet(selectionState.originalText, state.dictionaries) || '';
+  DOMElements.qInputZw.value = text;
+  DOMElements.qInputHv.value = getHanViet(text, state.dictionaries) || '';
 
-  const allMeanings = getAllMeanings(selectionState.originalText, state.dictionaries, nameDictionary);
+  const allMeanings = getAllMeanings(text, state.dictionaries, nameDictionary);
   DOMElements.qInputTc.value = allMeanings.name || (allMeanings.vietphrase.length > 0 ? allMeanings.vietphrase[0] : '');
 
   DOMElements.qInputHV.value = DOMElements.qInputHv.value.toUpperCase();
   DOMElements.qInputVp.value = allMeanings.vietphrase.length > 0 ? allMeanings.vietphrase[0] : '';
 
-  DOMElements.qDeleteBtn.disabled = !nameDictionary.has(selectionState.originalText);
+  DOMElements.qDeleteBtn.disabled = !nameDictionary.has(text);
 }
 
 function openOldModal(state) {
@@ -295,8 +311,6 @@ function closeOldModal() {
   setTimeout(() => {
     DOMElements.editModal.style.display = 'none';
     DOMElements.vietphraseOptionsContainer.classList.add('hidden');
-    // Note: We don't force unlock here unless desired.
-    // If we want to keep it locked, just close it.
   }, 200);
 }
 
@@ -402,10 +416,18 @@ function applyCase(caseType) {
   if (!val) return;
 
   switch (caseType) {
-    case 'lower': val = val.toLowerCase(); break;
-    case 'upper': val = val.toUpperCase(); break;
-    case 'title': val = val.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '); break;
-    case 'sentence': val = val.charAt(0).toUpperCase() + val.slice(1).toLowerCase(); break;
+    case 'cap':
+      val = val.charAt(0).toUpperCase() + val.slice(1);
+      break;
+    case 'cap2':
+      val = val.split(' ').map((w, i) => i < 2 ? w.charAt(0).toUpperCase() + w.slice(1) : w).join(' ');
+      break;
+    case 'lowerLast':
+      val = val.slice(0, -1) + val.slice(-1).toLowerCase();
+      break;
+    case 'upper':
+      val = val.toUpperCase();
+      break;
   }
   input.value = val;
 }

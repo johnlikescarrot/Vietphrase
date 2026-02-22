@@ -25,6 +25,10 @@ function showModal(message, showCancelButton = false) {
   }
 
   modal.classList.remove('hidden');
+  setTimeout(() => {
+    const mc = modal.querySelector('.modal-content');
+    if (mc) mc.classList.add('show');
+  }, 10);
   okBtn.focus();
 
   document.addEventListener('keydown', handleKeyDown);
@@ -34,16 +38,23 @@ function showModal(message, showCancelButton = false) {
   });
 }
 
+function closeModal(result) {
+  const mc = modal.querySelector('.modal-content');
+  if (mc) mc.classList.remove('show');
+
+  setTimeout(() => {
+    modal.classList.add('hidden');
+    document.removeEventListener('keydown', handleKeyDown);
+    if (resolveCallback) resolveCallback(result);
+  }, 200);
+}
+
 okBtn.addEventListener('click', () => {
-  modal.classList.add('hidden');
-  document.removeEventListener('keydown', handleKeyDown);
-  if (resolveCallback) resolveCallback(true);
+  closeModal(true);
 });
 
 cancelBtn.addEventListener('click', () => {
-  modal.classList.add('hidden');
-  document.removeEventListener('keydown', handleKeyDown);
-  if (resolveCallback) resolveCallback(false);
+  closeModal(false);
 });
 
 export function customAlert(message) {

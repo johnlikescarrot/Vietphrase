@@ -99,12 +99,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   const closeImportOptionsModalBtn = document.getElementById('close-import-options-modal-btn');
   const singleFileImporter = document.getElementById('single-file-importer');
 
+  const showModalWithAnimation = (modalEl) => {
+    modalEl.classList.remove('hidden');
+    setTimeout(() => {
+      const mc = modalEl.querySelector('.modal-content');
+      if (mc) mc.classList.add('show');
+    }, 10);
+  };
+
+  const hideModalWithAnimation = (modalEl) => {
+    const mc = modalEl.querySelector('.modal-content');
+    if (mc) mc.classList.remove('show');
+    setTimeout(() => {
+      modalEl.classList.add('hidden');
+    }, 200);
+  };
+
   DOMElements.importLocalBtn.addEventListener('click', () => {
     if (isImporting) return;
-    importOptionsModal.classList.remove('hidden');
+    showModalWithAnimation(importOptionsModal);
   });
 
-  const hideImportOptionsModal = () => importOptionsModal.classList.add('hidden');
+  const hideImportOptionsModal = () => hideModalWithAnimation(importOptionsModal);
   closeImportOptionsModalBtn.addEventListener('click', hideImportOptionsModal);
   importOptionsModal.addEventListener('click', (e) => {
     if (e.target === importOptionsModal) {
@@ -116,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     hideImportOptionsModal();
     if (isImporting) return;
     importHasFinished = false;
-    DOMElements.logModal.classList.remove('hidden');
+    showModalWithAnimation(DOMElements.logModal);
     DOMElements.logList.innerHTML = '';
     DOMElements.fileImporter.click();
   });
@@ -143,7 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     isImporting = true;
     DOMElements.importLocalBtn.disabled = true;
     DOMElements.importServerBtn.disabled = true;
-    DOMElements.logModal.classList.remove('hidden');
+    showModalWithAnimation(DOMElements.logModal);
     DOMElements.logList.innerHTML = '';
 
     const logHandler = { append: appendLog, update: updateLog };
@@ -188,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     isImporting = true;
     DOMElements.importLocalBtn.disabled = true;
     DOMElements.importServerBtn.disabled = true;
-    DOMElements.logModal.classList.remove('hidden');
+    showModalWithAnimation(DOMElements.logModal);
     DOMElements.logList.innerHTML = '';
 
     const logHandler = { append: appendLog, update: updateLog };
@@ -217,8 +233,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   function closeLogModal() {
-    DOMElements.logModal.classList.add('hidden');
-    DOMElements.logList.innerHTML = '';
+    hideModalWithAnimation(DOMElements.logModal);
+    setTimeout(() => {
+      DOMElements.logList.innerHTML = '';
+    }, 200);
   }
 
   DOMElements.closeLogModalBtn.addEventListener('click', closeLogModal);
