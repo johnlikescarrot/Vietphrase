@@ -1,13 +1,3 @@
-/*
-export function updateCurrentYear() {
-  const yearSpan = document.getElementById('current-year');
-  if (yearSpan) {
-    const currentYear = new Date().getFullYear();
-    yearSpan.textContent = currentYear;
-  }
-}
-*/
-
 export function updateClock() {
   const clockElement = document.getElementById('live-clock');
   if (!clockElement) {
@@ -30,10 +20,19 @@ export function updateClock() {
 
   clockElement.textContent = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
 export function initializeSearch(DOMElements) {
   if (!DOMElements.searchInput) return;
 
-  DOMElements.searchInput.addEventListener('input', (e) => {
+  const debounce = (func, delay) => {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+  };
+
+  const handleSearch = (e) => {
     const term = e.target.value.toLowerCase().trim();
     const words = DOMElements.outputPanel.querySelectorAll('.word');
 
@@ -55,7 +54,9 @@ export function initializeSearch(DOMElements) {
         word.style.opacity = '0.3';
       }
     });
-  });
+  };
+
+  DOMElements.searchInput.addEventListener('input', debounce(handleSearch, 250));
 }
 
 export function initializeHelp(DOMElements) {
