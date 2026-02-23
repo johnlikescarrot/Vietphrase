@@ -55,7 +55,8 @@ function applyCapitalization(text, shouldCapitalize) {
   if (trimmed.length > 0 && !/\d/.test(trimmed.charAt(0)) && /\p{L}/u.test(trimmed)) {
     const firstCharIdx = text.indexOf(trimmed.charAt(0));
     return {
-      text: text.substring(0, firstCharIdx) + trimmed.charAt(0).toUpperCase() + trimmed.slice(firstCharIdx + 1),
+
+      text: text.substring(0, firstCharIdx) + trimmed.charAt(0).toUpperCase() + text.slice(firstCharIdx + 1),
       capitalized: true
     };
   }
