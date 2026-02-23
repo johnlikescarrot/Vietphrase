@@ -1,6 +1,6 @@
 import DOMElements from './m_dom.js';
 import { getHanViet, getAllMeanings, translateWord } from './m_dictionary.js';
-import { debounce } from './m_utils.js';
+import { debounce, showModalWithAnimation, hideModalWithAnimation } from './m_utils.js';
 import { nameDictionary, temporaryNameDictionary, saveNameDictionaryToStorage, renderNameList, rebuildMasterData, updateMasterDataForDeletion } from './m_nameList.js';
 import { performTranslation } from './m_translation.js';
 import { customConfirm } from './m_dialog.js';
@@ -317,10 +317,7 @@ function updateActiveSuggestion(options) {
 
 function showQuickEditPanel(selection) {
   const panel = DOMElements.quickEditPanel;
-  panel.style.visibility = 'hidden';
-  panel.classList.remove('hidden');
-
-  setTimeout(() => { panel.classList.add('show'); }, 10);
+  showModalWithAnimation(panel);
 
   const range = selection.getRangeAt(0);
   const rect = range.getBoundingClientRect();
@@ -380,23 +377,13 @@ function openOldModal(state) {
   DOMElements.originalWordInput.value = text;
   updateOldModalFields(text, state);
   hideQuickEditPanel();
-  DOMElements.editModal.style.display = 'flex';
-  setTimeout(() => {
-    const mc = DOMElements.editModal.querySelector('.modal-content');
-    if (mc) mc.classList.add('show');
-  }, 10);
+  showModalWithAnimation(DOMElements.editModal);
 }
 
 function closeOldModal() {
-  const mc = DOMElements.editModal.querySelector('.modal-content');
-  if (mc) mc.classList.remove('show');
-
-  setTimeout(() => {
-    DOMElements.editModal.style.display = 'none';
+  hideModalWithAnimation(DOMElements.editModal, () => {
     DOMElements.vietphraseOptionsContainer.classList.add('hidden');
-
-    // Lock state intentionally persists across modal close/open cycles
-  }, 200);
+  });
 }
 
 function updateOldModalFields(text, state) {

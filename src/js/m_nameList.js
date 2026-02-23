@@ -3,14 +3,14 @@ import { debounce } from './m_utils.js';
 import { customConfirm, customAlert } from './m_dialog.js';
 import { performTranslation } from './m_translation.js';
 
-class TrieNode {
+export class TrieNode {
   constructor() {
     this.children = {};
     this.value = null;
   }
 }
 
-class Trie {
+export class Trie {
   constructor() {
     this.root = new TrieNode();
   }
@@ -29,6 +29,7 @@ class Trie {
   }
 
   findLongestMatch(text, startIndex) {
+    const start = performance.now();
     let node = this.root;
     let longestMatch = null;
 
@@ -45,6 +46,8 @@ class Trie {
         };
       }
     }
+    const end = performance.now();
+    // if (end - start > 1) console.warn(`Slow Trie match: ${end - start}ms`);
     return longestMatch;
   }
 }

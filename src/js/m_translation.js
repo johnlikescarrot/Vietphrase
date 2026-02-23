@@ -84,7 +84,7 @@ function processSpacingAndCapitalization(params) {
 
   // Enhance punctuation logic: trigger capitalization after ellipses and CJK equivalents
   const trimmedText = textForSpan.trim();
-  if (/[.!?]$/.test(trimmedText) || trimmedText.endsWith("\u2026")) {
+  if (/[.!?。！？]$/.test(trimmedText) || trimmedText.endsWith("\u2026")) {
     newCapitalizeNextWord = true;
   }
   if (UNAMBIGUOUS_OPENING.has(originalWord)) newCapitalizeNextWord = true;
@@ -173,6 +173,7 @@ export function synthesizeCompoundTranslation(text, state) {
 }
 
 export function performTranslation(state, options = {}) {
+  const startTime = performance.now();
   if (!state || !state.dictionaries || !state.dictionaryTrie) {
     DOMElements.outputPanel.textContent = 'Lỗi: Từ điển chưa được tải hoặc xử lý.';
     return;
@@ -307,5 +308,7 @@ export function performTranslation(state, options = {}) {
   }).filter(Boolean);
 
   DOMElements.outputPanel.innerHTML = translatedLineHtmls.join('');
+  const endTime = performance.now();
+  console.log(`Translation completed in ${endTime - startTime}ms`);
   if (!options.preserveTempDict) temporaryNameDictionary.clear();
 }

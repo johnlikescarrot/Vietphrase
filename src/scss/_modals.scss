@@ -69,7 +69,8 @@
 
 // Specific Modal Styles
 #edit-modal {
-    display: none;
+    display: flex;
+    &.hidden { display: none; }
     position: fixed;
     top: 0;
     left: 0;

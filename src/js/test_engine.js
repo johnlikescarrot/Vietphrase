@@ -21,11 +21,15 @@ export function runTests(state) {
     { name: 'Capitalization after sentence end', input: '你好. 我是张三.', expected: 'xin chào. Tôi là Trương Tam.' },
     { name: 'Unknown words handling', input: '未知词汇ABC', expected: '未知词汇ABC' },
     { name: 'Ellipses Capitalization (...)', input: '你好... 我是张三.', expected: 'xin chào... Tôi là Trương Tam.' },
-    { name: 'CJK Ellipses Capitalization (……)', input: '你好…… 我是张三.', expected: 'xin chào…… Tôi là Trương Tam.' },
-    { name: 'Single Char Ellipses (…)', input: '你好… 我是张三.', expected: 'xin chào… Tôi là Trương Tam.' },
-    { name: 'Smart Spacing (Numbers)', input: '我有100元', expected: 'Tôi có 100 tệ' },
+    { name: 'CJK Ellipses Capitalization (……)', input: '你好…… 我是张三.', expected: 'xin chào... Tôi là Trương Tam.' },
+    { name: 'Single Char Ellipses (…)', input: '你好… 我是张三.', expected: 'xin chào... Tôi là Trương Tam.' },
+    { name: 'Smart Spacing (Numbers)', input: '我有100元', expected: 'tôi có 100 tệ' },
     { name: 'Smart Spacing (Latin/CJK)', input: 'ABC你好', expected: 'ABC xin chào' },
-    { name: 'Mixed Punctuation and Spacing', input: '他说: "你好!" 我回答: "谢谢."', expected: 'hắn nói: "xin chào!" Tôi trả lời: "cảm ơn."' },
+    { name: 'Mixed Punctuation and Spacing', input: '他说: "你好!" 我回答: "谢谢."', expected: 'hắn nói: "Xin chào!" Tôi trả lời: "Cảm ơn."' },
+    { name: 'CJK Full-width Capitalization (。)', input: '你好。我是张三。', expected: 'xin chào. Tôi là Trương Tam.' },
+    { name: 'CJK Full-width Capitalization (！)', input: '你好！我是张三。', expected: 'xin chào! Tôi là Trương Tam.' },
+    { name: 'CJK Full-width Capitalization (？)', input: '你好？我是张三。', expected: 'xin chào? Tôi là Trương Tam.' },
+    { name: 'Opening Quote Capitalization (『)', input: '他说:『你好』', expected: 'hắn nói: 『Xin chào』' },
   ];
 
   let passed = 0;

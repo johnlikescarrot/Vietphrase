@@ -330,10 +330,16 @@ export async function loadSingleDictionaryFromFile(file, dictionaryId, currentDi
   });
 }
 
-export function getTranslationFromPrioritizedDicts(word, dictionaries, nameDict) {
+let cachedSortedDicts = null;
+let lastDictionariesMap = null;
+
+export function getTranslationFromPrioritizedDicts(word, dictionaries) {
   if (!dictionaries) return null;
-  const sortedDicts = [...dictionaries.values()].sort((a, b) => a.priority - b.priority);
-  for (const dictInfo of sortedDicts) {
+  if (lastDictionariesMap !== dictionaries) {
+    lastDictionariesMap = dictionaries;
+    cachedSortedDicts = [...dictionaries.values()].sort((a, b) => a.priority - b.priority);
+  }
+  for (const dictInfo of cachedSortedDicts) {
     if (dictInfo.dict.has(word)) return dictInfo.dict.get(word);
   }
   return null;
