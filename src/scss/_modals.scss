@@ -179,3 +179,33 @@
     opacity: 1;
     transform: translateY(0);
 }
+
+// Suggestions logic styles
+.vietphrase-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover, &.selected {
+        background-color: var(--accent-color);
+        color: var(--bg-main);
+    }
+}
+
+#vietphrase-options-container,
+#q-vietphrase-options-container {
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--accent-color);
+        border-radius: 3px;
+    }
+}

@@ -6,7 +6,7 @@ import { initializeModal } from './m_modal.js';
 import { performTranslation } from './m_translation.js';
 import { updateClock } from './m_ui.js';
 import { initializeSettings } from './m_settings.js';
-import { showModalWithAnimation, hideModalWithAnimation } from './m_utils.js';
+import { showModalWithAnimation, hideModalWithAnimation, getCleanTranslation } from './m_utils.js';
 import { initializeSearch } from './m_search.js';
 
 function appendLog(message, type) {
@@ -334,6 +334,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Không thể sao chép tự động:', err);
     }
   });
+  DOMElements.copyCleanBtn.addEventListener('click', async () => {
+    const text = getCleanTranslation(DOMElements.outputPanel);
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      const originalText = DOMElements.copyCleanBtn.textContent;
+      DOMElements.copyCleanBtn.textContent = 'Copied!';
+      DOMElements.copyCleanBtn.disabled = true;
+      setTimeout(() => {
+        DOMElements.copyCleanBtn.textContent = originalText;
+        DOMElements.copyCleanBtn.disabled = false;
+      }, 1500);
+    } catch (err) {
+      console.error('Failed to copy clean text: ', err);
+      customAlert('Không thể sao chép bản dịch sạch. Vui lòng kiểm tra quyền truy cập clipboard.');
+    }
+  });
+
 
   DOMElements.exportBtn.addEventListener('click', () => {
     const outputPanel = DOMElements.outputPanel;

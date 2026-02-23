@@ -62,6 +62,10 @@ function applyCapitalization(text, shouldCapitalize) {
   return { text, capitalized: trimmed.length > 0 && /\d/.test(trimmed.charAt(0)) };
 }
 
+/**
+ * Processes spacing and capitalization for a translated segment.
+ * Includes "Smart Spacing" logic and enhanced punctuation handling.
+ */
 function processSpacingAndCapitalization(params) {
   let {
     textForSpan, originalWord, i, lastChar,
@@ -71,9 +75,12 @@ function processSpacingAndCapitalization(params) {
 
   const capResult = applyCapitalization(textForSpan, capitalizeNextWord);
   textForSpan = capResult.text;
-  let newCapitalizeNextWord = capResult.capitalized || !textForSpan.trim() ? false : capitalizeNextWord;
+  let newCapitalizeNextWord = (capResult.capitalized || !textForSpan.trim()) ? false : capitalizeNextWord;
 
-  if (/[.!?]$/.test(textForSpan.trim())) newCapitalizeNextWord = true;
+  // Enhance punctuation logic: trigger capitalization after ellipses and CJK equivalents
+  if (/[.!?]$/.test(textForSpan.trim()) || textForSpan.trim().endsWith("...") || textForSpan.trim().endsWith("……") || textForSpan.trim().endsWith("…")) {
+    newCapitalizeNextWord = true;
+  }
   if (UNAMBIGUOUS_OPENING.has(originalWord)) newCapitalizeNextWord = true;
 
   let leadingSpace = ' ';
@@ -101,6 +108,13 @@ function processSpacingAndCapitalization(params) {
   }
 
   if (i === 0 || /\s/.test(lastChar) || textForSpan === '') leadingSpace = '';
+
+  // Smart Spacing: Ensure spacing between Vietnamese and Latin/Digits is prioritized
+  if (leadingSpace === '' && i > 0 && textForSpan !== '') {
+    const isCurrentLatinDigit = /[a-zA-Z0-9]/.test(textForSpan.trim().charAt(0));
+    const isLastLatinDigit = /[a-zA-Z0-9]/.test(lastChar);
+    if (isCurrentLatinDigit && isLastLatinDigit) leadingSpace = ' ';
+  }
 
   return {
     textForSpan,
