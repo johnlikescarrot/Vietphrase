@@ -6,7 +6,7 @@ import DOMElements from './m_dom.js';
  * @param {Object} state - The application state, must have dictionaries and dictionaryTrie populated.
  */
 export function runTests(state) {
-  if (!state || !state.dictionaryTrie) {
+  if (!state || !state.dictionaries || !state.dictionaryTrie) {
     console.error('❌ Cannot run tests: Application state or Trie not initialized.');
     return;
   }
