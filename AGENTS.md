@@ -174,7 +174,7 @@ console.log(unknown);
 
 ### getHanViet
 
-Retrieves the Sino-Vietnamese (Hán Việt) reading for Chinese characters. Returns character-by-character phonetic transcription, preserving non-Chinese characters.
+Retrieves the Sino-Vietnamese (Han Viet) reading for Chinese characters. Returns character-by-character phonetic transcription, preserving non-Chinese characters.
 
 ```javascript
 import { getHanViet } from './m_dictionary.js';
@@ -182,17 +182,17 @@ import { getHanViet } from './m_dictionary.js';
 // Basic Sino-Vietnamese reading
 const hanViet = getHanViet('中国人', dictionaries);
 console.log(hanViet);
-// Output: 'trung quốc nhân'
+// Output: 'trung quoc nhan'
 
 // Mixed content (Chinese + other characters preserved)
 const mixed = getHanViet('我是ABC123', dictionaries);
 console.log(mixed);
-// Output: 'ngã thị ABC123'
+// Output: 'nga thi ABC123'
 
 // Long phrase
 const phrase = getHanViet('天下无敌', dictionaries);
 console.log(phrase);
-// Output: 'thiên hạ vô địch'
+// Output: 'thien ha vo dich'
 
 // Used in quick edit panel to show HV reading
 document.getElementById('hanviet-input').value = getHanViet(selectedWord, dictionaries) || '';
@@ -233,13 +233,13 @@ const meanings = getAllMeanings(word, dictionaries, nameDictionary);
 console.log(meanings);
 /* Output:
 {
-  name: 'Lý Bạch',           // From user's Name List (highest priority)
-  names: ['Lý Bạch'],        // From Names.txt
+  name: 'Ly Bach',           // From user's Name List (highest priority)
+  names: ['Ly Bach'],        // From Names.txt
   names2: [],                // From Names2.txt
-  vietphrase: ['lý bạch'],   // From Vietphrase.txt
+  vietphrase: ['ly bach'],   // From Vietphrase.txt
   chapter: [],               // From Chapter number dictionary
   number: [],                // From Number dictionary
-  hanviet: 'lý bạch'         // Sino-Vietnamese reading
+  hanviet: 'ly bach'         // Sino-Vietnamese reading
 }
 */
 
@@ -296,16 +296,16 @@ performTranslation(state, {
 
 // The output HTML structure with interactive spans:
 // <p>
-//   <span class="word" data-original="这">đây</span>
-//   <span class="word" data-original="是">là</span>
-//   <span class="word from-name-dict" data-original="张三">Trương Tam</span>
+//   <span class="word" data-original="这">day</span>
+//   <span class="word" data-original="是">la</span>
+//   <span class="word from-name-dict" data-original="张三">Truong Tam</span>
 //   <span class="word untranslatable" data-original="未知"></span>
 // </p>
 
 // Vietphrase mode (show all meanings)
 DOMElements.modeToggle.checked = true;
 performTranslation(state);
-// Output: (tôi/ta/mình) (là) (người/nhân) ...
+// Output: (toi/ta/minh) (la) (nguoi/nhan) ...
 ```
 
 ### synthesizeCompoundTranslation
@@ -319,14 +319,14 @@ const text = '大家好';
 const suggestions = synthesizeCompoundTranslation(text, state);
 
 console.log(suggestions);
-// Output: ['mọi người tốt', 'đại gia tốt', 'mọi người hay', ...]
+// Output: ['moi nguoi tot', 'dai gia tot', 'moi nguoi hay', ...]
 // Returns up to 100 unique combinations
 
 // Handle long inputs (limited to 7 segments)
 const longText = '这是一个很长很长的句子';
 const longSuggestions = synthesizeCompoundTranslation(longText, state);
 console.log(longSuggestions);
-// Output: ['这是一个很长很长的句子 - Quá dài để gợi ý']
+// Output: ['这是一个很长很长的句子 - Qua dai de goi y']
 
 // Use in quick edit panel
 const editSuggestions = synthesizeCompoundTranslation(selectedText, state);
@@ -350,18 +350,18 @@ import {
 } from './m_nameList.js';
 
 // Add a permanent name (persists across browser sessions)
-nameDictionary.set('李云龙', 'Lý Vân Long');
-nameDictionary.set('赵刚', 'Triệu Cương');
+nameDictionary.set('李云龙', 'Ly Van Long');
+nameDictionary.set('赵刚', 'Trieu Cuong');
 saveNameDictionaryToStorage(); // Save to localStorage
 renderNameList(); // Update UI textarea
 
 // Add a temporary name (session only, for quick corrections)
-temporaryNameDictionary.set('张三', 'Trương Tam');
+temporaryNameDictionary.set('张三', 'Truong Tam');
 // Will be used in translation but cleared after performTranslation()
 
 // Check if word exists in name list
 if (nameDictionary.has('李云龙')) {
-  console.log('Found:', nameDictionary.get('李云龙')); // 'Lý Vân Long'
+  console.log('Found:', nameDictionary.get('李云龙')); // 'Ly Van Long'
 }
 
 // Delete from name list
@@ -399,7 +399,7 @@ Rebuilds the masterKeySet and Trie data structures after dictionary changes. Cal
 import { rebuildMasterData } from './m_nameList.js';
 
 // After modifying dictionaries or name list programmatically
-nameDictionary.set('新词', 'từ mới');
+nameDictionary.set('新词', 'tu moi');
 rebuildMasterData(state);
 
 // The function rebuilds:
@@ -430,9 +430,9 @@ renderNameList('cn-az');    // Chinese key A-Z
 renderNameList('cn-za');    // Chinese key Z-A
 
 // Output format in textarea:
-// 李云龙=Lý Vân Long
-// 赵刚=Triệu Cương
-// 张三=Trương Tam
+// 李云龙=Ly Van Long
+// 赵刚=Trieu Cuong
+// 张三=Truong Tam
 ```
 
 ## Text Preprocessing Module (m_preprocessor.js)
@@ -475,15 +475,15 @@ Normalizes dictionary entry lines while preserving the Vietnamese translation pa
 import { standardizeDictionaryLine } from './m_preprocessor.js';
 
 // Standard dictionary line format: Chinese=Vietnamese
-const line = '你好！=xin chào';
+const line = '你好！=xin chao';
 const standardized = standardizeDictionaryLine(line);
 console.log(standardized);
-// Output: '你好!=xin chào' (only Chinese part is normalized)
+// Output: '你好!=xin chao' (only Chinese part is normalized)
 
 // Preserve Vietnamese side completely
-const withSpecial = '什么？=cái gì?';
+const withSpecial = '什么？=cai gi?';
 console.log(standardizeDictionaryLine(withSpecial));
-// Output: '什么?=cái gì?' (Vietnamese "?" preserved as-is)
+// Output: '什么?=cai gi?' (Vietnamese "?" preserved as-is)
 
 // Blacklist entries (no '=' sign) - entire line normalized
 const blacklistLine = '广告词！';
@@ -512,7 +512,7 @@ initializeModal(state);
 // - Single click/selection on output panel: Opens quick edit panel
 // - Double-click on word: Opens full edit modal (via quick edit)
 // - Expand selection left/right buttons
-// - Quick add buttons (✔️ temporary, 💾 permanent)
+// - Quick add buttons (temporary, permanent)
 // - Lock/pin panel functionality (persists across sessions)
 // - Delete from name list button
 // - Case transformation buttons (capitalize, uppercase, etc.)
@@ -520,8 +520,8 @@ initializeModal(state);
 // - Clipboard copy for Chinese text
 
 // The quick edit panel shows:
-// - hv: Hán Việt (lowercase)
-// - HV: Hán Việt (uppercase)
+// - hv: Han Viet (lowercase)
+// - HV: Han Viet (uppercase)
 // - zw: Original Chinese text
 // - Vp: Vietphrase meaning
 // - tc: Custom input field
@@ -550,7 +550,7 @@ class Trie {
 // Used during translation to find longest dictionary matches
 const match = state.dictionaryTrie.findLongestMatch('我是中国人', 2);
 console.log(match);
-// Output: { key: '中国人', value: { translation: 'người Trung Quốc', type: 'Names' } }
+// Output: { key: '中国人', value: { translation: 'nguoi Trung Quoc', type: 'Names' } }
 ```
 
 ## Dictionary File Format
@@ -560,23 +560,23 @@ Dictionary files use a simple key=value format with one entry per line. Multiple
 ```text
 # Vietphrase.txt - Main translation dictionary
 # Format: Chinese=Vietnamese (multiple meanings separated by / or ;)
-你好=xin chào
-谢谢=cảm ơn
-我=tôi/ta/mình
-今天=hôm nay
-什么=cái gì/gì
+你好=xin chao
+谢谢=cam on
+我=toi/ta/minh
+今天=hom nay
+什么=cai gi/gi
 
 # Names.txt - Character names and proper nouns (higher priority than Vietphrase)
-李云龙=Lý Vân Long
-张三=Trương Tam
-北京=Bắc Kinh
-中国=Trung Quốc
+李云龙=Ly Van Long
+张三=Truong Tam
+北京=Bac Kinh
+中国=Trung Quoc
 
 # LuatNhan.txt - Pattern replacement rules with {0} placeholder
 # {0} captures Chinese text which is then translated
-不比{0}强=không mạnh bằng {0}
-对{0}说=nói với {0}
-把{0}放下=đặt {0} xuống
+不比{0}强=khong manh bang {0}
+对{0}说=noi voi {0}
+把{0}放下=dat {0} xuong
 
 # Blacklist.txt - Words to ignore (removed from output, no translation shown)
 # No = sign needed, one entry per line
@@ -587,14 +587,14 @@ Dictionary files use a simple key=value format with one entry per line. Multiple
 # PhienAm.txt / HanViet.txt - Sino-Vietnamese readings (character by character)
 # Used for generating phonetic readings
 中=trung
-国=quốc
-人=nhân
-我=ngã
+国=quoc
+人=nhan
+我=nga
 
 # Pronouns.txt - Personal pronouns
-他=hắn/y
-她=nàng/cô ấy
-你=ngươi/anh/em
+他=han/y
+她=nang/co ay
+你=nguoi/anh/em
 ```
 
 ## Application State Object
