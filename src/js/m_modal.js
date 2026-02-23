@@ -88,6 +88,19 @@ export function initializeModal(state) {
       if (DOMElements.editModal.style.display !== 'none') closeOldModal();
       hideQuickEditPanel();
     }
+
+    // Ctrl + Enter to Translate
+    if (e.ctrlKey && e.key === 'Enter') {
+      e.preventDefault();
+      DOMElements.translateBtn.click();
+    }
+
+    // Ctrl + F to focus search
+    if (e.ctrlKey && e.key === 'f' && DOMElements.searchInput) {
+      e.preventDefault();
+      DOMElements.searchInput.focus();
+      DOMElements.searchInput.select();
+    }
   });
 
   DOMElements.qCloseBtn.addEventListener('click', () => {
@@ -256,7 +269,11 @@ function showQuickEditPanel(selection) {
   let top = rect.top + window.scrollY - panel.offsetHeight - 10;
   let left = rect.left + window.scrollX + (rect.width / 2) - (panel.offsetWidth / 2);
 
-  if (top < 0) top = rect.bottom + window.scrollY + 10;
+  if (top < window.scrollY) top = rect.bottom + window.scrollY + 10;
+  // Ensure it doesn't go off bottom
+  if (top + panel.offsetHeight > window.innerHeight + window.scrollY) {
+      top = Math.max(window.scrollY, window.innerHeight + window.scrollY - panel.offsetHeight - 10);
+  }
   if (left < 0) left = 10;
   if (left + panel.offsetWidth > window.innerWidth) left = window.innerWidth - panel.offsetWidth - 10;
 

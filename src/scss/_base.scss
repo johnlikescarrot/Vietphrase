@@ -28,3 +28,8 @@ body {
     background-color: #555555;
     color: var(--text-highlight);
 }
+.search-highlight {
+    background-color: var(--accent-color);
+    color: var(--bg-main);
+    border-radius: 2px;
+}

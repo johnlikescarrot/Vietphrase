@@ -1,42 +1,45 @@
 import { standardizeDictionaryLine } from './m_preprocessor.js';
 
-// --- CÁC HÀM PARSE ---
-function parseStyleChung(text) {
+/**
+ * Analyze and standardize the dictionary in a single pass to save memory.
+ */
+function parseDictionaryOptimized(text, shouldStandardize, style = 'Style-Chung') {
   const dictionary = new Map();
-  const lines = text.split(/\r?\n/);
-  lines.forEach(line => {
-    if (line.startsWith('#') || line.trim() === '') return;
-    const parts = line.split('=');
-    if (parts.length >= 2) {
-      const key = parts[0].trim();
-      const value = parts.slice(1).join('=').trim();
-      if (key) dictionary.set(key, value);
-    }
-  });
-  return dictionary;
-}
+  let start = 0;
+  let end = text.indexOf('\n');
 
-function parseBlacklistStyle(text) {
-  const dictionary = new Map();
-  const lines = text.split(/\r?\n/);
-  lines.forEach(line => {
+  while (start < text.length) {
+    let line = end === -1 ? text.substring(start) : text.substring(start, end);
+    // Handle \r character if present (Windows line endings)
+    if (line.endsWith('\r')) line = line.slice(0, -1);
+
     const trimmedLine = line.trim();
     if (trimmedLine && !trimmedLine.startsWith('#')) {
-      dictionary.set(trimmedLine, '');
+      let finalLine = trimmedLine;
+      if (shouldStandardize) {
+        finalLine = standardizeDictionaryLine(trimmedLine);
+      }
+
+      if (style === 'Blacklist-Style') {
+        dictionary.set(finalLine, '');
+      } else {
+        const eqIdx = finalLine.indexOf('=');
+        if (eqIdx !== -1) {
+          const key = finalLine.substring(0, eqIdx).trim();
+          const value = finalLine.substring(eqIdx + 1).trim();
+          if (key) dictionary.set(key, value);
+        }
+      }
     }
-  });
+
+    if (end === -1) break;
+    start = end + 1;
+    end = text.indexOf('\n', start);
+  }
   return dictionary;
 }
 
-function parseDictionary(text, style = 'Style-Chung') {
-  switch (style) {
-    case 'Blacklist-Style': return parseBlacklistStyle(text);
-    default: return parseStyleChung(text);
-  }
-}
-
-// --- CÁC HÀM LÀM VIỆC VỚI INDEXEDDB ---
-// Những hàm này được sao chép từ m_dictionary.js để worker có thể tự truy cập CSDL
+// --- INDEXEDDB FUNCTIONS ---
 const DB_NAME = 'VietphraseDB';
 const STORE_NAME = 'dictionaryStore';
 
@@ -72,16 +75,14 @@ async function getDataFromDB(db, id) {
   });
 }
 
-
-// --- BỘ NÃO CỦA WORKER ---
+// --- WORKER LOGIC ---
 self.onmessage = async function (e) {
   try {
     const { filesContent } = e.data;
-    // Bước 1: Mở kết nối tới CSDL
     const db = await openDB();
-    // Bước 2: Lấy dữ liệu từ điển hiện có từ CSDL
     const cachedData = await getDataFromDB(db, 'parsed-dictionaries');
     const dictionaries = new Map();
+
     if (cachedData) {
       cachedData.data.forEach(([name, data]) => {
         dictionaries.set(name, {
@@ -91,48 +92,31 @@ self.onmessage = async function (e) {
       });
     }
 
-    // Bước 2B: Chuẩn hóa nội dung các file từ điển cần thiết
     const dictionariesToStandardize = new Set([
-      'Names2', 'Names',
-      'LuatNhan',
-      'Vietphrase', 'Chapter', 'Number',
-      'Pronouns', 'PhienAm',
-      'English',
-      'Blacklist'
+      'Names2', 'Names', 'LuatNhan', 'Vietphrase',
+      'Chapter', 'Number', 'Pronouns', 'PhienAm',
+      'English', 'Blacklist'
     ]);
 
-    // Bước 3: Phân tích (Parse) nội dung các file mới và cập nhật
     filesContent.forEach(item => {
       const fileInfo = item.fileInfo;
       const dictionaryId = fileInfo.id;
+      const shouldStandardize = dictionariesToStandardize.has(dictionaryId);
 
-      let contentToParse = item.content;
-      // Nếu file này nằm trong danh sách cần chuẩn hóa, hãy xử lý nó
-      if (dictionariesToStandardize.has(dictionaryId)) {
-        contentToParse = contentToParse
-          .split(/\r?\n/)
-          .map(standardizeDictionaryLine)
-          .join('\n');
-      }
-      const newDict = parseDictionary(contentToParse, fileInfo.style);
-
-      // Luôn ghi đè từ điển cũ bằng dữ liệu mới từ file
+      const newDict = parseDictionaryOptimized(item.content, shouldStandardize, fileInfo.style);
       dictionaries.set(dictionaryId, { priority: fileInfo.priority, dict: newDict });
     });
 
-    // Bước 4: Chuẩn bị dữ liệu để lưu vào IndexedDB
     const storableDicts = Array.from(dictionaries.entries()).map(([name, data]) => {
       return [name, {
         priority: data.priority,
         dict: Array.from(data.dict.entries())
       }];
     });
-    // Bước 5: Lưu dữ liệu đã xử lý vào CSDL
+
     await saveDataToDB(db, { id: 'parsed-dictionaries', data: storableDicts });
-    // Bước 6: Gửi một thông báo thành công đơn giản về luồng chính
     self.postMessage({ status: 'success' });
   } catch (error) {
-    // Nếu có lỗi bên trong worker, gửi thông báo lỗi chi tiết về
     self.postMessage({ status: 'error', error: error.message + "\n" + error.stack });
   }
 };

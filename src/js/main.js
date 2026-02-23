@@ -7,6 +7,7 @@ import { performTranslation } from './m_translation.js';
 import { updateClock } from './m_ui.js';
 import { initializeSettings } from './m_settings.js';
 import { showModalWithAnimation, hideModalWithAnimation } from './m_utils.js';
+import { initializeSearch } from './m_search.js';
 
 function appendLog(message, type) {
   const li = document.createElement('li');
@@ -24,7 +25,10 @@ function appendLog(message, type) {
     icon = '<span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E0E0E0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>';
   }
 
-  li.innerHTML = `${icon}<span>${message}</span>`;
+  li.innerHTML = icon;
+  const span = document.createElement("span");
+  span.textContent = message;
+  li.appendChild(span);
   li.classList.add(`log-${type}`);
   DOMElements.logList.appendChild(li);
 
@@ -44,7 +48,10 @@ function updateLog(li, message, type) {
     icon = '<span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E0E0E0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>';
   }
 
-  li.innerHTML = `${icon}<span>${message}</span>`;
+  li.innerHTML = icon;
+  const span = document.createElement("span");
+  span.textContent = message;
+  li.appendChild(span);
   li.classList.remove('log-loading');
   li.classList.add(`log-${type}`);
 }
@@ -60,6 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let singleImportType = null;
 
   initializeSettings();
+  initializeSearch();
   initializeNameList(state);
   initializeModal(state);
 

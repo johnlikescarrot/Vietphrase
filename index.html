@@ -87,7 +87,7 @@
   </div>
 
   <div id="main-container" class="mx-auto flex flex-col gap-6">
-    <header class="text-center" aria-hidden="true">
+    <header class="text-center">
       <h1 class="text-3xl md:text-4xl font-bold text-text-highlight">Công Cụ Dịch Thuật Vietphrase</h1>
       <p class="text-md mt-2">Web thuần tĩnh nên cần nhiều RAM để xử lý Từ Điển</p>
 
@@ -99,7 +99,7 @@
 
     </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" aria-hidden="true">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 panel p-6 flex flex-col">
         <h2 class="text-xl font-semibold text-text-highlight mb-4">Văn bản gốc (Tiếng Trung)</h2>
         <textarea id="input-text" class="w-full flex-grow text-lg leading-relaxed"
@@ -127,7 +127,7 @@
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-semibold text-text-highlight">Name List</h2>
           <div id="name-list-sort-container" class="relative">
-            <button id="name-list-sort-btn" title="Sắp xếp" class="btn btn-secondary !p-2 w-8 h-8">☰</button>
+            <button id="name-list-sort-btn" aria-label="Sắp xếp" title="Sắp xếp" class="btn btn-secondary !p-2 w-8 h-8">☰</button>
             <div id="name-list-sort-dropdown"
               class="hidden absolute right-0 mt-2 w-56 bg-bg-panel border border-border-color rounded-lg shadow-xl z-20">
               <ul class="text-sm">
@@ -168,14 +168,18 @@
     <div class="panel p-3" role="main">
       <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
         <h2 class="text-xl font-semibold text-text-highlight" aria-hidden="true">Kết quả dịch (Tiếng Việt)</h2>
-        <div class="flex items-center gap-4" aria-hidden="true">
+        <div class="flex items-center gap-4">
+          <div id="search-container" class="relative">
+            <label for="search-input" class="sr-only">Tìm kiếm</label>
+            <input type="text" id="search-input" aria-label="Tìm kiếm" placeholder="Tìm kiếm..." class="text-sm p-1 rounded bg-bg-input border border-border-color w-32 md:w-48 focus:w-64 transition-all outline-none">
+          </div>
           <div class="flex items-center gap-2">
-            <button id="decrease-font-btn" title="Giảm cỡ chữ" class="btn btn-secondary !p-2 w-8 h-8">-</button>
+            <button id="decrease-font-btn" aria-label="Giảm cỡ chữ" title="Giảm cỡ chữ" class="btn btn-secondary !p-2 w-8 h-8">-</button>
             <span id="font-size-label" class="text-sm w-12 text-center" title="Cỡ chữ hiện tại"></span>
-            <button id="increase-font-btn" title="Tăng cỡ chữ" class="btn btn-secondary !p-2 w-8 h-8">+</button>
+            <button id="increase-font-btn" aria-label="Tăng cỡ chữ" title="Tăng cỡ chữ" class="btn btn-secondary !p-2 w-8 h-8">+</button>
           </div>
           <button id="copy-btn" class="btn btn-secondary">Copy</button>
-          <button id="export-btn" title="Xuất ra file .txt" class="btn btn-secondary !p-2 w-8 h-8">
+          <button id="export-btn" aria-label="Xuất ra file .txt" title="Xuất ra file .txt" class="btn btn-secondary !p-2 w-8 h-8">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -184,7 +188,7 @@
             </svg>
           </button>
 
-          <button id="settings-btn" title="Cài đặt hiển thị" class="btn btn-secondary !p-2 w-8 h-8">
+          <button id="settings-btn" aria-label="Cài đặt hiển thị" title="Cài đặt hiển thị" class="btn btn-secondary !p-2 w-8 h-8">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="3"></circle>
@@ -208,7 +212,7 @@
       <div class="flex justify-between items-center">
         <h3 class="text-xl font-bold text-text-highlight">Thêm name/Chỉnh name</h3>
         <div class="flex items-center gap-2">
-          <button id="edit-modal-delete-btn" title="Xóa khỏi Name List"
+          <button id="edit-modal-delete-btn" aria-label="Xóa khỏi Name List" title="Xóa khỏi Name List"
             class="p-1 rounded-full text-text-color hover:bg-bg-input transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -218,7 +222,7 @@
               <line x1="14" y1="11" x2="14" y2="17"></line>
             </svg>
           </button>
-          <button id="edit-modal-lock-btn" title="Ghim bảng"
+          <button id="edit-modal-lock-btn" aria-label="Ghim bảng" title="Ghim bảng"
             class="p-1 rounded-full text-text-color hover:bg-bg-input transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -240,10 +244,10 @@
       <div class="mt-2 mb-3">
         <label class="text-sm font-bold mb-1 block">Tiếng Trung:</label>
         <div class="flex items-center gap-2">
-          <button id="expand-left-btn" title="Mở rộng sang trái"
+          <button id="expand-left-btn" aria-label="Mở rộng sang trái" title="Mở rộng sang trái"
             class="btn btn-secondary !p-1.5 h-9 text-base">&lt;</button>
           <input type="text" id="original-word-input" class="w-full">
-          <button id="expand-right-btn" title="Mở rộng sang phải"
+          <button id="expand-right-btn" aria-label="Mở rộng sang phải" title="Mở rộng sang phải"
             class="btn btn-secondary !p-1.5 h-9 text-base">&gt;</button>
         </div>
       </div>
@@ -304,40 +308,40 @@
         <label for="q-input-hv" class="font-bold text-sm text-accent-color">hv</label>
         <input type="text" id="q-input-hv" class="w-full text-sm">
         <div class="flex gap-1">
-          <button class="q-temp-add-btn" data-target="q-input-hv" title="Thêm tạm thời">✔️</button>
-          <button class="q-perm-add-btn" data-target="q-input-hv" title="Thêm vào Name">💾</button>
+          <button class="q-temp-add-btn" data-target="q-input-hv" aria-label="Thêm tạm thời" title="Thêm tạm thời">✔️</button>
+          <button class="q-perm-add-btn" data-target="q-input-hv" aria-label="Thêm vào Name" title="Thêm vào Name">💾</button>
         </div>
       </div>
       <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
         <label for="q-input-HV" class="font-bold text-sm text-accent-color">HV</label>
         <input type="text" id="q-input-HV" class="w-full text-sm">
         <div class="flex gap-1">
-          <button class="q-temp-add-btn" data-target="q-input-HV" title="Thêm tạm thời">✔️</button>
-          <button class="q-perm-add-btn" data-target="q-input-HV" title="Thêm vào Name">💾</button>
+          <button class="q-temp-add-btn" data-target="q-input-HV" aria-label="Thêm tạm thời" title="Thêm tạm thời">✔️</button>
+          <button class="q-perm-add-btn" data-target="q-input-HV" aria-label="Thêm vào Name" title="Thêm vào Name">💾</button>
         </div>
       </div>
       <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
         <label for="q-input-zw" class="font-bold text-sm text-accent-color">zw</label>
         <input type="text" id="q-input-zw" class="w-full text-sm">
         <div class="flex gap-2">
-          <button id="q-search-btn" title="Dịch bằng Google Dịch" class="!p-0">🔍</button>
-          <button id="q-copy-btn" title="Sao chép chữ Hán" class="!p-0">📋</button>
+          <button id="q-search-btn" aria-label="Dịch bằng Google Dịch" title="Dịch bằng Google Dịch" class="!p-0">🔍</button>
+          <button id="q-copy-btn" aria-label="Sao chép chữ Hán" title="Sao chép chữ Hán" class="!p-0">📋</button>
         </div>
       </div>
       <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
         <label for="q-input-Vp" class="font-bold text-sm text-accent-color">Vp</label>
         <input type="text" id="q-input-Vp" class="w-full text-sm">
         <div class="flex gap-1">
-          <button class="q-temp-add-btn" data-target="q-input-Vp" title="Thêm tạm thời">✔️</button>
-          <button class="q-perm-add-btn" data-target="q-input-Vp" title="Thêm vào Name">💾</button>
+          <button class="q-temp-add-btn" data-target="q-input-Vp" aria-label="Thêm tạm thời" title="Thêm tạm thời">✔️</button>
+          <button class="q-perm-add-btn" data-target="q-input-Vp" aria-label="Thêm vào Name" title="Thêm vào Name">💾</button>
         </div>
       </div>
       <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3">
         <label for="q-input-tc" class="font-bold text-sm text-accent-color">tc</label>
         <input type="text" id="q-input-tc" class="w-full text-sm" placeholder="Nhập bản dịch của bạn...">
         <div class="flex gap-1">
-          <button class="q-temp-add-btn" data-target="q-input-tc" title="Thêm tạm thời">✔️</button>
-          <button class="q-perm-add-btn" data-target="q-input-tc" title="Thêm vào Name">💾</button>
+          <button class="q-temp-add-btn" data-target="q-input-tc" aria-label="Thêm tạm thời" title="Thêm tạm thời">✔️</button>
+          <button class="q-perm-add-btn" data-target="q-input-tc" aria-label="Thêm vào Name" title="Thêm vào Name">💾</button>
         </div>
       </div>
     </div>
@@ -345,7 +349,7 @@
     <div class="flex justify-between items-center pt-2 mt-2 border-t border-border-color">
       <button id="q-add-name-btn" class="btn text-sm">Thêm Name...</button>
       <div class="flex items-center gap-3">
-        <button id="q-delete-btn" title="Xóa khỏi Name List" class="!p-0">
+        <button id="q-delete-btn" aria-label="Xóa khỏi Name List" title="Xóa khỏi Name List" class="!p-0">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="3 6 5 6 21 6"></polyline>
@@ -354,14 +358,14 @@
             <line x1="14" y1="11" x2="14" y2="17"></line>
           </svg>
         </button>
-        <button id="q-lock-btn" title="Ghim bảng dịch nhanh" class="!p-0">
+        <button id="q-lock-btn" aria-label="Ghim bảng dịch nhanh" title="Ghim bảng dịch nhanh" class="!p-0">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
           </svg>
         </button>
-        <button id="q-close-btn" title="Đóng" class="!p-0">
+        <button id="q-close-btn" aria-label="Đóng" title="Đóng" class="!p-0">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6 6 18"></path>
@@ -468,7 +472,7 @@
     style="background-color: var(--bg-panel); border-color: var(--border-color);">
     <div class="flex justify-between items-center pb-2 mb-3 border-b" style="border-color: var(--border-color);">
       <h3 class="text-lg font-bold text-text-highlight">Cài đặt hiển thị</h3>
-      <button id="settings-panel-close-btn" title="Đóng" class="p-1 hover:text-accent-color">
+      <button id="settings-panel-close-btn" aria-label="Đóng" title="Đóng" class="p-1 hover:text-accent-color">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M18 6 6 18"></path>

@@ -128,7 +128,7 @@ export function standardizeText(text) {
   // "我。你" -> "我.你"
   processedText = processedText.replace(puncRegexForConvert, (match) => punctuationMap.get(match));
 
-  return processedText;
+  return processedText.trim();
 }
 
 // Chỉ xử lý vế Tiếng Trung, giữ nguyên vế Tiếng Việt.
