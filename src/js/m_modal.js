@@ -1,5 +1,5 @@
 import DOMElements from './m_dom.js';
-import { getHanViet, getAllMeanings } from './m_dictionary.js';
+import { getHanViet, getAllMeanings, translateWord } from './m_dictionary.js';
 import { debounce } from './m_utils.js';
 import { nameDictionary, temporaryNameDictionary, saveNameDictionaryToStorage, renderNameList, rebuildMasterData, updateMasterDataForDeletion } from './m_nameList.js';
 import { performTranslation } from './m_translation.js';
@@ -8,6 +8,7 @@ import { customConfirm } from './m_dialog.js';
 let isEditModalLocked = localStorage.getItem('isEditModalLocked') === 'true';
 let isPanelLocked = localStorage.getItem('isQuickEditLocked') === 'true';
 let isPanelVisible = false;
+let activeSuggestionIndex = -1;
 
 const selectionState = {
   text: '',
@@ -17,7 +18,35 @@ const selectionState = {
   endIndex: -1
 };
 
-export function updateLockIcon(button, isLocked, tooltips) {
+export
+/**
+ * Renders translation suggestions into a container and attaches click handlers.
+ */
+function renderMeaningOptions(container, allMeanings, onSelect) {
+  const uniqueMeanings = new Set();
+  if (allMeanings.name) uniqueMeanings.add(allMeanings.name);
+  allMeanings.names.forEach(m => uniqueMeanings.add(m));
+  allMeanings.names2.forEach(m => uniqueMeanings.add(m));
+  allMeanings.vietphrase.forEach(m => uniqueMeanings.add(m));
+
+  container.innerHTML = '';
+  uniqueMeanings.forEach(meaning => {
+    const div = document.createElement('div');
+    div.className = 'vietphrase-option';
+    div.textContent = meaning;
+    div.addEventListener('click', () => {
+      onSelect(meaning);
+      container.classList.add('hidden');
+      // Reset aria attributes
+      const toggle = container.id === 'q-vietphrase-options-container' ? DOMElements.qVietphraseToggleBtn : DOMElements.vietphraseToggleBtn;
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    });
+    container.appendChild(div);
+  });
+  return uniqueMeanings;
+}
+
+function updateLockIcon(button, isLocked, tooltips) {
   if (!button) return;
   const svgLocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
   const svgUnlocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
@@ -27,53 +56,32 @@ export function updateLockIcon(button, isLocked, tooltips) {
 }
 
 export function initializeModal(state) {
-  const debouncedPopulateQuickEdit = debounce((selection, state) => {
-    // Regression fix: use selection.originalText (Chinese) instead of selection.text (Vietnamese)
-    populateQuickEditPanel(selection.originalText, state);
-  }, 100);
+  const debouncedUpdateOldModal = debounce((text, state) => updateOldModalFields(text, state), 100);
 
-  const debouncedUpdateOldModal = debounce((text, state) => {
-    updateOldModalFields(text, state);
-  }, 100);
-
-  DOMElements.outputPanel.addEventListener('pointerup', (e) => {
+  DOMElements.outputPanel.addEventListener('click', (e) => {
     const selection = window.getSelection();
-    const selectedText = selection.toString().trim();
-
-    if (selectedText) {
+    if (selection.toString().trim().length > 0) {
       const range = selection.getRangeAt(0);
       const container = range.commonAncestorContainer;
       const parentElement = container.nodeType === 3 ? container.parentElement : container;
 
       if (DOMElements.outputPanel.contains(parentElement)) {
-        selectionState.text = selectedText;
-        selectionState.spans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
+        const spans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
+        const startNode = (selection.anchorNode.nodeType === 3 ? selection.anchorNode.parentElement : selection.anchorNode).closest('.word');
+        const endNode = (selection.focusNode.nodeType === 3 ? selection.focusNode.parentElement : selection.focusNode).closest('.word');
 
-        const selectedNodes = [];
-        let curr = range.startContainer.nodeType === 3 ? range.startContainer.parentNode : range.startContainer;
-        while (curr) {
-          if (curr.nodeType === 1 && curr.classList.contains('word')) selectedNodes.push(curr);
-          if (curr === range.endContainer || (curr.contains && curr.contains(range.endContainer))) break;
+        let startIndex = spans.indexOf(startNode);
+        let endIndex = spans.indexOf(endNode);
+        if (startIndex > endIndex) [startIndex, endIndex] = [endIndex, startIndex];
 
-          if (curr.firstChild) {
-              curr = curr.firstChild;
-          } else if (curr.nextSibling) {
-              curr = curr.nextSibling;
-          } else {
-              let p = curr.parentNode;
-              while(p && !p.nextSibling) p = p.parentNode;
-              curr = p ? p.nextSibling : null;
-          }
-        }
+        if (startIndex !== -1 && endIndex !== -1) {
+          selectionState.spans = spans;
+          selectionState.startIndex = startIndex;
+          selectionState.endIndex = endIndex;
+          selectionState.originalText = spans.slice(startIndex, endIndex + 1).map(s => s.dataset.original || s.textContent).join('');
 
-        const words = selectedNodes.filter(n => n.classList.contains('word'));
-        if (words.length > 0) {
-          selectionState.originalText = words.map(s => s.dataset.original || s.textContent).join('');
-          selectionState.startIndex = selectionState.spans.indexOf(words[0]);
-          selectionState.endIndex = selectionState.spans.indexOf(words[words.length - 1]);
-
+          populateQuickEditPanel(selectionState.originalText, state);
           showQuickEditPanel(selection);
-          debouncedPopulateQuickEdit(selectionState, state);
         }
       }
     } else {
@@ -84,22 +92,56 @@ export function initializeModal(state) {
   });
 
   document.addEventListener('keydown', (e) => {
+    // 1. Modal/Panel closing
     if (e.key === 'Escape') {
-      if (DOMElements.editModal.style.display !== 'none') closeOldModal();
+      if (getComputedStyle(DOMElements.editModal).display !== 'none') closeOldModal();
       hideQuickEditPanel();
+
+      // Hide suggestion containers
+      DOMElements.qVietphraseOptionsContainer.classList.add('hidden');
+      DOMElements.vietphraseOptionsContainer.classList.add('hidden');
+      DOMElements.qVietphraseToggleBtn.setAttribute('aria-expanded', 'false');
+      DOMElements.vietphraseToggleBtn.setAttribute('aria-expanded', 'false');
+      activeSuggestionIndex = -1;
     }
 
-    // Ctrl + Enter to Translate
+    // 2. Translation triggering
     if (e.ctrlKey && e.key === 'Enter') {
       e.preventDefault();
       DOMElements.translateBtn.click();
     }
 
-    // Ctrl + F to focus search
+    // 3. Search focus
     if (e.ctrlKey && e.key === 'f' && DOMElements.searchInput) {
       e.preventDefault();
       DOMElements.searchInput.focus();
       DOMElements.searchInput.select();
+    }
+
+    // 4. Suggestion navigation
+    const qContainer = DOMElements.qVietphraseOptionsContainer;
+    const editContainer = DOMElements.vietphraseOptionsContainer;
+    const activeContainer = !qContainer.classList.contains('hidden') ? qContainer : (!editContainer.classList.contains('hidden') ? editContainer : null);
+
+    if (activeContainer) {
+      const options = Array.from(activeContainer.querySelectorAll('.vietphrase-option'));
+      if (options.length > 0) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          activeSuggestionIndex = (activeSuggestionIndex + 1) % options.length;
+          updateActiveSuggestion(options);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          activeSuggestionIndex = (activeSuggestionIndex - 1 + options.length) % options.length;
+          updateActiveSuggestion(options);
+        } else if (e.key === 'Enter') {
+          if (activeSuggestionIndex >= 0 && activeSuggestionIndex < options.length) {
+            e.preventDefault();
+            options[activeSuggestionIndex].click();
+            activeSuggestionIndex = -1;
+          }
+        }
+      }
     }
   });
 
@@ -115,35 +157,17 @@ export function initializeModal(state) {
     updateLockIcon(DOMElements.qLockBtn, isPanelLocked, { lock: "Ghim bảng này", unlock: "Bỏ ghim bảng" });
   });
 
-  DOMElements.qExpandLeftBtn.addEventListener('click', () => expandSelection('left', state));
-  DOMElements.qExpandRightBtn.addEventListener('click', () => expandSelection('right', state));
-
-  DOMElements.qAddNameBtn.addEventListener('click', async () => {
-    const cn = DOMElements.qInputZw.value.trim();
-    const vn = DOMElements.qInputTc.value.trim();
-    if (cn && vn) {
-      try {
-        await addPermanentName(cn, vn, state);
-        hideQuickEditPanel();
-      } catch (e) {
-        console.error("Lỗi khi lưu Name:", e);
-      }
-    }
-  });
-
-  DOMElements.qSearchBtn.addEventListener('click', () => {
-    openOldModal(state);
-  });
-
-  DOMElements.qDeleteBtn.addEventListener('click', async () => {
-    const text = DOMElements.qInputZw.value.trim();
-    if (text && await customConfirm(`Xóa "${text}" khỏi Name List?`)) {
-      try {
-        await deletePermanentName(text, state);
-        hideQuickEditPanel();
-      } catch (e) {
-        console.error("Lỗi khi xóa Name:", e);
-      }
+  DOMElements.qVietphraseToggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const container = DOMElements.qVietphraseOptionsContainer;
+    if (container.classList.contains('hidden')) {
+      container.classList.remove('hidden');
+      DOMElements.qVietphraseToggleBtn.setAttribute('aria-expanded', 'true');
+      activeSuggestionIndex = -1;
+    } else {
+      container.classList.add('hidden');
+      DOMElements.qVietphraseToggleBtn.setAttribute('aria-expanded', 'false');
+      activeSuggestionIndex = -1;
     }
   });
 
@@ -160,18 +184,44 @@ export function initializeModal(state) {
   DOMElements.vietphraseToggleBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     const container = DOMElements.vietphraseOptionsContainer;
-    const isHidden = container.classList.contains('hidden');
-    if (isHidden) {
+    if (container.classList.contains('hidden')) {
       const inputRect = DOMElements.customMeaningInput.getBoundingClientRect();
       container.style.position = 'fixed';
       container.style.top = `${inputRect.bottom + 2}px`;
       container.style.left = `${inputRect.left}px`;
       container.style.width = `${inputRect.width}px`;
       container.classList.remove('hidden');
+
+      DOMElements.vietphraseToggleBtn.setAttribute('aria-expanded', 'true');
+      activeSuggestionIndex = -1;
     } else {
       container.classList.add('hidden');
+      DOMElements.vietphraseToggleBtn.setAttribute('aria-expanded', 'false');
+      activeSuggestionIndex = -1;
     }
   });
+
+  DOMElements.qSplitBtn.addEventListener('click', () => splitSelectedWord(state));
+
+  DOMElements.qDeleteBtn.addEventListener('click', async () => {
+    const text = DOMElements.qInputZw.value.trim();
+    if (text && await customConfirm("Xóa '" + text + "' khỏi Name List?")) {
+
+      try {
+        await deletePermanentName(text, state);
+        hideQuickEditPanel();
+      } catch (e) {
+        console.error('Lỗi khi xóa Name:', e);
+        customAlert('Không thể xóa Name. Vui lòng thử lại.', 'error');
+      }
+    }
+  });
+
+  DOMElements.qSearchBtn.addEventListener('click', () => {
+    openOldModal(state);
+  });
+  DOMElements.qExpandLeftBtn.addEventListener('click', () => expandSelection('left', state));
+  DOMElements.qExpandRightBtn.addEventListener('click', () => expandSelection('right', state));
 
   document.querySelectorAll('.q-temp-add-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -181,7 +231,6 @@ export function initializeModal(state) {
       if (!input) return;
       const vnText = input.value;
       const cnText = selectionState.originalText;
-
       if (vnText && cnText) {
         temporaryNameDictionary.set(cnText, vnText);
         updateTranslationInPlace(vnText);
@@ -214,7 +263,6 @@ export function initializeModal(state) {
   });
 
   DOMElements.closeEditModalBtn.addEventListener('click', closeOldModal);
-
   DOMElements.expandLeftBtn.addEventListener('click', () => expandOldModalSelection('left', state));
   DOMElements.expandRightBtn.addEventListener('click', () => expandOldModalSelection('right', state));
 
@@ -246,14 +294,25 @@ export function initializeModal(state) {
   });
 
   document.addEventListener('click', () => {
-    const container = DOMElements.vietphraseOptionsContainer;
-    if (!container.classList.contains('hidden')) {
-      container.classList.add('hidden');
-    }
+    DOMElements.vietphraseOptionsContainer.classList.add('hidden');
+    DOMElements.qVietphraseOptionsContainer.classList.add('hidden');
   });
 
   updateLockIcon(DOMElements.qLockBtn, isPanelLocked, { lock: "Ghim bảng này", unlock: "Bỏ ghim bảng" });
   updateLockIcon(DOMElements.editModalLockBtn, isEditModalLocked, { lock: "Ghim bảng này", unlock: "Bỏ ghim bảng" });
+}
+
+
+
+function updateActiveSuggestion(options) {
+  options.forEach((opt, idx) => {
+    if (idx === activeSuggestionIndex) {
+      opt.classList.add('selected');
+      opt.scrollIntoView({ block: 'nearest' });
+    } else {
+      opt.classList.remove('selected');
+    }
+  });
 }
 
 function showQuickEditPanel(selection) {
@@ -308,6 +367,11 @@ function populateQuickEditPanel(text, state) {
   DOMElements.qInputHV.value = DOMElements.qInputHv.value.toUpperCase();
   DOMElements.qInputVp.value = allMeanings.vietphrase.length > 0 ? allMeanings.vietphrase[0] : '';
 
+
+  renderMeaningOptions(DOMElements.qVietphraseOptionsContainer, allMeanings, (val) => {
+    DOMElements.qInputTc.value = val;
+  });
+
   DOMElements.qDeleteBtn.disabled = !nameDictionary.has(text);
 }
 
@@ -349,24 +413,10 @@ function updateOldModalFields(text, state) {
 
   hanvietInput.value = (getHanViet(text, state.dictionaries) || '').toLowerCase();
 
-  const uniqueMeanings = new Set();
   const all = getAllMeanings(text, state.dictionaries, nameDictionary);
-  if (all.name) uniqueMeanings.add(all.name);
-  all.names.forEach(m => uniqueMeanings.add(m));
-  all.names2.forEach(m => uniqueMeanings.add(m));
-  all.vietphrase.forEach(m => uniqueMeanings.add(m));
-
-  optionsContainer.innerHTML = '';
-  uniqueMeanings.forEach(meaning => {
-    const div = document.createElement('div');
-    div.className = 'vietphrase-option';
-    div.textContent = meaning;
-    div.addEventListener('click', () => {
-      vietphraseInput.value = meaning;
-      customMeaningInput.value = meaning;
-      optionsContainer.classList.add('hidden');
-    });
-    optionsContainer.appendChild(div);
+  const uniqueMeanings = renderMeaningOptions(optionsContainer, all, (val) => {
+    vietphraseInput.value = val;
+    customMeaningInput.value = val;
   });
 
   const best = Array.from(uniqueMeanings)[0] || '';
@@ -374,6 +424,36 @@ function updateOldModalFields(text, state) {
   customMeaningInput.value = best;
 
   DOMElements.editModalDeleteBtn.disabled = !nameDictionary.has(text);
+}
+
+function splitSelectedWord(state) {
+  const { spans, startIndex, endIndex } = selectionState;
+  if (startIndex === -1 || endIndex === -1 || !spans || startIndex !== endIndex) return;
+
+  const targetSpan = spans[startIndex];
+  const originalText = targetSpan.dataset.original || targetSpan.textContent;
+  if (originalText.length <= 1) return;
+
+  const parent = targetSpan.parentNode;
+  const nextSibling = targetSpan.nextSibling;
+
+  for (let i = 0; i < originalText.length; i++) {
+    const char = originalText[i];
+    const translation = translateWord(char, state.dictionaries, nameDictionary, temporaryNameDictionary);
+    const span = document.createElement('span');
+    span.className = translation.found ? 'word' : 'word untranslatable';
+    span.dataset.original = char;
+    span.textContent = translation.found ? translation.best : char;
+
+    if (i > 0) {
+      parent.insertBefore(document.createTextNode(' '), nextSibling);
+    }
+    parent.insertBefore(span, nextSibling);
+  }
+
+  targetSpan.remove();
+  selectionState.spans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
+  hideQuickEditPanel();
 }
 
 function expandSelection(direction, state) {

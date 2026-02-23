@@ -118,3 +118,16 @@
     border-bottom-left-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
 }
+
+// Accessibility: Focus states
+.btn,
+.btn-secondary,
+button,
+input,
+textarea,
+select {
+    &:focus-visible {
+        outline: 2px solid var(--accent-color);
+        outline-offset: 2px;
+    }
+}

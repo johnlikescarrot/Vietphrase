@@ -68,3 +68,17 @@ export function hideModalWithAnimation(element, onComplete = null) {
 
   animationTimeouts.set(element, timeoutId);
 }
+
+/**
+ * Extracts a clean text translation from the output panel.
+ * Strips out metadata and handle formatting.
+ */
+export function getCleanTranslation(panel) {
+  if (!panel) return '';
+
+  // innerText generally handles spacing and visibility correctly for our spans
+  const text = panel.innerText;
+
+  // Additional cleanup: remove multiple spaces and trim
+  return text.split('\n').map(line => line.trim().replace(/\s+/g, ' ')).join('\n').trim();
+}

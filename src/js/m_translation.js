@@ -55,25 +55,38 @@ function applyCapitalization(text, shouldCapitalize) {
   if (trimmed.length > 0 && !/\d/.test(trimmed.charAt(0)) && /\p{L}/u.test(trimmed)) {
     const firstCharIdx = text.indexOf(trimmed.charAt(0));
     return {
-      text: text.substring(0, firstCharIdx) + trimmed.charAt(0).toUpperCase() + trimmed.slice(firstCharIdx + 1),
+
+      text: text.substring(0, firstCharIdx) + trimmed.charAt(0).toUpperCase() + text.slice(firstCharIdx + 1),
       capitalized: true
     };
   }
   return { text, capitalized: trimmed.length > 0 && /\d/.test(trimmed.charAt(0)) };
 }
 
+/**
+ * Processes spacing and capitalization for a translated segment.
+ * Includes "Smart Spacing" logic and enhanced punctuation handling.
+ */
+
 function processSpacingAndCapitalization(params) {
   let {
-    textForSpan, originalWord, i, lastChar,
+    textForSpan, originalWord, i, lastChar, lastRenderedChar,
     isInsideDoubleQuote, isInsideSingleQuote,
     capitalizeNextWord
   } = params;
 
+  const trimmed = textForSpan.trim();
   const capResult = applyCapitalization(textForSpan, capitalizeNextWord);
   textForSpan = capResult.text;
-  let newCapitalizeNextWord = capResult.capitalized || !textForSpan.trim() ? false : capitalizeNextWord;
 
-  if (/[.!?]$/.test(textForSpan.trim())) newCapitalizeNextWord = true;
+  // Reset capitalization flag only if we actually processed a word that was capitalized
+  let newCapitalizeNextWord = capResult.capitalized ? false : capitalizeNextWord;
+
+  // Enhance punctuation logic: trigger capitalization after ellipses and CJK equivalents
+  const trimmedText = textForSpan.trim();
+  if (/[.!?]$/.test(trimmedText) || trimmedText.endsWith("\u2026")) {
+    newCapitalizeNextWord = true;
+  }
   if (UNAMBIGUOUS_OPENING.has(originalWord)) newCapitalizeNextWord = true;
 
   let leadingSpace = ' ';
@@ -101,6 +114,13 @@ function processSpacingAndCapitalization(params) {
   }
 
   if (i === 0 || /\s/.test(lastChar) || textForSpan === '') leadingSpace = '';
+
+  // Smart Spacing: Ensure spacing between segments that were joined by punctuation logic
+  if (leadingSpace === '' && i > 0 && trimmed !== '') {
+    const isCurrentLatinDigit = /[a-zA-Z0-9]/.test(trimmed[0]);
+    const isLastLatinDigit = /[a-zA-Z0-9]/.test(lastRenderedChar);
+    if (isCurrentLatinDigit && isLastLatinDigit) leadingSpace = ' ';
+  }
 
   return {
     textForSpan,
@@ -175,9 +195,11 @@ export function performTranslation(state, options = {}) {
 
     let isInsideDoubleQuote = false;
     let isInsideSingleQuote = false;
+
     let capitalizeNextWord = false;
     let lineHtml = '';
     let lastChar = '';
+    let lastRenderedChar = '';
     let i = 0;
 
     while (i < line.length) {
@@ -201,8 +223,10 @@ export function performTranslation(state, options = {}) {
           span.className = 'word blacklisted-word';
           span.dataset.original = originalWord;
           span.textContent = '';
+
           lineHtml += span.outerHTML;
           lastChar = originalWord.slice(-1);
+          lastRenderedChar = '';
           i += originalWord.length;
           continue;
         }
@@ -217,7 +241,7 @@ export function performTranslation(state, options = {}) {
         if (isVietphraseMode && translationResult.found) span.classList.add('vietphrase-word');
 
         const result = processSpacingAndCapitalization({
-          textForSpan, originalWord, i, lastChar, isInsideDoubleQuote, isInsideSingleQuote, capitalizeNextWord
+          textForSpan, originalWord, i, lastChar, lastRenderedChar, isInsideDoubleQuote, isInsideSingleQuote, capitalizeNextWord
         });
 
         textForSpan = result.textForSpan;
@@ -228,6 +252,7 @@ export function performTranslation(state, options = {}) {
         span.textContent = textForSpan;
         lineHtml += result.leadingSpace + span.outerHTML;
         lastChar = originalWord.slice(-1);
+        lastRenderedChar = textForSpan.trim().slice(-1);
         i += originalWord.length;
       } else {
         const currentChar = line[i];
@@ -252,14 +277,16 @@ export function performTranslation(state, options = {}) {
           span.className = 'word untranslatable';
           span.dataset.original = nonMatchBlock;
           span.textContent = '';
+
           lineHtml += span.outerHTML;
           lastChar = nonMatchBlock.slice(-1);
+          lastRenderedChar = '';
           i = nonMatchEnd;
           continue;
         }
 
         const result = processSpacingAndCapitalization({
-          textForSpan: nonMatchBlock, originalWord: nonMatchBlock, i, lastChar, isInsideDoubleQuote, isInsideSingleQuote, capitalizeNextWord
+          textForSpan: nonMatchBlock, originalWord: nonMatchBlock, i, lastChar, lastRenderedChar, isInsideDoubleQuote, isInsideSingleQuote, capitalizeNextWord
         });
 
         isInsideDoubleQuote = result.isInsideDoubleQuote;
@@ -272,6 +299,7 @@ export function performTranslation(state, options = {}) {
         span.textContent = result.textForSpan;
         lineHtml += result.leadingSpace + span.outerHTML;
         lastChar = nonMatchBlock.slice(-1);
+        lastRenderedChar = result.textForSpan.trim().slice(-1);
         i = nonMatchEnd;
       }
     }
