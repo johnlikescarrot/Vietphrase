@@ -336,13 +336,14 @@
           <button class="q-perm-add-btn" data-target="q-input-Vp" aria-label="Thêm vào Name" title="Thêm vào Name">💾</button>
         </div>
       </div>
+
       <div class="grid grid-cols-[30px,1fr,auto] items-center gap-3 relative">
         <label for="q-input-tc" class="font-bold text-sm text-accent-color">tc</label>
-        <div class="flex items-center w-full">
+        <div class="flex items-center w-full relative">
           <input type="text" id="q-input-tc" class="w-full text-sm" placeholder="Nhập bản dịch của bạn...">
           <button id="q-vietphrase-toggle-btn" class="ml-1 text-xs px-1 border border-border-color rounded" title="Xem gợi ý" aria-expanded="false" aria-controls="q-vietphrase-options-container">▼</button>
+          <div id="q-vietphrase-options-container" class="hidden absolute z-50 bg-bg-panel border border-border-color rounded-md shadow-lg max-h-48 overflow-y-auto left-0 right-0 top-full mt-1"></div>
         </div>
-        <div id="q-vietphrase-options-container" class="hidden absolute z-50 bg-bg-panel border border-border-color rounded-md shadow-lg max-h-48 overflow-y-auto left-[30px] right-0 top-full mt-1"></div>
         <div class="flex gap-1">
           <button class="q-temp-add-btn" data-target="q-input-tc" aria-label="Thêm tạm thời" title="Thêm tạm thời">✔️</button>
           <button class="q-perm-add-btn" data-target="q-input-tc" aria-label="Thêm vào Name" title="Thêm vào Name">💾</button>

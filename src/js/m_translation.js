@@ -112,9 +112,10 @@ function processSpacingAndCapitalization(params) {
 
   if (i === 0 || /\s/.test(lastChar) || textForSpan === '') leadingSpace = '';
 
-  // Smart Spacing: Ensure spacing between Vietnamese and Latin/Digits is prioritized
-  if (leadingSpace === '' && i > 0 && textForSpan !== '') {
-    const isCurrentLatinDigit = /[a-zA-Z0-9]/.test(textForSpan.trim().charAt(0));
+
+  // Smart Spacing: Ensure spacing between segments that were joined by punctuation logic
+  if (leadingSpace === '' && i > 0 && trimmed !== '') {
+    const isCurrentLatinDigit = /[a-zA-Z0-9]/.test(trimmed[0]);
     const isLastLatinDigit = /[a-zA-Z0-9]/.test(lastChar);
     if (isCurrentLatinDigit && isLastLatinDigit) leadingSpace = ' ';
   }

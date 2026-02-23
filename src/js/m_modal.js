@@ -191,11 +191,13 @@ export function initializeModal(state) {
       container.style.left = `${inputRect.left}px`;
       container.style.width = `${inputRect.width}px`;
       container.classList.remove('hidden');
+
       DOMElements.vietphraseToggleBtn.setAttribute('aria-expanded', 'true');
       activeSuggestionIndex = -1;
     } else {
       container.classList.add('hidden');
       DOMElements.vietphraseToggleBtn.setAttribute('aria-expanded', 'false');
+      activeSuggestionIndex = -1;
     }
   });
 
@@ -204,11 +206,13 @@ export function initializeModal(state) {
   DOMElements.qDeleteBtn.addEventListener('click', async () => {
     const text = DOMElements.qInputZw.value.trim();
     if (text && await customConfirm("Xóa '" + text + "' khỏi Name List?")) {
+
       try {
         await deletePermanentName(text, state);
         hideQuickEditPanel();
       } catch (e) {
         console.error('Lỗi khi xóa Name:', e);
+        customAlert('Không thể xóa Name. Vui lòng thử lại.', 'error');
       }
     }
   });
