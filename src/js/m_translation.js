@@ -78,7 +78,8 @@ function processSpacingAndCapitalization(params) {
   let newCapitalizeNextWord = (capResult.capitalized || !textForSpan.trim()) ? false : capitalizeNextWord;
 
   // Enhance punctuation logic: trigger capitalization after ellipses and CJK equivalents
-  if (/[.!?]$/.test(textForSpan.trim()) || textForSpan.trim().endsWith("...") || textForSpan.trim().endsWith("……") || textForSpan.trim().endsWith("…")) {
+  const trimmed = textForSpan.trim();
+  if (/[.!?]$/.test(trimmed) || trimmed.endsWith('…')) {
     newCapitalizeNextWord = true;
   }
   if (UNAMBIGUOUS_OPENING.has(originalWord)) newCapitalizeNextWord = true;

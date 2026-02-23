@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   DOMElements.copyCleanBtn.addEventListener('click', async () => {
     const text = getCleanTranslation(DOMElements.outputPanel);
-    if (!text) return;
+    if (!text || text === 'Kết quả sẽ hiện ở đây...') return;
     try {
       await navigator.clipboard.writeText(text);
       const originalText = DOMElements.copyCleanBtn.textContent;

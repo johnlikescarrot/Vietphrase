@@ -28,7 +28,7 @@ export function updateLockIcon(button, isLocked, tooltips) {
 }
 
 export function initializeModal(state) {
-  const debouncedUpdateOldModal = debounce((text, state) => updateOldModalFields(text, state), 300);
+  const debouncedUpdateOldModal = debounce((text, state) => updateOldModalFields(text, state), 100);
 
   DOMElements.outputPanel.addEventListener('click', (e) => {
     const selection = window.getSelection();
@@ -39,8 +39,8 @@ export function initializeModal(state) {
 
       if (DOMElements.outputPanel.contains(parentElement)) {
         const spans = Array.from(DOMElements.outputPanel.querySelectorAll('.word'));
-        const startNode = selection.anchorNode.nodeType === 3 ? selection.anchorNode.parentElement : selection.anchorNode;
-        const endNode = selection.focusNode.nodeType === 3 ? selection.focusNode.parentElement : selection.focusNode;
+        const startNode = (selection.anchorNode.nodeType === 3 ? selection.anchorNode.parentElement : selection.anchorNode).closest('.word');
+        const endNode = (selection.focusNode.nodeType === 3 ? selection.focusNode.parentElement : selection.focusNode).closest('.word');
 
         let startIndex = spans.indexOf(startNode);
         let endIndex = spans.indexOf(endNode);
@@ -104,7 +104,7 @@ export function initializeModal(state) {
           e.preventDefault();
           activeSuggestionIndex = (activeSuggestionIndex - 1 + options.length) % options.length;
           updateActiveSuggestion(options);
-        } else if (e.key === 'Enter' || e.key === 'Tab') {
+        } else if (e.key === 'Enter') {
           if (activeSuggestionIndex >= 0 && activeSuggestionIndex < options.length) {
             e.preventDefault();
             options[activeSuggestionIndex].click();
@@ -135,6 +135,7 @@ export function initializeModal(state) {
       activeSuggestionIndex = -1;
     } else {
       container.classList.add('hidden');
+      activeSuggestionIndex = -1;
     }
   });
 
@@ -165,6 +166,22 @@ export function initializeModal(state) {
   });
 
   DOMElements.qSplitBtn.addEventListener('click', () => splitSelectedWord(state));
+
+  DOMElements.qDeleteBtn.addEventListener('click', async () => {
+    const text = DOMElements.qInputZw.value.trim();
+    if (text && await customConfirm("Xóa '" + text + "' khỏi Name List?")) {
+      try {
+        await deletePermanentName(text, state);
+        hideQuickEditPanel();
+      } catch (e) {
+        console.error('Lỗi khi xóa Name:', e);
+      }
+    }
+  });
+
+  DOMElements.qSearchBtn.addEventListener('click', () => {
+    openOldModal(state);
+  });
   DOMElements.qExpandLeftBtn.addEventListener('click', () => expandSelection('left', state));
   DOMElements.qExpandRightBtn.addEventListener('click', () => expandSelection('right', state));
 
@@ -420,7 +437,7 @@ function splitSelectedWord(state) {
     span.textContent = translation.found ? translation.best : char;
 
     if (i > 0) {
-      parent.insertBefore(document.createTextNode(' '), nextSibling);
+      parent.insertBefore(document.createTextNode(' '), nextSibling);
     }
     parent.insertBefore(span, nextSibling);
   }
