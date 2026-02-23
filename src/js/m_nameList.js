@@ -29,7 +29,6 @@ export class Trie {
   }
 
   findLongestMatch(text, startIndex) {
-    const start = performance.now();
     let node = this.root;
     let longestMatch = null;
 
@@ -46,8 +45,6 @@ export class Trie {
         };
       }
     }
-    const end = performance.now();
-    // if (end - start > 1) console.warn(`Slow Trie match: ${end - start}ms`);
     return longestMatch;
   }
 }

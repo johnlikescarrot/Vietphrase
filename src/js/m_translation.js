@@ -173,7 +173,6 @@ export function synthesizeCompoundTranslation(text, state) {
 }
 
 export function performTranslation(state, options = {}) {
-  const startTime = performance.now();
   if (!state || !state.dictionaries || !state.dictionaryTrie) {
     DOMElements.outputPanel.textContent = 'Lỗi: Từ điển chưa được tải hoặc xử lý.';
     return;
@@ -308,7 +307,5 @@ export function performTranslation(state, options = {}) {
   }).filter(Boolean);
 
   DOMElements.outputPanel.innerHTML = translatedLineHtmls.join('');
-  const endTime = performance.now();
-  console.log(`Translation completed in ${endTime - startTime}ms`);
   if (!options.preserveTempDict) temporaryNameDictionary.clear();
 }

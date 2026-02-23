@@ -302,8 +302,6 @@ export function initializeModal(state) {
   updateLockIcon(DOMElements.editModalLockBtn, isEditModalLocked, { lock: "Ghim bảng này", unlock: "Bỏ ghim bảng" });
 }
 
-
-
 function updateActiveSuggestion(options) {
   options.forEach((opt, idx) => {
     if (idx === activeSuggestionIndex) {
@@ -335,21 +333,16 @@ function showQuickEditPanel(selection) {
 
   panel.style.top = `${top}px`;
   panel.style.left = `${left}px`;
-  panel.style.visibility = 'visible';
   isPanelVisible = true;
 }
 
 function hideQuickEditPanel() {
   if (isPanelVisible) {
     if (isPanelLocked) return;
-    const panel = DOMElements.quickEditPanel;
-    panel.classList.remove('show');
-    setTimeout(() => {
-        panel.classList.add('hidden');
-        panel.style.visibility = ''; // Clear stale inline style
-        isPanelVisible = false;
-        if (window.getSelection) window.getSelection().removeAllRanges();
-    }, 200);
+    hideModalWithAnimation(DOMElements.quickEditPanel, () => {
+      isPanelVisible = false;
+      if (window.getSelection()) window.getSelection().removeAllRanges();
+    });
   }
 }
 
