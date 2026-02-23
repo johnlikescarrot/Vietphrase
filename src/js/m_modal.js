@@ -18,7 +18,35 @@ const selectionState = {
   endIndex: -1
 };
 
-export function updateLockIcon(button, isLocked, tooltips) {
+export
+/**
+ * Renders translation suggestions into a container and attaches click handlers.
+ */
+function renderMeaningOptions(container, allMeanings, onSelect) {
+  const uniqueMeanings = new Set();
+  if (allMeanings.name) uniqueMeanings.add(allMeanings.name);
+  allMeanings.names.forEach(m => uniqueMeanings.add(m));
+  allMeanings.names2.forEach(m => uniqueMeanings.add(m));
+  allMeanings.vietphrase.forEach(m => uniqueMeanings.add(m));
+
+  container.innerHTML = '';
+  uniqueMeanings.forEach(meaning => {
+    const div = document.createElement('div');
+    div.className = 'vietphrase-option';
+    div.textContent = meaning;
+    div.addEventListener('click', () => {
+      onSelect(meaning);
+      container.classList.add('hidden');
+      // Reset aria attributes
+      const toggle = container.id === 'q-vietphrase-options-container' ? DOMElements.qVietphraseToggleBtn : DOMElements.vietphraseToggleBtn;
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    });
+    container.appendChild(div);
+  });
+  return uniqueMeanings;
+}
+
+function updateLockIcon(button, isLocked, tooltips) {
   if (!button) return;
   const svgLocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
   const svgUnlocked = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
@@ -66,12 +94,14 @@ export function initializeModal(state) {
   document.addEventListener('keydown', (e) => {
     // 1. Modal/Panel closing
     if (e.key === 'Escape') {
-      if (DOMElements.editModal.style.display !== 'none') closeOldModal();
+      if (getComputedStyle(DOMElements.editModal).display !== 'none') closeOldModal();
       hideQuickEditPanel();
 
       // Hide suggestion containers
       DOMElements.qVietphraseOptionsContainer.classList.add('hidden');
       DOMElements.vietphraseOptionsContainer.classList.add('hidden');
+      DOMElements.qVietphraseToggleBtn.setAttribute('aria-expanded', 'false');
+      DOMElements.vietphraseToggleBtn.setAttribute('aria-expanded', 'false');
       activeSuggestionIndex = -1;
     }
 
@@ -132,9 +162,11 @@ export function initializeModal(state) {
     const container = DOMElements.qVietphraseOptionsContainer;
     if (container.classList.contains('hidden')) {
       container.classList.remove('hidden');
+      DOMElements.qVietphraseToggleBtn.setAttribute('aria-expanded', 'true');
       activeSuggestionIndex = -1;
     } else {
       container.classList.add('hidden');
+      DOMElements.qVietphraseToggleBtn.setAttribute('aria-expanded', 'false');
       activeSuggestionIndex = -1;
     }
   });
@@ -159,9 +191,11 @@ export function initializeModal(state) {
       container.style.left = `${inputRect.left}px`;
       container.style.width = `${inputRect.width}px`;
       container.classList.remove('hidden');
+      DOMElements.vietphraseToggleBtn.setAttribute('aria-expanded', 'true');
       activeSuggestionIndex = -1;
     } else {
       container.classList.add('hidden');
+      DOMElements.vietphraseToggleBtn.setAttribute('aria-expanded', 'false');
     }
   });
 
@@ -330,23 +364,8 @@ function populateQuickEditPanel(text, state) {
   DOMElements.qInputVp.value = allMeanings.vietphrase.length > 0 ? allMeanings.vietphrase[0] : '';
 
 
-  const optionsContainer = DOMElements.qVietphraseOptionsContainer;
-  const uniqueMeanings = new Set();
-  if (allMeanings.name) uniqueMeanings.add(allMeanings.name);
-  allMeanings.names.forEach(m => uniqueMeanings.add(m));
-  allMeanings.names2.forEach(m => uniqueMeanings.add(m));
-  allMeanings.vietphrase.forEach(m => uniqueMeanings.add(m));
-
-  optionsContainer.innerHTML = '';
-  uniqueMeanings.forEach(meaning => {
-    const div = document.createElement('div');
-    div.className = 'vietphrase-option';
-    div.textContent = meaning;
-    div.addEventListener('click', () => {
-      DOMElements.qInputTc.value = meaning;
-      optionsContainer.classList.add('hidden');
-    });
-    optionsContainer.appendChild(div);
+  renderMeaningOptions(DOMElements.qVietphraseOptionsContainer, allMeanings, (val) => {
+    DOMElements.qInputTc.value = val;
   });
 
   DOMElements.qDeleteBtn.disabled = !nameDictionary.has(text);
@@ -390,24 +409,10 @@ function updateOldModalFields(text, state) {
 
   hanvietInput.value = (getHanViet(text, state.dictionaries) || '').toLowerCase();
 
-  const uniqueMeanings = new Set();
   const all = getAllMeanings(text, state.dictionaries, nameDictionary);
-  if (all.name) uniqueMeanings.add(all.name);
-  all.names.forEach(m => uniqueMeanings.add(m));
-  all.names2.forEach(m => uniqueMeanings.add(m));
-  all.vietphrase.forEach(m => uniqueMeanings.add(m));
-
-  optionsContainer.innerHTML = '';
-  uniqueMeanings.forEach(meaning => {
-    const div = document.createElement('div');
-    div.className = 'vietphrase-option';
-    div.textContent = meaning;
-    div.addEventListener('click', () => {
-      vietphraseInput.value = meaning;
-      customMeaningInput.value = meaning;
-      optionsContainer.classList.add('hidden');
-    });
-    optionsContainer.appendChild(div);
+  const uniqueMeanings = renderMeaningOptions(optionsContainer, all, (val) => {
+    vietphraseInput.value = val;
+    customMeaningInput.value = val;
   });
 
   const best = Array.from(uniqueMeanings)[0] || '';

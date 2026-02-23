@@ -73,12 +73,14 @@ function processSpacingAndCapitalization(params) {
     capitalizeNextWord
   } = params;
 
+  const trimmed = textForSpan.trim();
   const capResult = applyCapitalization(textForSpan, capitalizeNextWord);
   textForSpan = capResult.text;
-  let newCapitalizeNextWord = (capResult.capitalized || !textForSpan.trim()) ? false : capitalizeNextWord;
+
+  // Reset capitalization flag only if we actually processed a visible word
+  let newCapitalizeNextWord = (trimmed === '') ? capitalizeNextWord : false;
 
   // Enhance punctuation logic: trigger capitalization after ellipses and CJK equivalents
-  const trimmed = textForSpan.trim();
   if (/[.!?]$/.test(trimmed) || trimmed.endsWith('…')) {
     newCapitalizeNextWord = true;
   }

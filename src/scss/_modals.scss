@@ -201,6 +201,8 @@
 
 #vietphrase-options-container,
 #q-vietphrase-options-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-color) transparent;
     &::-webkit-scrollbar {
         width: 6px;
     }
